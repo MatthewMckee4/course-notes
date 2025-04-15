@@ -14,83 +14,87 @@
 
 \subsubsection*{Array Creation and File I/O}
 \begin{itemize}
-    \item \texttt{np.loadtxt(fname)} -- Load data from a text file
-    \item \texttt{np.savetxt(fname, array)} -- Save array to a text file
-    \item \texttt{np.zeros((3, 3))} -- Create a 3x3 array of zeros
-    \item \texttt{np.ones((2, 4))} -- Create a 2x4 array of ones
-    \item \texttt{np.full((2, 2), 7)} -- Create 2x2 array filled with 7s
-    \item \texttt{np.empty((2, 3))} -- Create uninitialized 2x3 array
-    \item \texttt{np.zeros\_like(x)}, \texttt{np.ones\_like(x)}, \texttt{np.full\_like(x, 3)}, \texttt{np.empty\_like(x)}
-    \item \texttt{np.arange(0, 10, 2)} -- Evenly spaced values in interval
-    \item \texttt{np.linspace(0, 1, 5)} -- 5 evenly spaced values from 0 to 1
-    \item \texttt{np.array([1, 2, 3])} -- Create array from list
-    \item \texttt{np.meshgrid(x, y)} -- Create coordinate matrices from vectors
+    \item \texttt{np.zeros((3, 3))} -- 3x3 array of zeros,\quad \texttt{np.ones((2, 4))} -- 2x4 array of ones
+    \item \texttt{np.full((2, 2), 7)} -- 2x2 array filled with 7,\quad \texttt{np.empty((2, 3))} -- uninitialized 2x3 array
+    \item \texttt{np.zeros\_like(x)}, \texttt{np.ones\_like(x)}, \texttt{np.full\_like(x, 3)}, \texttt{np.empty\_like(x)} -- same shape as `x`
+    \item \texttt{np.arange(0, 10, 2)} -- range with step,\quad \texttt{np.linspace(0, 1, 5)} -- 5 values from 0 to 1
+    \item \texttt{np.array([1, 2, 3])} -- from list,\quad \texttt{np.meshgrid(x, y)} -- coordinate matrices
 \end{itemize}
 
 \subsubsection*{Logical Operations}
 \begin{itemize}
-    \item \texttt{np.logical\_and(a > 0, a < 5)} -- Element-wise AND
-    \item \texttt{np.logical\_or(a == 0, a == 1)} -- Element-wise OR
-    \item \texttt{np.logical\_not(a)} -- Element-wise NOT
+    \item \texttt{np.logical\_and(a > 0, a < 5)} -- element-wise AND,\quad \texttt{np.logical\_or(a == 0, a == 1)} -- OR
+    \item \texttt{np.logical\_not(a)} -- element-wise NOT
 \end{itemize}
 
 \subsubsection*{Aggregation and Statistics}
 \begin{itemize}
-    \item \texttt{np.any(a > 10)}, \texttt{np.all(a > 0)}
-    \item \texttt{np.prod(a)}, \texttt{np.min(a)}, \texttt{np.max(a)}
-    \item \texttt{np.sum(a)}, \texttt{np.mean(a)}, \texttt{np.std(a)}
+    \item \texttt{np.any(a > 10)} -- any true?,\quad \texttt{np.all(a > 0)} -- all true?
+    \item \texttt{np.prod(a)} -- product,\quad \texttt{np.min(a)}, \texttt{np.max(a)} -- min/max
+    \item \texttt{np.sum(a)} -- sum,\quad \texttt{np.mean(a)} -- average,\quad \texttt{np.std(a)} -- std deviation
 \end{itemize}
 
 \subsubsection*{Cumulative Functions and Differences}
 \begin{itemize}
-    \item \texttt{np.cumprod(a)}, \texttt{np.cumsum(a)}
-    \item \texttt{np.diff(a)}, \texttt{np.gradient(a)}
+    \item \texttt{np.cumprod(a)} -- cumulative product,\quad \texttt{np.cumsum(a)} -- cumulative sum
+    \item \texttt{np.diff(a)} -- discrete difference between elements,\quad \texttt{np.gradient(a)} -- numerical gradient
 \end{itemize}
 
 \subsubsection*{Random Number Generation}
 \begin{itemize}
-    \item \texttt{np.random.uniform(0, 1, 5)} -- Uniform [0, 1)
-    \item \texttt{np.random.normal(0, 1, (2, 2))} -- Normal distribution
-    \item \texttt{np.random.randint(0, 10, 3)} -- Random ints in [0,10)
-    \item \texttt{np.random.choice([1, 2, 3])}, \texttt{np.random.permutation(5)}
+    \item \texttt{np.random.uniform(0, 1, 5)} -- uniform [0,1),\quad \texttt{np.random.normal(0, 1, (2, 2))} -- normal dist
+    \item \texttt{np.random.randint(0, 10, 3)} -- random ints,\quad \texttt{np.random.choice([1, 2, 3])} -- random pick
+    \item \texttt{np.random.permutation(5)} -- random permuted range
 \end{itemize}
 
 \subsubsection*{Array Manipulation}
 \begin{itemize}
-    \item \texttt{np.tile(a, (2, 1))}, \texttt{np.transpose(a)}, \texttt{x.T}
-    \item \texttt{np.stack([a, b], axis=0)}, \texttt{np.concatenate((a, b), axis=0)}
-    \item \texttt{np.squeeze(a)}, \texttt{np.reshape(a, (2, 5))}, \texttt{np.ravel(a)}
-    \item \texttt{np.swapaxes(a, 0, 1)}, \texttt{np.rollaxes(a, 2, 0)}
-    \item \texttt{np.einsum('i,j->ij', a, b)} -- Einstein summation
+    \item \texttt{np.tile(a, (2, 1))} -- repeat matrix,\quad \texttt{np.transpose(a)}, \texttt{x.T} -- transpose
+    \item \texttt{np.stack([a, b], axis=0)} -- stack arrays,\quad \texttt{np.concatenate((a, b), axis=0)} -- join
+    \item \texttt{np.squeeze(a)} -- remove 1-dim,\quad \texttt{np.reshape(a, (2, 5))} -- reshape,\quad \texttt{np.ravel(a)} -- flatten
+    \item \texttt{np.swapaxes(a, 0, 1)} -- swap axes,\quad \texttt{np.rollaxes(a, 2, 0)} -- move axes
+    \item \texttt{np.einsum('i,j->ij', a, b)} -- Einstein summation (outer product here)
 \end{itemize}
 
 \subsubsection*{Special Values and Comparisons}
 \begin{itemize}
-    \item \texttt{np.isinf(a)}, \texttt{np.isnan(a)}, \texttt{np.isfinite(a)}
-    \item \texttt{np.nan}, \texttt{np.inf}, \texttt{np.allclose(a, b)}, \texttt{np.frexp(x)}
+    \item \texttt{np.isinf(a)} -- is infinite?,\quad \texttt{np.isnan(a)} -- is NaN?,\quad \texttt{np.isfinite(a)} -- is finite?
+    \item \texttt{np.nan}, \texttt{np.inf} -- special values,\quad \texttt{np.allclose(a, b)} -- approx equal?,\quad \texttt{np.frexp(x)} -- mantissa & exp
 \end{itemize}
 
 \subsubsection*{Indexing and Conditionals}
 \begin{itemize}
-    \item \texttt{np.argmin(a)}, \texttt{np.argmax(a)}
-    \item \texttt{np.argsort(a)}, \texttt{np.sort(a)}
-    \item \texttt{np.nonzero(a)}, \texttt{np.where(a > 0, 1, 0)}
+    \item \texttt{np.argmin(a)}, \texttt{np.argmax(a)} -- index of min/max
+    \item \texttt{np.argsort(a)} -- indices to sort,\quad \texttt{np.sort(a)} -- sorted array
+    \item \texttt{np.nonzero(a)} -- indices of non-zeros,\quad \texttt{np.where(a > 0, 1, 0)} -- conditional selection
 \end{itemize}
 
 \subsubsection*{Linear Algebra Operations}
 \begin{itemize}
-    \item \texttt{np.dot(a, b)} -- Dot product
-    \item \texttt{np.inner(a, b)} -- Inner product
-    \item \texttt{np.outer(a, b)} -- Outer product
+    \item \texttt{np.dot(a, b)} -- dot product,\quad \texttt{np.inner(a, b)} -- inner product,\quad \texttt{np.outer(a, b)} -- outer product
 \end{itemize}
 
 \subsubsection*{Elementwise Math Functions}
 \begin{itemize}
-    \item \texttt{np.minimum(a, b)}, \texttt{np.maximum(a, b)}
-    \item \texttt{np.add(a, b)}, \texttt{np.subtract(a, b)}, \texttt{np.multiply(a, b)}
-    \item \texttt{np.log(a)}, \texttt{np.exp(a)}
-    \item \texttt{np.sin(a)}, \texttt{np.cos(a)}, \texttt{np.tan(a)}
-    \item \texttt{np.arcsin(a)}, \texttt{np.arccos(a)}, \texttt{np.tanh(a)}
+    \item \texttt{np.minimum(a, b)}, \texttt{np.maximum(a, b)} -- min/max of elements
+    \item \texttt{np.add(a, b)}, \texttt{np.subtract(a, b)}, \texttt{np.multiply(a, b)} -- elementwise ops
+    \item \texttt{np.log(a)} -- log base e,\quad \texttt{np.exp(a)} -- exponential
+    \item \texttt{np.sin(a)}, \texttt{np.cos(a)}, \texttt{np.tan(a)} -- trig functions
+    \item \texttt{np.arcsin(a)}, \texttt{np.arccos(a)}, \texttt{np.tanh(a)} -- inverse/other trigs
 \end{itemize}
+
+\subsubsection*{Vector and Matrix Operations}
+\begin{itemize}
+    \item \texttt{np.linalg.norm(x)} -- vector norm (length), \texttt{$\rightarrow$} Euclidean: $\sqrt{x_1^2 + x_2^2 + \dots}$  
+    \item \texttt{np.linalg.norm(x - y)} -- Euclidean distance between vectors $x$ and $y$
+    \item \texttt{np.dot(x, y)} -- inner (dot) product, \texttt{$\rightarrow$} $\sum_i x_i y_i$
+    \item \texttt{np.mean(x, axis=0)} -- mean vector across rows (centroid)
+    \item \texttt{np.cov(x)} -- covariance matrix of $x$ (rows are variables, columns are observations)
+    \item \texttt{np.diag(x)} -- diagonal matrix from vector $x$ or extract diagonal from matrix
+    \item \texttt{np.clip(x, a, b)} -- clip values in $x$ to lie within [a, b]
+    \item \texttt{np.round(x)}, \texttt{np.floor(x)}, \texttt{np.ceil(x)} -- rounding operations
+    \item \texttt{x / np.linalg.norm(x)} -- normalization to unit vector
+\end{itemize}
+
 
 \end{document}
