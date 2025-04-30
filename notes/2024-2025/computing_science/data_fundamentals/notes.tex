@@ -218,8 +218,127 @@ or the number of linearly independent rows or columns.
 \noindent The \textbf{condition number} of a matrix is the ratio of the largest singular value to the smallest.
 
 \noindent \textbf{Whitening} removes all linear correlations within a dataset.
-$X^{\text w} = (X - \vec{\mu}) \Sigma^{-1/2}$ where $\vec{\mu}$ is the mean vector, i.e. a row vector
-containing the mean of each column in $X$, and $\Sigma$ is the covariance matrix.
+$X^{\text w} = (X - \vec{\mu}) \Sigma^{-1/2}$ where $\vec{\mu}$ is the mean vector, i.e.
+A row vector containing the mean of each column in $X$, and $\Sigma$ is the covariance matrix.
+
+% Week 6
+
+\subsection*{Optimisation}
+\textbf{Paremeters} are things we can adjust (inputs), they exist in a parameter space: the set of all possible values.
+
+\noindent \textbf{Objective Function} (loss function) maps the parameters onto a single numerical measure of how good the configuration is.
+The desired output of the optimisation algorithm is the parameter configuration that minimises the objective function.
+$\theta^* = \arg \min_{\theta \in \Theta} \text{L}(\theta)$
+
+\noindent \textbf{Constraints} are limitations on the parameters. This defines a region of the parameter space that is feasible,
+the feasible set or region.
+
+\noindent It is common to have express problems in a form where the objective function is a distance between an output
+and a reference is measured.
+
+\noindent \textbf{Evaluating the objective function} may be expensive, so a good optimisation algorithm will find the optimal
+configuration with few queries.
+
+\noindent \textbf{Discrete and continuous} optimisation are inferred based on the parameter space.
+
+\noindent \textbf{Constraint types}: box constraint, convex constraint (collection of inequalities).
+equiality and inequality constraint.
+
+\noindent \textbf{Constrained optimisation} could speed it up, though fewer algorithms are available for optimisation.
+May be hard to specify feasible region.
+
+\noindent \textbf{Soft constraints} work by applying penalties to the objecive function to `discourage' solutions that violate the constraints.
+
+\noindent $ L(\theta) = L(\theta) + \lambda C(\theta) $ where $C(\theta)$ is a penalty function with an increasing value as the
+constraints are more egregiously violated. $\lambda$ is a penalty coecient that controls how much the constraints are penalised.
+This may not respect important constraints.
+
+\noindent \textbf{Relaxation} is a technique where an algorithm tries to find a continuous or unconstrained
+optimisation problem to solve instead of a discrete optimisation.
+
+\noindent \textbf{Penalisation} refers to terms which augment an objective function to minimise some other property of
+the solution, typically to approximate constrained optimisation.
+
+\noindent \textbf{Properties of the objective function}. A local minimum is any point where the objective function
+increases in every direction around that point. An objective function is \textbf{convex} if it has a single, global minimum.
+
+\noindent \textbf{Convex optimisation}
+
+\noindent \textbf{Algorithms}:
+\textbf{Direct convex optimisation} techniques, such as least squares,
+are used to find the best-fitting solution by minimizing the sum of the squares of the differences
+between observed and predicted values. This method is particularly effective for linear regression
+problems, where the goal is to determine the linear relationship between variables.
+
+\noindent \textbf{Iterative optimisation}
+Make a guess, if the guess is better than the previous guess, keep it, continue until you have reached a good enough solution.
+\begin{enumerate}
+    \item choose a starting point $x_0$
+    \item while objective function changing
+    \begin{enumerate}
+        \item adjust parameters
+        \item evaluate objective function
+        \item if better solution found than any so far, record it
+    \end{enumerate}
+    \item return best parameter set found
+\end{enumerate}
+
+\noindent \textbf{Grid search}: The parameter space is split equally in each dimension.
+This is very slow as it scales with more dimensions.
+If the grid is not fine enough, minima can be missed.
+
+\noindent \textbf{Hyperparameters} are properties which affect the way in which the optimiser finds a solution.
+
+\noindent \textbf{Simple stochastic: random search}: Guess a number $\theta$, check the objective function,
+if $L(\theta) \le L(\theta^*)$, then $\theta^* = \theta$.
+
+\noindent \textbf{Metaheuristics}:
+There are a number of meta-heuristisc that can be used to improve random search.
+\textbf{Locality} which takes advantage of the fact the objective function is likely to have similar values for similar parameter configurations.
+\textbf{Temperature} which can change the rate of movement in the parameter space over the course of an optimisation.
+\textbf{Population} which can track multiple simultaneous parameter configurations and select among them
+\textbf{Memory} which can record good or bad steps in the last and avoid them.
+
+\noindent \textbf{Hill climbing} is a modication of random search, taking steps up hill to get out of local minimum
+
+\noindent \textbf{Simulated annealing} extends hill-climbing with the ability to sometimes randomly go
+uphill, instead of always going downhill. It uses a \textbf{temperature schedule} that allows more
+uphill steps at the start of the optimisation and fewer ones later in the process. This is used
+to overcome ridges and avoid getting stuck in local minima.
+
+\noindent \textbf{Population}: track multiple simultaneous parameters configurations and select/mix among them.
+Involves mutation (random variables), natural selection (solution selection) and breeding (interchange between solutions).
+each iteration will move solutions slightly by random mutation, cull the weakest solutions and copy the remaining “fittest” solutions to keep the population size constant
+
+\noindent \textbf{Memory} This ineciency can be mitigated
+using some form of memory, where the optimiser remembers where “good” and “bad” bits
+of the parameters space are, and makes decisions using this memory. In particular, we want
+to remember good paths in solution space.
+
+\noindent \textbf{Convergence}
+An optimisation algorithm is said to converge to a solution
+What can go wrong? Slow progress. Noisy and diverging performance. Getting stuck
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
