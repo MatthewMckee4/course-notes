@@ -406,6 +406,214 @@ $ H(X) = - \sum_{x} P(x) \log P(x) $
 This is just the expected value of the log-probability of a random variable
 (the “average” log-probability).
 
+% Week 9
+
+\subsection*{Probability 2}
+
+% What Monte Carlo approaches are, and how expectation can be approximated
+
+\noindent \textbf{Monte Carlo Approaches} involve simulating the random variable many times and averaging the results.
+
+% The specific problems of continuous random variables as compared to discrete random variables
+
+\noindent \textbf{Problems of Continuous Random Variables}:
+Probability of an exact value is 0.
+Unlike with discrete variables, you can't estimate the probability density function (PDF) from simple counts,
+since each observation has no width and doesn't `fill in' the distribution.
+Bayes' Rule is easy to apply to discrete problems but not continuous
+
+% The normal distribution and the central limit theorem
+
+\noindent \textbf{Normal Distribution}:
+The normal distribution is a continuous probability distribution that is symmetric and bell-shaped.
+It is defined by its mean and standard deviation, and is given by the formula:
+$ f(x) = \frac{1}{\sigma \sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}} $
+
+
+% What multivariate distributions are
+
+\noindent \textbf{Multivariate Distributions} generalise discrete variables to continuous spaces via probability density functions.
+
+% What inference is
+
+\noindent \textbf{Inference} is the process of determining parameters of the function generating data by looking at the aftermath.
+Different approaches are \textbf{direct estimation}: define functions of observations that will estimate the values of parameters
+of distributions directly.
+\textbf{Maximum Likelihood Estimation}: use optimisation to find parameter settings that make the observations appear as likely as possible.
+\textbf{Bayesian Inference}: use Bayes' Rule to update the probability of a hypothesis as more evidence is gathered.
+
+% What population, parameters, statistics and samples are
+
+\noindent \textbf{Population}: The complete set of individuals or items of interest.
+\textbf{Parameters}: Numerical characteristics of the population.
+\textbf{Statistics}: Functions of the sample data used to estimate parameters.
+\textbf{Sample}: A subset of the population used to make inferences.
+
+% How parameters can be estimated from a sample
+
+\noindent \textbf{Parameter Estimation}: Using sample data to estimate population parameters.
+
+% How estimators and maximum likelihood estimation work
+
+\noindent \textbf{Estimators}: Functions of the sample data used to estimate parameters.
+\textbf{Maximum Likelihood Estimation}: use optimisation to find parameter settings that make the observations appear as likely as possible.
+
+% The maximum likelihood algorithm
+
+\noindent \textbf{Maximum Likelihood Estimation Algorithm}:
+When no closed-form solution exists for parameter estimation, we use optimization to find the parameters that maximize the likelihood of the observed data.
+The likelihood function $L(\theta|x)$ depends on the distribution parameters $\theta$.
+To perform the optimization, we convert this to a negative log-likelihood function where $\theta^* = \arg \min_\theta L(\theta)$ and $L(\theta) = -\log L(\theta|x_1,...,x_n) = -\sum_i \log f_X(x_i;\theta)$.
+For mixture models such as Gaussian mixtures, the probability density function (PDF) is a weighted combination of N normal distributions.
+The PDF is given by $f_X(x) = \sum_i \lambda_i n_X(x;\mu_i,\sigma_i)$ where the weights $\lambda_i$ sum to 1.
+When fitting these mixtures, we compute the likelihood for each observation by summing the weighted PDFs from each component of the mixture.
+
+
+% What Bayesian inference involves
+
+\noindent \textbf{Bayesian Inference} involves inferring a distribution over possible parameter settings that are compatible with the data, rather than seeking the most likely parameter setting.
+It works by inferring a posterior distribution using Bayes' Rule: $P(\theta|D) = \frac{P(D|\theta)P(\theta)}{P(D)}$.
+Here, $P(D)$ is the prior belief, $P(\theta)$ is the evidence, and $P(D|\theta)$ is the likelihood function.
+The posterior distribution $P(\theta|D)$ needs to be computed for a distribution over $\theta$, not just specific values.
+The normalizing constant $P(D) = \int_\theta P(D|\theta)P(\theta)$ is often intractable to compute directly.
+To make Bayesian inference tractable, we can use sampling methods or work with relative probabilities only, where $P(\theta|D) \propto P(D|\theta)P(\theta)$.
+Bayesian inference can be applied to both continuous and discrete distributions.
+However, closed-form computations are typically much more challenging for continuous distributions.
+
+% MCMC approaches to sampling posteriors in Bayesian inference
+
+\noindent \textbf{Markov Chain Monte Carlo (MCMC)} samples from difficult probability distributions via random walks in parameter space. It accepts changes that improve likelihood, sometimes accepting worse changes with probability proportional to the likelihood change.
+MCMC's key advantage is working with relative probabilities, avoiding normalization constants and complex integrals. It only needs prior and likelihood evaluation for any parameter setting, enabling sampling from any evaluable distribution.
+MCMC enables direct model inference without complex approximations or analytical solutions, working purely algorithmically.
+However, MCMC has limitations. While asymptotically correct, sampling strategy choice significantly impacts practical performance. Bayesian inference should depend only on priors and evidence, but MCMC results also depend on the sampling strategy.
+
+
+% The Metropolis-Hastings algorithm
+
+\noindent \textbf{Metropolis-Hastings Algorithm}:
+The Metropolis-Hastings algorithm is a MCMC method that uses a proposal distribution to generate candidate samples.
+It accepts moves that increase the likelihood, and sometimes accepts moves that decrease likelihood with probability
+proportional to the likelihood ratio.
+
+% The difference between the posterior and the predictive posterior
+
+\noindent \textbf{Posterior Distribution}:
+The posterior distribution is the distribution of the parameters given the data.
+
+\noindent \textbf{Predictive Distribution}:
+The predictive distribution is the distribution of the data given the parameters.
+
+
+% Week 10
+
+\subsection*{Digital Signals and Time Series}
+
+% what sampling is, for 1D and 2D signals
+
+\noindent \textbf{Sampling} is the process of taking measurements of a continuous signal at discrete points in time.
+\noindent \textbf{Quantisation} means to force something to a discrete set of values.
+
+% how amplitude quantization affects signals
+
+\noindent \textbf{Amplitude Quantisation} is the process of converting a continuous amplitude into a discrete set of values.
+
+% what the sampling rate and Nyquist limit are
+
+\noindent \textbf{Sampling Rate}: how frequently we have sampled the original data.
+\noindent \textbf{Nyquist Limit}: the maximum frequency that can be represented in a signal without aliasing.
+Usually $f_n = f_s/2$ where $f_s$ is the sampling rate.
+
+% what aliasing is, and how and when it manifests itself
+
+\noindent \textbf{Aliasing} is the phenomenon where high frequencies are misinterpreted as lower frequencies.
+
+% the importance of noise and the signal-to-noise ratio
+
+\noindent \textbf{Noise} is unwanted information in a signal.
+\noindent \textbf{Signal-to-Noise Ratio (SNR)} is the ratio of the power of the signal to the power of the noise.
+
+% the purpose of filtering signals
+
+\noindent \textbf{Filtering} takes advantage of the fact that we we have temporal structure.
+Real signals cannot have arbitrary changes.
+
+% how moving averages work
+This idea of a sliding window is critical in digital signal processing. A
+sliding window takes a sampled signal of unbounded length, and reduces
+it to a collection of fixeded length vectors
+
+% how median filtering works
+
+\noindent \textbf{Median Filtering} is a non-linear filtering technique that replaces each pixel with the median value of the pixels in a neighborhood.
+
+\noindent \textbf{Linear Filtering} is a filtering technique that uses a linear combination of the pixels in a neighborhood to produce a new pixel.
+
+% how convolution is implemented
+
+\noindent \textbf{Convolution} is the process of taking weighted sums of neighbouring values.
+
+% standard types of convolution, including smoothing
+
+\noindent \textbf{Smoothing} is a type of convolution that uses a Gaussian kernel to blur the image.
+
+% what the frequency domain and time domain are and what they represent
+
+\noindent We can view signals in two ways: as a sequence of amplitude measurements over time: \textbf{the time domain}
+,as a sum of oscillations with different frequencies: \textbf{the frequency domain}
+
+% how the Fourier transform relates the time domain to the frequency domain
+
+\noindent The Fourier Transform is a mathematical operation that decomposes a signal into its constituent frequencies.
+
+% what convolution is and how the Fourier transform can be used to predict its behaviour
+
+\noindent Convolution is the process of taking weighted sums of neighbouring values.
+The Fourier Transform can be used to predict the behaviour of convolutions.
+
+
+
+\noindent \textbf{Frequency Domain Analysis}
+
+\noindent Signals can be represented in two ways. In the time domain, we see a sequence of amplitude measurements over time. In the frequency domain, we see a sum of oscillations with different frequencies.
+
+\noindent A pure oscillation is represented by a sine wave:
+$x(t) = A\sin(2\pi\omega t + \theta)$
+where $\omega$ represents the frequency, $\theta$ represents the phase (time offset), and $A$ represents the magnitude.
+
+\noindent \textbf{Fourier Transform}
+
+\noindent The Fourier Transform decomposes any repeating continuous function into sine waves. It expresses signals as a sum of sinusoidal functions:
+$x(t) = \sum_i A_i\sin(\omega_i 2\pi t + \theta_i)$
+
+\noindent The correlation between signals is calculated as:
+$c = \sum_t a[t]b[t]$
+When signals are unrelated, $c$ is approximately 0. For similar signals, $c$ is large and positive, while for inverse signals, $c$ is large and negative.
+
+\noindent The phase can be calculated using:
+$\theta = \tan^{-1}\left(\frac{c(\omega)}{c'(\omega)}\right)$
+
+\noindent The Fourier transform formula is:
+$\hat{f}(\omega) = \int_{-\infty}^{\infty} f(x)e^{-2\pi ix\omega}dx$
+
+\noindent For real signals, we only need to consider the real part of the complex output.
+
+\noindent \textbf{Discrete Fourier Transform (DFT)}
+
+\noindent The Discrete Fourier Transform works on discrete measurements. It has complex components representing phase and magnitude. The frequency is calculated as $freq = \frac{f_N k}{N}$. In terms of computational complexity, the DFT requires $O(N^2)$ operations, while the Fast Fourier Transform (FFT) requires only $O(N\log N)$ operations when N is a power of 2.
+
+\noindent \textbf{Convolution Theorem}
+
+\noindent The Convolution Theorem states:
+$FT(f(x) * g(x)) = FT(f(x))FT(g(x))$
+where $FT$ represents the Fourier Transform, $*$ represents convolution, and $IFT$ represents the Inverse Fourier Transform.
+
+\noindent \textbf{Filter Types}
+
+\noindent There are several types of filters. A lowpass filter reduces high frequencies, while a highpass filter reduces low frequencies. A bandpass filter reduces frequencies outside a specific band, and a notch/bandstop filter reduces frequencies inside a band.
+
+\noindent Linear filters can only modify existing frequencies, not introduce new ones.
+
+
 
 
 \end{document}
