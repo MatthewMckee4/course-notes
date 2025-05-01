@@ -382,9 +382,9 @@ SIP was designed to express options and alternatives.
 \textbf{Streaming Video:}
 RTP and RTSP offer low latency, but HTTPS is used for easier CDN support despite higher latency.
 \textbf{Content Delivery:}
-CDNs are optimized for HTTP, not RTP.
+CDNs are optimized for HTTP, not RTP\@.
 \textbf{HTTP Adaptive Streaming (DASH):}
-Video split into ~10s chunks at multiple bitrates. Clients pick bitrate based on network speed.
+Video split into \~10s chunks at multiple bitrates. Clients pick bitrate based on network speed.
 \textbf{DASH and TCP:}
 TCP controls congestion fast (RTT), DASH adapts slowly (~10s). Start with low quality, adjust later.
 \textbf{Latency:}
@@ -407,7 +407,59 @@ query the subdomain to find the addresses.
 Responses include a \textbf{time to live} that allows a resolver to cache the value for a certain time period.
 
 % 8b
-The set of top-level domains is controlled by the \textbf{Internet Corporation for
-Assigned Names and Numbers (ICANN)}
+The set of top-level domains is controlled by the \textbf{Internet Corporation for Assigned Names and Numbers (ICANN)}.
+ICANN is \textbf{political} \- many countries and organisations want to influence how domain names are managed and allocated.
+Types of TLDs:
+\textbf{Country code} (e.g. \.uk, \.fr, \.us),
+\textbf{generic} (e.g. \.com, \.net, \.org),
+\textbf{infrastructure} (e.g. \.arpa, \.int).
+\textbf{special-use} (e.g. \.example, \.invalid, \.localhost).
+
+DNS names should be available in any language. Initial TLDs and sub-domains were in ASCII, but UTF-8 ought to be allowed
+DNS should, in principle, work with UTF-8 name \- in practice it doesn't, due to protocol ossification
+The set of 13 servers that advertise the name servers for the top level domains
+
+% 8c
+\textbf{DNS Security}
+Two approaches to securing DNS.
+\textbf{Transport security}: make DNS requests and recieve replies over TLS\@.
+\textbf{Record security}: add a digital signature to DNS responses that client can verify to check the data is valid.
+Need both transport and record security for fully secure DNS\@.
+DNS queries generally made over UDP port 53. Requests and responses can fit in a single packet.
+
+DNS over UDP is insecure. Packets are not encrypted or authenticated.
+
+DNS over TLS solves this problem. Client opens TCP connection to port 853, client opens TLS connection,
+client sends query and recieves response over TLS\@.
+
+Also, DNS over HTTPS and DNS over QUIC are alternatives.
+
+% 8d
+\textbf{The Politics of Names}
+How is the DNS resolver chosen? When connecting to network, hosts use dynamic host configuration protocol (DHCP)
+to discover network settings and configuration.
+DNS resolution has typically been a system-wide service, but now in JS you can perform DNS queries via any HTTP website.
+Is this flexibility for each application to perform DNS queries differently a concern?
+No: Applications should be able to use a secure DNS server they trust, why should network operators be able to see DNS queries and modify repsonses.
+Yes: Network operators filter DNS responses to block access to malicious sites and prevent malware spreading,
+Network operators filter DNS responses to enforce legal or societal constraints.
+Can a network restruct the choice of a DNS resolver?
+Firewalls can block access to DNS over UDP and DNS over TLS\@.
+Difficult to block DNS over HTTPS as it looks like any other HTTPS request, though you may be able to tell from the destination address.
+What Domains Should Exist?
+Who Controls the Root Servers?
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \end{document}
