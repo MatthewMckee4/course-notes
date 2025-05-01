@@ -451,11 +451,34 @@ Who Controls the Root Servers?
 
 
 
+\subsection*{Networks and Internet Routing}
 
+% 9a
+\textbf{Content Distribution Networks (CDNs)} provide scalability, load balancing and low latency.
+They host content for their customers in web caches around the world.
+Reduced latency to respond to requests.
+Cloudflare is a CDN\@.
+Reduces load on the ISP's network.
+Requires global distribution of CDN proxy caches.
+\textbf{Locating the Nearest CDN Node using DNS}
+Each resource hosted by the CDN has a unique DNS name.
+Directs to local cache based on IP address.
+Locate the nearest CDN node using anycast routing.
+The CDN uses multiple data centres \- all using the same IP addresses.
 
-
-
-
+% 9b
+\textbf{Inter-domain Routing}
+The Internet is a network of networks
+Each network is an Autonomous System (AS).
+Each network is a separate routing domain.
+Inter-domain routing is the problem of finding the best path from the source network to the destination network.
+An Autonomous System (AS) is an independently operated network.
+Each AS is identified by a unique number, allocated by the RIR\@.
+Devices at the edge tend to have simple routing tables: The devices on the local network and a default route for everything else.
+Core networks need full routing table: The \textbf{default free zone (DFZ)}.
+AS-level topology flattening → increasingly rich interconnections.
+Internet Exchange Points (IXPs) are becoming commonplace.
+Routing must consider policy: who can determine the network topology? which traffic should follow betw
 
 
 
