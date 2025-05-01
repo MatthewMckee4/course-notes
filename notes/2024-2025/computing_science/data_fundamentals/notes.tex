@@ -320,26 +320,91 @@ An optimisation algorithm is said to converge to a solution
 What can go wrong? Slow progress. Noisy and diverging performance. Getting stuck
 
 
+% Week 7
+
+\subsection*{Optimisation 2}
+
+\noindent \textbf{Gradients of Vector-Valued Functions}.
+\textbf{Jacobian}: matrix of partial derivatives.
+\textbf{Gradient Vector}: gradient of a scalar-valued function of a vector variable.
+\textbf{Hessian}: matrix of second partial derivatives.
+\textbf{Lipschitz continuous}: a function $f$ is Lipschitz continuous if there exists a constant $L$ such that for all $x$ and $y$, $|f(x) - f(y)| \leq L |x - y|$.
+
+\noindent \textbf{Gradient Descent}: An iterative optimisation algorithm that uses the gradient of the objective function to find a local minimum. The update rule is:
+$\theta_{t+1} = \theta_t - \alpha \nabla L(\theta_t)$. While gradient descent can be very fast, following the gradient is not necessarily the fastest route to a minimum.
+
+\noindent \textbf{Adaptive Step Sizes}:
+\textbf{Line search}: Start with a big step, then reduce it if the gradient is not decreasing.
+\textbf{Adagrad}: adapt the step size for each dimension based on the history of the gradient in that dimension.
+
+\noindent \textbf{Stochastic Gradient Descent}: If the objective function can be broken down into
+small parts, then the gradient can be approximated by sampling the gradient at random points.
+
+\noindent \textbf{Eigenvalues of the Hessian}: The Hessian matrix captures important properties about the type of critical
+point that we saw in the previous lecture. In particular, the eigenvalues of the Hessian tell us what kind of point we have.
+If all eigenvalues are strictly positive, the matrix is called positive definite and the point is a minimum. If all eigenvalues
+are strictly negative, the matrix is called negative definite and the point is a maximum. If eigenvalues have mixed signs,
+the point is a saddle point. If the eigenvalues are all positive or negative, but with some zeros, the matrix is semidefinite
+and the point is a plateau or ridge.
 
 
+% Week 8
+
+\subsection*{Probability}
+\textbf{Experiment/Trial}: An occurrence with an uncertain outcome (e.g., submarine location)
+\textbf{Outcome}: Result of an experiment (e.g., submarine in grid [2,3])
+\textbf{Sample Space}: Set of all possible outcomes
+\textbf{Event}: Subset of possible outcomes with common property
+\textbf{Probability}: Ratio of event outcomes to total outcomes (0 to 1)
+\textbf{Probability Distribution}: Mapping of outcomes to probabilities that sum to 1
+\textbf{Random Variable}: Variable representing unknown value with known probability distribution
+\textbf{Probability Density/Mass Function}: Function defining probability distribution
+\textbf{Observation}: Directly observed outcome (data)
+\textbf{Likelihood}: How likely an observation is given a probability distribution
+\textbf{Sample}: Simulated outcome from a probability distribution
+\textbf{Expectation}: Average value of a random variable
 
 
+\noindent \textbf{Probability Mass Function}: A function that maps each possible outcome of a discrete random variable to its probability.
+\noindent \textbf{Probability Density Function}: A function that maps each possible outcome of a continuous random variable to its probability.
 
 
+\noindent \textbf{Expected Value}: The average value of a random variable. For discrete $X$:
+$ E[X] = \sum_{x} x \cdot P(x) $
+For continuous $X$:
+$ E[X] = \int_{-\infty}^{\infty} x \cdot f(x) \, dx $
+
+\noindent \textbf{Variance}: A measure of the spread of a random variable's values. For a random variable $X$ with expected value $E[X]$, the variance is defined as:
+$ \text{Var}(X) = E[(X - E[X])^2] $
 
 
+\noindent \textbf{Joint Probability}: The probability of two events occurring together. For events $A$ and $B$, the joint probability is:
+$ P(A \cap B) = P(A) \cdot P(B|A) $
 
+\noindent \textbf{Conditional Probability}: The probability of an event given that another event has occurred. For events $A$ and $B$, the conditional probability of $A$ given $B$ is:
+$ P(A|B) = \frac{P(A \cap B)}{P(B)} $
 
+\noindent \textbf{Odds}: The ratio of the probability of an event occurring to the probability of it not occurring. For event $A$, the odds are:
+$ \text{odds}(A) = \frac{P(A)}{1 - P(A)} $
 
+\noindent \textbf{Log-odds} are particularly useful for very unlikely scenarios.
 
+\noindent \textbf{Bayes' Theorem}: A fundamental theorem in probability that describes how to update the probabilities of hypotheses when given evidence. The theorem is stated as:
+$ P(A|B) = \frac{P(B|A) \cdot P(A)}{P(B)} $.
+\textbf{Posterior}: What we want to know after computation
+\textbf{Likelihood}: Probability of evidence given the event
+\textbf{Prior}: Probability of event before evidence
+\textbf{Evidence}: Probability of evidence occurring
 
+\noindent \textbf{Integration over the evidence}
+$ P(A) = \int P(A|B) \cdot P(B) \, dB $
 
-
-
-
-
-
-
+\noindent \textbf{Entropy}:
+The entropy of a (discrete) distribution of a random variable can be
+computed as:
+$ H(X) = - \sum_{x} P(x) \log P(x) $
+This is just the expected value of the log-probability of a random variable
+(the “average” log-probability).
 
 
 
