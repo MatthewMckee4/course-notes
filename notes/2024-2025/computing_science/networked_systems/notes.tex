@@ -15,12 +15,12 @@
 
 \subsection*{The Changing Internet}
 
-\textbf{Networked System:} A cooperating set of autonomous computing devices that exchange data to perform some application goal
+\textbf{Networked System:} A cooperating set of autonomous computing devices that exchange data to perform some application goal.
 
-\textbf{Channel constraints:} bound communications speed and reliability
+\textbf{Channel constraints:} bound communications speed and reliability.
 
-\textbf{OSI Reference Model:} Application Layer, Presentation Layer, Session Layer, Transport Layer, Network Layer, Data Link Layer, Physical Layer
-\textbf{Note:} Real networks don't follow the OSI Reference Model
+\textbf{OSI Reference Model:} Application Layer, Presentation Layer, Session Layer, Transport Layer, Network Layer, Data Link Layer, Physical Layer.
+\textbf{Note:} Real networks don't follow the OSI Reference Model.
 
 \textbf{Physical Layer:} Transmits raw bits over a physical medium.
 \textbf{Baseband Data Encoding:}
@@ -65,6 +65,7 @@ TCP follows a client-server model.
 The server calls the accept () function to accept incoming connections, while the client initiates a connection by calling connect ().
 Calls to send () and recv () are used to send and receive data.
 As RTT increases, benefits of increasing bandwidth reduce
+For this example, with 300ms RTT, increasing bandwidth from 15Mbps to 1Gbps gives only 22\% reduction in page download time.
 
 % 2b
 \textbf{Impact of TLS:}
@@ -460,7 +461,7 @@ Reduced latency to respond to requests.
 Cloudflare is a CDN\@.
 Reduces load on the ISP's network.
 Requires global distribution of CDN proxy caches.
-\textbf{Locating the Nearest CDN Node using DNS}
+\textbf{Locating the Nearest CDN Node using DNS}.
 Each resource hosted by the CDN has a unique DNS name.
 Directs to local cache based on IP address.
 Locate the nearest CDN node using anycast routing.
@@ -478,7 +479,80 @@ Devices at the edge tend to have simple routing tables: The devices on the local
 Core networks need full routing table: The \textbf{default free zone (DFZ)}.
 AS-level topology flattening → increasingly rich interconnections.
 Internet Exchange Points (IXPs) are becoming commonplace.
-Routing must consider policy: who can determine the network topology? which traffic should follow betw
+Routing must consider policy: who can determine the network topology? which traffic should follow between a particular source and destination?
+Policy restrictions might prioritise non-shortest path routes. Do you prioritise cost, bandwidth, or latency.
+
+\textbf{Border Gateway Protocol (BGP)} is the inter-domain routing protocol.
+\textbf{External BGP (eBGP)} used to exchange routing information between ASes.
+TCP connection is made between two routers, then exchange knowledge of the AS-level topology of the network.
+Used to compute appropriate interdomain routes to each destination AS\@.
+eBGP routers advertise lists of IP address ranges (“prefixes”) and their associated AS-level paths
+\textbf{Internal BGP (iBGP)} propagates this information to routers within an AS\@.
+iBGP distributes information to internal routers on how to reach external destinations.
+Gao-Rexford rules specify what routes are advertised.
+Each AS exchanges routing information with neighbours.
+Each AS applies policy to choose what routes to use:
+Each AS applies polocy to determine what routes to advertise.
+
+% 9c
+\textbf{Routing Security}
+Any AS participating in BGP routing can announce any address prefix \- whether or not they own it
+Could accidental, or malicious.
+So traffic is misdirected, this is \textbf{BGP Hijacking}.
+\textbf{Resource public key infrastructure (RPKI)} is an attempt to secure internet routing.
+Lets an AS make a signed \textbf{Route Origin Authorisation (ROA)} \- a digital signature
+
+% 9d
+\textbf{Intra-domain Routing}
+
+Distance vector \- the \textbf{Routing Information Protocol (RIP)}
+Nodes maintain a vector containing the distance to every other node in network.
+Not widely used as it is not scalable. Simple to implement, suffers from slow convergence.
+
+Link state \- \textbf{Open Shortest Path First routing (OSPF)}
+Nodes know the links to their neighbours, and cost of using those links.
+Ensures all nodes know the entire network topology.
+Each nodes uses Dijkstra's algorithm to compute the shortest path to every other node.
+More complex, requires each router to store complete network map. Much faster convergence.
+
+Challenges. Construction work is good at breaking cables. Good network desings have multiple paths from source to destination.
+Must quickly notice failure and switch to backup path.
+\textbf{Fast failover} \- pre-calculate alternative paths to allow rapid switchover
+\textbf{Equal cost multipath routing} \- if two paths with the same cost, alternate traffic between them
+Care needed if order is important.
+
+
+
+
+The course has focussed on how the Internet can change and evolve to address coming challenges:
+
+\begin{itemize}
+    \item How to establish connections in a fragmented network?
+    \item How can encryption protect against pervasive monitoring and prevent transport ossification?
+    \item How can we reduce latency and support real-time and interactive content?
+    \item How can we adapt to the vagaries of wireless networks?
+    \item How can we identify and distribute content? How can we manage the tussle for control of the DNS and naming?
+    \item How can we manage interdomain routing to efficiently delivery content?
+    \item How can we re-decentralise the network?
+\end{itemize}
+
+
+To address these challenges, the Internet is in the middle of a significant change:
+
+\begin{itemize}
+    \item IPv6 as a basis for routing and forwarding evolution
+    \item TLS 1.3 to simplify and improve security
+    \item QUIC as a basis for future transport evolution, avoiding protocol ossification
+    \item HTTP/3 as a basis for web evolution
+    \item DNS over encryption (HTTPS, TLS, QUIC) for secure name resolution
+    \item CDNs and overlays
+\end{itemize}
+
+
+
+
+
+
 
 
 
