@@ -3,9 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage[margin=2px]{geometry}
-
-\newtheorem{definition}{Definition}
-\newtheorem{note}{Note}
+\setlength{\parindent}{0pt}
 
 \title{Networked Systems}
 \author{}
@@ -17,48 +15,48 @@
 
 \subsection*{The Changing Internet}
 
-\noindent \textbf{Networked System:} A cooperating set of autonomous computing devices that exchange data to perform some application goal
+\textbf{Networked System:} A cooperating set of autonomous computing devices that exchange data to perform some application goal.
 
-\noindent \textbf{Channel constraints:} bound communications speed and reliability
+\textbf{Channel constraints:} bound communications speed and reliability.
 
-\noindent \textbf{OSI Reference Model:} Application Layer, Presentation Layer, Session Layer, Transport Layer, Network Layer, Data Link Layer, Physical Layer
-\textbf{Note:} Real networks don't follow the OSI Reference Model
+\textbf{OSI Reference Model:} Application Layer, Presentation Layer, Session Layer, Transport Layer, Network Layer, Data Link Layer, Physical Layer.
+\textbf{Note:} Real networks don't follow the OSI Reference Model.
 
-\noindent \textbf{Physical Layer:} Transmits raw bits over a physical medium.
+\textbf{Physical Layer:} Transmits raw bits over a physical medium.
 \textbf{Baseband Data Encoding:}
 \textbf{NRZ:} 0 is represented by no change in voltage, 1 is represented by a change in voltage. Easy to miscount bits if long run of same value.
 \textbf{Manchester:} Encoding: 0 is represented by a transition from high to low, 1 is represented by a transition from low to high.
 \textbf{Modulation:} Allows multiple signals on a channel, modulated onto carriers of different frequency. Amplitude Modulation, Frequency Modulation, Phase Modulation.
 
-\noindent \textbf{Data Link Layer:} provides framing, addressing, media access control, error detection, and flow control.
+\textbf{Data Link Layer:} provides framing, addressing, media access control, error detection, and flow control.
 \textbf{Framing:} Separate the bitstream into meaningful frames of data.
 \textbf{Media Access Control:} How devices share the channel. If another transmission is active, the device must wait until the channel is free.
 
 
-\noindent \textbf{Network Layer:} provides routing, addressing, and packet switching. Internet Protocol (IP).
+\textbf{Network Layer:} provides routing, addressing, and packet switching. Internet Protocol (IP).
 \textbf{IPv4:} 32-bit address space. Fragmentation difficult at high data rates.
 \textbf{IPv6:} 128-bit address space. No in-network fragmentation. Simple header format.
-\textbf{Routing:} Each network administered separately - an autonomous system (AS), different technologies and policies.
+\textbf{Routing:} Each network administered separately \- an autonomous system (AS), different technologies and policies.
 \textbf{Inter-domain Rounting:} Route advertisements are sent to the routing table of the destination. Border Gateway Protocol (BGP). Advertisements have AS-path.
 
 
-\noindent \textbf{Transport Layer:} provides end-to-end error recovery, flow control, and multiplexing.
+\textbf{Transport Layer:} provides end-to-end error recovery, flow control, and multiplexing.
 \textbf{TCP:} Connection-oriented, reliable, in-order delivery, flow control, congestion control.
 \textbf{UDP:} Connectionless, unreliable, out-of-order delivery, no flow control, no congestion control.
 
-\noindent \textbf{Session Layer:} provides session establishment, maintenance, and termination.
+\textbf{Session Layer:} provides session establishment, maintenance, and termination.
 \textbf{Managing Connections:} How to find participants in a connection, how to setup and manage the connection.
 
-\noindent \textbf{Presentation Layer:} provides data representation and encryption.
+\textbf{Presentation Layer:} provides data representation and encryption.
 
-\noindent \textbf{Application Layer:} provides the interface to the application. Deliver email, stream video, etc.
+\textbf{Application Layer:} provides the interface to the application. Deliver email, stream video, etc.
 \textbf{Happy Eyeballs}: The process of trying multiple connections to a server to find one that is available.
 
 
 \subsection*{Connection Establishment in a Fragmented Network}
 
 % 2a
-\noindent \textbf{TCP} is a transport layer protocol, provides a reliable ordered byte stream service over the
+\textbf{TCP} is a transport layer protocol, provides a reliable ordered byte stream service over the
 best-effort IP network. Provides congestion control.
 TCP segments carried as data in IP packets.
 IP packets carried as data in link layer frames. Link layer frames delivered over physical layer.
@@ -67,17 +65,18 @@ TCP follows a client-server model.
 The server calls the accept () function to accept incoming connections, while the client initiates a connection by calling connect ().
 Calls to send () and recv () are used to send and receive data.
 As RTT increases, benefits of increasing bandwidth reduce
+For this example, with 300ms RTT, increasing bandwidth from 15Mbps to 1Gbps gives only 22\% reduction in page download time.
 
 % 2b
-\noindent \textbf{Impact of TLS:}
+\textbf{Impact of TLS:}
 HTTP sends and retrives data immediatly once the TCP connection is open.
 HTTPS opens a TCP connection, then negotiates secure parameters using TLS.\@
 TLS v1.3: extra 1RTT, TLS v1.2: 2RTT.\@
-\noindent \textbf{Impact of Ipv6 and dual stack deployments:}
+\textbf{Impact of Ipv6 and dual stack deployments:}
 Hosts support a combination of IPv4 and IPv6.
 
 % 2c
-\noindent \textbf{Peer-to-peer Connections}
+\textbf{Peer-to-peer Connections}
 You should be able to run a TCP server on any device, and TCP, UDP based peer-to-peer applications.
 Peer-to-peer connetion establishment is difficult due to network address translation (NAT).
 \textbf{NAT} is a work around for the shortage of IPv4 addresses, it allows several devices to share a single public IP address.
@@ -85,7 +84,7 @@ ISP assigns new range of IP addressses to customer.
 Records the mapping, so the reverse changes can be made to any incoming replies as they traverse the NAT in the reverse direction
 
 % 2d
-\noindent \textbf{NAT Breaks Applications}:
+\textbf{NAT Breaks Applications}:
 Client-server applications with server behind NAT fail – need explicit port forwarding
 Hard-coding IP addresses, rather than DNS names, in configuration files and application is a bad idea
 Outgoing connections create state in NAT, so replies can be translated to reach the correct host on the private network.
@@ -93,7 +92,7 @@ No state for incoming connections.
 UDP not connection-oriented; NAT can’t detect the end of a flow, so use short timeout to cleanup state once UDP flow has stopped
 
 % 2e
-\noindent \textbf{NAT Traversal and Peer-to-Peer Connections Establishment}:
+\textbf{NAT Traversal and Peer-to-Peer Connections Establishment}:
 Incoming connections fail, since NAT cannot know how to translate the incoming packets
 Peer-to-peer connections can succeed if both NATs think a client server connection is being opened, and the response is coming from the server
 Peers connect to referral server on public network, use server to discover the NAT bindings: binding discovery.
@@ -116,7 +115,7 @@ These middleboxes must inderstand the protocols, this creates ossification.
 The more of a protocol that is encrypted, the easier it is to change.
 
 % 3b
-\noindent \textbf{Principles of Secure Communication}. Avoid eavesdropping, tampering, and spoofing.
+\textbf{Principles of Secure Communication}. Avoid eavesdropping, tampering, and spoofing.
 Use encryption to make data useless if intercepted.
 \textbf{Symmetric Cryptography}: Same key used for encryption and decryption. Very fast, suitable for bulk data.
 \textbf{Public-Key Cryptography}: Different keys for encryption and decryption. Very slow.
@@ -136,7 +135,7 @@ if the signature is valid and the message is unchanged, the reciever can be sure
 
 
 % 3c
-\noindent \textbf{Transport Layer Security (TLS)} is used to encrypt and authenticate data carried within a TCP connection.
+\textbf{Transport Layer Security (TLS)} is used to encrypt and authenticate data carried within a TCP connection.
 TLS handshake runs within a TCP connection. ClientHello is sent with the ACK, ServerHello is sent in response, Finished message concludes.
 ClientHello signals TLS v1.2 but header indicates TLS v1.3, provides the cryptographic algorithms the client supports,
 provides the name of the server to which the client is connecting, no data.
@@ -152,7 +151,7 @@ If a client and server have previously communicated, they can re-use a key (0-RT
 \subsection*{Improving Secure Connection Establishment}
 
 % 4a
-\noindent \textbf{Limitations of TLS}.
+\textbf{Limitations of TLS}.
 Connection establishment is still relatively slow, and so first data is sent 2x RTT after the start.
 Connection establishment leaks potentially sensitive metadata
 The protocol is ossified due to middlebox interference
@@ -171,7 +170,7 @@ TLS 1.3 says its using TLS 1.2, but it says in the header that it is using TLS 1
 \textbf{GREASE}: Generate random extensions and sustain extensibility: send random extensions that are ignored.
 
 % 4b
-\noindent \textbf{QUIC Transport Protocol}:
+\textbf{QUIC Transport Protocol}:
 What’s wrong with TLS v1.3 over TCP?,
 Slow to connect – due to sequential TCP and TLS handshakes,
 Leaks some metadata,
@@ -197,7 +196,7 @@ The is one short header packet defined in QUIC:
 QUIC packet contain an encrypted sequence of frames
 
 % 4c
-\noindent \textbf{QUIC Connection Establishment}. A QUIC connection proceeds in two phases: handshake and data transfer.
+\textbf{QUIC Connection Establishment}. A QUIC connection proceeds in two phases: handshake and data transfer.
 \textbf{C} $\rightarrow$ \textbf{S}: QUIC Initial packet
 \textbf{S} $\rightarrow$ \textbf{C}: QUIC Initial and Handshake Packet
 \textbf{C} $\rightarrow$ \textbf{S}: QUIC Initial, Handshake, and 1-RTT Packet
@@ -217,7 +216,7 @@ Indicate sequence numbers of QUIC packets that were received, not frames
 Data is sent within STREAM frames, sent within QUIC packets, contains a stream identifier, offset of the data, data length and data.
 
 % 4d
-\noindent \textbf{QUIC over UDP}. Why run QUIC over UDP? To ease end-system deployment.
+\textbf{QUIC over UDP}. Why run QUIC over UDP? To ease end-system deployment.
 To work around protocol ossification.
 Entire packet except invariant fields and the last 7-bits of the first byte is encrypted.
 QUIC authenticates all data.
@@ -233,7 +232,7 @@ CPU usage is high compared to TLS-over-TCP.
 \subsection*{Reliability and Data Transfer}
 
 % 5a
-\noindent \textbf{Packet Loss in the Internet}.
+\textbf{Packet Loss in the Internet}.
 The Internet is a best effort packet delivery network – it is unreliable.
 IP packets may be lost, delayed, reordered, or corrupted in transit.
 Only put functionality that is absolutely necessary in the network, leave everything else to end systems.
@@ -241,7 +240,7 @@ If a connection is to be reliable, it cannot guarantee timeliness.
 If a connection is to be timely, it cannot guarantee reliability.
 
 % 5b
-\noindent \textbf{Unreliable Data Using UDP}.
+\textbf{Unreliable Data Using UDP}.
 The \texttt{sendto ()} call sends a single datagram.
 Each call to \texttt{sendto ()} can send to a different address, even though they use the same socket.
 The \texttt{recv ()} call may be used to read a single datagram, but doesn’t provide the source address of the datagram.
@@ -249,7 +248,7 @@ Most code uses \texttt{recvfrom ()} instead – this fills in the source address
 UDP does not attempt to provide sequencing, reliability, or timing recovery.
 
 % 5c
-\noindent \textbf{Reliable Data Using TCP}.
+\textbf{Reliable Data Using TCP}.
 TCP ensures data delivered reliably and in order.
 TCP sends acknowledgements for segments as they are received; retransmits lost data.
 TCP will recover original transmission order if segments are delayed and arrive out of order.
@@ -263,7 +262,7 @@ number – as an indication of packet loss
 \textbf{Head-of-line Blocking in TCP}: TCP segments are sent in order, if a segment is lost, all subsequent segments are held up.
 
 % 5d
-\noindent \textbf{Reliable Data Transfer with QUIC}.
+\textbf{Reliable Data Transfer with QUIC}.
 QUIC delivers several ordered reliable byte streams within a single connection.
 Each QUIC packet has a packet number.
 Within each space, packet number starts at zero, increases by one for each packet sent.
@@ -278,7 +277,7 @@ Order is not preserved between streams within a QUIC connection.
 \subsection*{Lowering Latency}
 
 % 6a
-\noindent \textbf{TCP Congestion Control}.
+\textbf{TCP Congestion Control}.
 \textbf{Principles}: packet loss as a congestion signal, additive increase, multiplicative decrease.
 \textbf{IP Routers} perform \textbf{Routing} (receive packets and determine route to destination) and
 \textbf{Forwarding} (enqueue packet on outgoing link).
@@ -286,7 +285,7 @@ Order is not preserved between streams within a QUIC connection.
 TCP uses window-based congestion control.
 
 % 6b
-\noindent \textbf{TCP Reno}.
+\textbf{TCP Reno}.
 \textbf{Congestion window}: number of packets to be sent before an acknowledgement arrives.
 \textbf{Initial window} is typically 1-10 packets.
 Use \textbf{slow start} by doubling the congestion window after each acknowledgement until a packet is lost,
@@ -300,26 +299,26 @@ Congestion avoidance phase takes long time to use increased capacity.
 Performs poorly on fast long-distance networks.
 
 % 6c
-\noindent \textbf{TCP Cubic}.
+\textbf{TCP Cubic}.
 More aggresive (multiplicative decrease 0.7).
-$W_{\text{cubic}} = C (t - K)^3 + W_{\text{max}}$.
+$W_{\text{cubic}} = C (t \- K)^3 + W_{\text{max}}$.
 $W_{\text{max}}$ window size before packet loss.
 $t$ time since packet loss.
 $K$ time to increase window back to $W_{\text{max}}$.
 $C = 0.4$ constant to control fairness to Reno.
 
 % 6d
-\noindent \textbf{TCP Vegas: Delay-based Congestion Control}
+\textbf{TCP Vegas: Delay-based Congestion Control}
 Watches for the increase in delay as the queue starts to fill up and slows down before the queue overflows.
 Still uses slow start.
 Measure BaseRTT, Calculate ExpectedRate = w / BaseRTT, measure ActualRate.
-If ExpectedRate - ActualRate < R1 then additive increase to window.
-If ExpectedRate - ActualRate > R2 then additive decrease to window.
+If ExpectedRate \- ActualRate < R1 then additive increase to window.
+If ExpectedRate \- ActualRate > R2 then additive decrease to window.
 Since Reno and Cubic are aggressive, this forces Vegas to slow down and the cycle repeats until rate drops to zero.
 So Vegas is not used. TCP Bottleneck Bandwidth \& RTT attempts to make delay-based congestion work.
 
 % 6e
-\noindent \textbf{Explicit Congestion Notification (ECN)}.
+\textbf{Explicit Congestion Notification (ECN)}.
 Why not have the network tell TCP congestion is occurring? ECN field in IP header.
 00 doesnt support.
 01 ECN capable.
@@ -327,7 +326,7 @@ Why not have the network tell TCP congestion is occurring? ECN field in IP heade
 Routers signal congestion before queues overflow.
 
 % 6f
-\noindent \textbf{Impact of propagation delay on latency}.
+\textbf{Impact of propagation delay on latency}.
 Time packets spend in queues.
 Time packets spend propagating down links between routers.
 
@@ -335,38 +334,219 @@ Time packets spend propagating down links between routers.
 \subsection*{Real-time and Interactive Applications}
 
 % 7a
-\noindent \textbf{Real-time Media Over The Internet}.
+\textbf{Real-time Media Over The Internet}.
 \textbf{Real-time Traffic} must be delivered by a certain time, must be loss tolerant.
 For streaming this may mean that the content takes a few seconds to load but is smooth once it starts.
 Trade-off between frame rate and frame quality.
 Interactive converencing has tight latency bounds.
-One-way mouth-to-ear delay ~150ms maximum for telephony.
+One-way mouth-to-ear delay \~150ms maximum for telephony.
 Video converencing want to lip-sync audio and video.
 Audio should be no more than 15ms ahead or 45ms behind.
-Speech coding data rate can be 10s of kbps, but should be ~100ms.
+Speech coding data rate can be 10s of kbps, but should be \~100ms.
 Video frame rate can be between 25 and 60fps.
-Many transfers are elastic - faster is better, but it doesn't matter what rate the congestion control selects.
+Many transfers are elastic \- faster is better, but it doesn't matter what rate the congestion control selects.
 Real-time traffic is inelasitc, has a minimum and maximum rate.
 Reserving network capacity makes using the network more expensive.
 
 % 7b
-\noindent \textbf{Interactive Applications}
-Frames of media data are captured periodically
-Codec compresses media frames
-Compressed frames fragmented into packets
-Transmitted using RTP inside UDP packets
-RTP protocol adds timing and sequencing, source identification, payload identification
-Transmitted over the network
+\textbf{Interactive Applications}
+Frames of media data are captured periodically.
+Codec compresses media frames.
+Compressed frames fragmented into packets.
+Transmitted using RTP inside UDP packets.
+RTP protocol adds timing and sequencing, source identification, payload identification.
+Transmitted over the network.
+UDP packets containing RTP protocol data arrive separated according to sender.
+Channel coder repairs loss using forward error correction.
+Playout buffer used to reconstruct order, smooth timing.
+Media is decompressed, packet loss concealed, and clock skew corrected.
+Recovered media is rendered to user.
+\textbf{Real-time Transport Protocol (RTP)}
+Usual TLS handshake but within UDP packets.
+Payload formats.
+Each packet should be independently usable
+
+% 7c
+\textbf{WebRTC} Data Channel provides a peer-to-peer data channel.
+A signalling protocol is needed to find the peer and establish the paths.
+The control protocol needs to describe the communication session expected.
+\textbf{Session description protocol (SDP)} provides a standard format for such data.
+SDP Offer: Description of the communication session expected by the offerer.
+SDP Answer: subsets of the offer, and confirms willingness to communicate.
+SDP was not designed to express options and alternatives.
+\textbf{Session Initiation Protocol (SIP)} is used to find the peer and establish the paths.
+SIP is used to describe the communication session expected.
+SIP was designed to express options and alternatives.
+\textbf{WebRTC} is an alternative signalling protocol.
+
+% 7d
+\textbf{Streaming Video:}
+RTP and RTSP offer low latency, but HTTPS is used for easier CDN support despite higher latency.
+\textbf{Content Delivery:}
+CDNs are optimized for HTTP, not RTP\@.
+\textbf{HTTP Adaptive Streaming (DASH):}
+Video split into \~10s chunks at multiple bitrates. Clients pick bitrate based on network speed.
+\textbf{DASH and TCP:}
+TCP controls congestion fast (RTT), DASH adapts slowly (~10s). Start with low quality, adjust later.
+\textbf{Latency:}
+Caused by chunk size, buffering, encoding, and TCP retransmissions.
+\textbf{Compression Trade-off:}
+Smaller chunks reduce latency but waste space due to frequent large I-frames.
+\textbf{Future:}
+WebRTC (low latency RTP in browsers) and QUIC (YouTube uses it) are the future for video.
+
+
+\subsection*{Naming and the Tussle for Control}
+
+% 8a
+\textbf{DNS Name Resolution}
+IP packets contain addresses, not names.
+\textbf{Domain name system (DNS)} is a distributed database; maps names to IP addresses.
+\textbf{DNS name structure}: <subdomain>.<top-level domain>.<dns root>.
+A recursive query via the DNS root server is made. Query the root to find the TLD, query the TLD to find the subdomain,
+query the subdomain to find the addresses.
+Responses include a \textbf{time to live} that allows a resolver to cache the value for a certain time period.
+
+% 8b
+The set of top-level domains is controlled by the \textbf{Internet Corporation for Assigned Names and Numbers (ICANN)}.
+ICANN is \textbf{political} \- many countries and organisations want to influence how domain names are managed and allocated.
+Types of TLDs:
+\textbf{Country code} (e.g. \.uk, \.fr, \.us),
+\textbf{generic} (e.g. \.com, \.net, \.org),
+\textbf{infrastructure} (e.g. \.arpa, \.int).
+\textbf{special-use} (e.g. \.example, \.invalid, \.localhost).
+
+DNS names should be available in any language. Initial TLDs and sub-domains were in ASCII, but UTF-8 ought to be allowed
+DNS should, in principle, work with UTF-8 name \- in practice it doesn't, due to protocol ossification
+The set of 13 servers that advertise the name servers for the top level domains
+
+% 8c
+\textbf{DNS Security}
+Two approaches to securing DNS.
+\textbf{Transport security}: make DNS requests and recieve replies over TLS\@.
+\textbf{Record security}: add a digital signature to DNS responses that client can verify to check the data is valid.
+Need both transport and record security for fully secure DNS\@.
+DNS queries generally made over UDP port 53. Requests and responses can fit in a single packet.
+
+DNS over UDP is insecure. Packets are not encrypted or authenticated.
+
+DNS over TLS solves this problem. Client opens TCP connection to port 853, client opens TLS connection,
+client sends query and recieves response over TLS\@.
+
+Also, DNS over HTTPS and DNS over QUIC are alternatives.
+
+% 8d
+\textbf{The Politics of Names}
+How is the DNS resolver chosen? When connecting to network, hosts use dynamic host configuration protocol (DHCP)
+to discover network settings and configuration.
+DNS resolution has typically been a system-wide service, but now in JS you can perform DNS queries via any HTTP website.
+Is this flexibility for each application to perform DNS queries differently a concern?
+No: Applications should be able to use a secure DNS server they trust, why should network operators be able to see DNS queries and modify repsonses.
+Yes: Network operators filter DNS responses to block access to malicious sites and prevent malware spreading,
+Network operators filter DNS responses to enforce legal or societal constraints.
+Can a network restruct the choice of a DNS resolver?
+Firewalls can block access to DNS over UDP and DNS over TLS\@.
+Difficult to block DNS over HTTPS as it looks like any other HTTPS request, though you may be able to tell from the destination address.
+What Domains Should Exist?
+Who Controls the Root Servers?
+
+
+
+\subsection*{Networks and Internet Routing}
+
+% 9a
+\textbf{Content Distribution Networks (CDNs)} provide scalability, load balancing and low latency.
+They host content for their customers in web caches around the world.
+Reduced latency to respond to requests.
+Cloudflare is a CDN\@.
+Reduces load on the ISP's network.
+Requires global distribution of CDN proxy caches.
+\textbf{Locating the Nearest CDN Node using DNS}.
+Each resource hosted by the CDN has a unique DNS name.
+Directs to local cache based on IP address.
+Locate the nearest CDN node using anycast routing.
+The CDN uses multiple data centres \- all using the same IP addresses.
+
+% 9b
+\textbf{Inter-domain Routing}
+The Internet is a network of networks
+Each network is an Autonomous System (AS).
+Each network is a separate routing domain.
+Inter-domain routing is the problem of finding the best path from the source network to the destination network.
+An Autonomous System (AS) is an independently operated network.
+Each AS is identified by a unique number, allocated by the RIR\@.
+Devices at the edge tend to have simple routing tables: The devices on the local network and a default route for everything else.
+Core networks need full routing table: The \textbf{default free zone (DFZ)}.
+AS-level topology flattening → increasingly rich interconnections.
+Internet Exchange Points (IXPs) are becoming commonplace.
+Routing must consider policy: who can determine the network topology? which traffic should follow between a particular source and destination?
+Policy restrictions might prioritise non-shortest path routes. Do you prioritise cost, bandwidth, or latency.
+
+\textbf{Border Gateway Protocol (BGP)} is the inter-domain routing protocol.
+\textbf{External BGP (eBGP)} used to exchange routing information between ASes.
+TCP connection is made between two routers, then exchange knowledge of the AS-level topology of the network.
+Used to compute appropriate interdomain routes to each destination AS\@.
+eBGP routers advertise lists of IP address ranges (“prefixes”) and their associated AS-level paths
+\textbf{Internal BGP (iBGP)} propagates this information to routers within an AS\@.
+iBGP distributes information to internal routers on how to reach external destinations.
+Gao-Rexford rules specify what routes are advertised.
+Each AS exchanges routing information with neighbours.
+Each AS applies policy to choose what routes to use:
+Each AS applies polocy to determine what routes to advertise.
+
+% 9c
+\textbf{Routing Security}
+Any AS participating in BGP routing can announce any address prefix \- whether or not they own it
+Could accidental, or malicious.
+So traffic is misdirected, this is \textbf{BGP Hijacking}.
+\textbf{Resource public key infrastructure (RPKI)} is an attempt to secure internet routing.
+Lets an AS make a signed \textbf{Route Origin Authorisation (ROA)} \- a digital signature
+
+% 9d
+\textbf{Intra-domain Routing}
+
+Distance vector \- the \textbf{Routing Information Protocol (RIP)}
+Nodes maintain a vector containing the distance to every other node in network.
+Not widely used as it is not scalable. Simple to implement, suffers from slow convergence.
+
+Link state \- \textbf{Open Shortest Path First routing (OSPF)}
+Nodes know the links to their neighbours, and cost of using those links.
+Ensures all nodes know the entire network topology.
+Each nodes uses Dijkstra's algorithm to compute the shortest path to every other node.
+More complex, requires each router to store complete network map. Much faster convergence.
+
+Challenges. Construction work is good at breaking cables. Good network desings have multiple paths from source to destination.
+Must quickly notice failure and switch to backup path.
+\textbf{Fast failover} \- pre-calculate alternative paths to allow rapid switchover
+\textbf{Equal cost multipath routing} \- if two paths with the same cost, alternate traffic between them
+Care needed if order is important.
 
 
 
 
+The course has focussed on how the Internet can change and evolve to address coming challenges:
+
+\begin{itemize}
+    \item How to establish connections in a fragmented network?
+    \item How can encryption protect against pervasive monitoring and prevent transport ossification?
+    \item How can we reduce latency and support real-time and interactive content?
+    \item How can we adapt to the vagaries of wireless networks?
+    \item How can we identify and distribute content? How can we manage the tussle for control of the DNS and naming?
+    \item How can we manage interdomain routing to efficiently delivery content?
+    \item How can we re-decentralise the network?
+\end{itemize}
 
 
+To address these challenges, the Internet is in the middle of a significant change:
 
-
-
-
+\begin{itemize}
+    \item IPv6 as a basis for routing and forwarding evolution
+    \item TLS 1.3 to simplify and improve security
+    \item QUIC as a basis for future transport evolution, avoiding protocol ossification
+    \item HTTP/3 as a basis for web evolution
+    \item DNS over encryption (HTTPS, TLS, QUIC) for secure name resolution
+    \item CDNs and overlays
+\end{itemize}
 
 
 
