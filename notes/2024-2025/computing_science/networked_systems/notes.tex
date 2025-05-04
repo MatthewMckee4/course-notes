@@ -5,7 +5,7 @@
 \usepackage[margin=10px]{geometry}
 \usepackage{enumitem}
 \setlength{\parindent}{0pt}
-\setlist{itemsep=0.1em, topsep=0.2em}
+\setlist{itemsep=0.05em, topsep=0.2em}
 
 \title{Networked Systems}
 \author{}
@@ -71,6 +71,7 @@ Calls to send () and recv () are used to send and receive data.
 As RTT increases, benefits of increasing bandwidth reduce
 For this example, with 300ms RTT, increasing bandwidth from 15Mbps to 1Gbps gives only 22\% reduction in page download time.
 
+\vspace{\baselineskip}
 % 2b
 \textbf{Impact of TLS:}
 HTTP sends and retrives data immediatly once the TCP connection is open.
@@ -79,6 +80,7 @@ TLS v1.3: extra 1RTT, TLS v1.2: 2RTT.\@
 \textbf{Impact of Ipv6 and dual stack deployments:}
 Hosts support a combination of IPv4 and IPv6.
 
+\vspace{\baselineskip}
 % 2c
 \textbf{Peer-to-peer Connections}
 You should be able to run a TCP server on any device, and TCP, UDP based peer-to-peer applications.
@@ -87,6 +89,7 @@ Peer-to-peer connetion establishment is difficult due to network address transla
 ISP assigns new range of IP addressses to customer.
 Records the mapping, so the reverse changes can be made to any incoming replies as they traverse the NAT in the reverse direction
 
+\vspace{\baselineskip}
 % 2d
 \textbf{NAT Breaks Applications}:
 Client-server applications with server behind NAT fail – need explicit port forwarding
@@ -95,6 +98,7 @@ Outgoing connections create state in NAT, so replies can be translated to reach 
 No state for incoming connections.
 UDP not connection-oriented; NAT can’t detect the end of a flow, so use short timeout to cleanup state once UDP flow has stopped
 
+\vspace{\baselineskip}
 % 2e
 \textbf{NAT Traversal and Peer-to-Peer Connections Establishment}:
 Incoming connections fail, since NAT cannot know how to translate the incoming packets
@@ -119,6 +123,7 @@ Preventing protocol ossification: network operators deploy middleboxes to monito
 These middleboxes must inderstand the protocols, this creates ossification.
 The more of a protocol that is encrypted, the easier it is to change.
 
+\vspace{\baselineskip}
 % 3b
 \textbf{Principles of Secure Communication}. Avoid eavesdropping, tampering, and spoofing.
 Use encryption to make data useless if intercepted.
@@ -138,7 +143,7 @@ reciever decrypts the digitalsignature using the senders public key,
 if the signature is valid and the message is unchanged, the reciever can be sure that the message was sent by the claimed sender.
 \textbf{Public key infrastructure (PKI)} verifies digital signatures.
 
-
+\vspace{\baselineskip}
 % 3c
 \textbf{Transport Layer Security (TLS)} is used to encrypt and authenticate data carried within a TCP connection.
 TLS handshake runs within a TCP connection. ClientHello is sent with the ACK, ServerHello is sent in response, Finished message concludes.
@@ -176,6 +181,7 @@ TLS 1.3 says its using TLS 1.2, but it says in the header that it is using TLS 1
 \textbf{How to Avoid Protocol Ossification}:
 \textbf{GREASE}: Generate random extensions and sustain extensibility: send random extensions that are ignored.
 
+\vspace{\baselineskip}
 % 4b
 \textbf{QUIC Transport Protocol}:
 What’s wrong with TLS v1.3 over TCP?,
@@ -202,6 +208,7 @@ The is one short header packet defined in QUIC:
 1-RTT – Used for all packets sent after the TLS handshake is complete
 QUIC packet contain an encrypted sequence of frames
 
+\vspace{\baselineskip}
 % 4c
 \textbf{QUIC Connection Establishment}. A QUIC connection proceeds in two phases: handshake and data transfer.
 \textbf{C} $\rightarrow$ \textbf{S}: QUIC Initial packet
@@ -222,6 +229,7 @@ Sent inside a long- or short-header packets; unlike TCP, not part of headers.
 Indicate sequence numbers of QUIC packets that were received, not frames
 Data is sent within STREAM frames, sent within QUIC packets, contains a stream identifier, offset of the data, data length and data.
 
+\vspace{\baselineskip}
 % 4d
 \textbf{QUIC over UDP}. Why run QUIC over UDP? To ease end-system deployment.
 To work around protocol ossification.
@@ -247,6 +255,7 @@ Only put functionality that is absolutely necessary in the network, leave everyt
 If a connection is to be reliable, it cannot guarantee timeliness.
 If a connection is to be timely, it cannot guarantee reliability.
 
+\vspace{\baselineskip}
 % 5b
 \textbf{Unreliable Data Using UDP}.
 The \texttt{sendto ()} call sends a single datagram.
@@ -255,6 +264,7 @@ The \texttt{recv ()} call may be used to read a single datagram, but doesn’t p
 Most code uses \texttt{recvfrom ()} instead – this fills in the source address of the received datagram.
 UDP does not attempt to provide sequencing, reliability, or timing recovery.
 
+\vspace{\baselineskip}
 % 5c
 \textbf{Reliable Data Using TCP}.
 TCP ensures data delivered reliably and in order.
@@ -269,6 +279,7 @@ Can send delayed acknowledgements if there is no data to send in reverse directi
 number – as an indication of packet loss
 \textbf{Head-of-line Blocking in TCP}: TCP segments are sent in order, if a segment is lost, all subsequent segments are held up.
 
+\vspace{\baselineskip}
 % 5d
 \textbf{Reliable Data Transfer with QUIC}.
 QUIC delivers several ordered reliable byte streams within a single connection.
@@ -293,6 +304,7 @@ Order is not preserved between streams within a QUIC connection.
 \textbf{ACK clocking}: each acknowledgement `clocks out' the next packet.
 TCP uses window-based congestion control.
 
+\vspace{\baselineskip}
 % 6b
 \textbf{TCP Reno}.
 \textbf{Congestion window}: number of packets to be sent before an acknowledgement arrives.
@@ -307,6 +319,7 @@ Trades some extra delay to maintain throughput.
 Congestion avoidance phase takes long time to use increased capacity.
 Performs poorly on fast long-distance networks.
 
+\vspace{\baselineskip}
 % 6c
 \textbf{TCP Cubic}.
 More aggresive (multiplicative decrease 0.7).
@@ -316,6 +329,7 @@ $t$ time since packet loss.
 $K$ time to increase window back to $W_{\text{max}}$.
 $C = 0.4$ constant to control fairness to Reno.
 
+\vspace{\baselineskip}
 % 6d
 \textbf{TCP Vegas: Delay-based Congestion Control}
 Watches for the increase in delay as the queue starts to fill up and slows down before the queue overflows.
@@ -326,6 +340,7 @@ If ExpectedRate \- ActualRate > R2 then additive decrease to window.
 Since Reno and Cubic are aggressive, this forces Vegas to slow down and the cycle repeats until rate drops to zero.
 So Vegas is not used. TCP Bottleneck Bandwidth \& RTT attempts to make delay-based congestion work.
 
+\vspace{\baselineskip}
 % 6e
 \textbf{Explicit Congestion Notification (ECN)}.
 Why not have the network tell TCP congestion is occurring? ECN field in IP header.
@@ -334,6 +349,7 @@ Why not have the network tell TCP congestion is occurring? ECN field in IP heade
 11 congestion occurs.
 Routers signal congestion before queues overflow.
 
+\vspace{\baselineskip}
 % 6f
 \textbf{Impact of propagation delay on latency}.
 Time packets spend in queues.
@@ -358,6 +374,7 @@ Many transfers are elastic \- faster is better, but it doesn't matter what rate 
 Real-time traffic is inelasitc, has a minimum and maximum rate.
 Reserving network capacity makes using the network more expensive.
 
+\vspace{\baselineskip}
 % 7b
 \textbf{Interactive Applications}
 Frames of media data are captured periodically.
@@ -376,6 +393,7 @@ Usual TLS handshake but within UDP packets.
 Payload formats.
 Each packet should be independently usable
 
+\vspace{\baselineskip}
 % 7c
 \textbf{WebRTC} Data Channel provides a peer-to-peer data channel.
 A signalling protocol is needed to find the peer and establish the paths.
@@ -389,6 +407,7 @@ SIP is used to describe the communication session expected.
 SIP was designed to express options and alternatives.
 \textbf{WebRTC} is an alternative signalling protocol.
 
+\vspace{\baselineskip}
 % 7d
 \textbf{Streaming Video:}
 RTP and RTSP offer low latency, but HTTPS is used for easier CDN support despite higher latency.
@@ -409,6 +428,7 @@ WebRTC (low latency RTP in browsers) and QUIC (YouTube uses it) are the future f
 
 \subsection*{Naming and the Tussle for Control}
 
+\vspace{\baselineskip}
 % 8a
 \textbf{DNS Name Resolution}
 IP packets contain addresses, not names.
@@ -418,6 +438,7 @@ A recursive query via the DNS root server is made. Query the root to find the TL
 query the subdomain to find the addresses.
 Responses include a \textbf{time to live} that allows a resolver to cache the value for a certain time period.
 
+\vspace{\baselineskip}
 % 8b
 The set of top-level domains is controlled by the \textbf{Internet Corporation for Assigned Names and Numbers (ICANN)}.
 ICANN is \textbf{political} \- many countries and organisations want to influence how domain names are managed and allocated.
@@ -431,6 +452,7 @@ DNS names should be available in any language. Initial TLDs and sub-domains were
 DNS should, in principle, work with UTF-8 name \- in practice it doesn't, due to protocol ossification
 The set of 13 servers that advertise the name servers for the top level domains
 
+\vspace{\baselineskip}
 % 8c
 \textbf{DNS Security}
 Two approaches to securing DNS.
@@ -446,6 +468,7 @@ client sends query and recieves response over TLS\@.
 
 Also, DNS over HTTPS and DNS over QUIC are alternatives.
 
+\vspace{\baselineskip}
 % 8d
 \textbf{The Politics of Names}
 How is the DNS resolver chosen? When connecting to network, hosts use dynamic host configuration protocol (DHCP)
@@ -479,6 +502,7 @@ Directs to local cache based on IP address.
 Locate the nearest CDN node using anycast routing.
 The CDN uses multiple data centres \- all using the same IP addresses.
 
+\vspace{\baselineskip}
 % 9b
 \textbf{Inter-domain Routing}
 The Internet is a network of networks
@@ -506,6 +530,7 @@ Each AS exchanges routing information with neighbours.
 Each AS applies policy to choose what routes to use:
 Each AS applies polocy to determine what routes to advertise.
 
+\vspace{\baselineskip}
 % 9c
 \textbf{Routing Security}
 Any AS participating in BGP routing can announce any address prefix \- whether or not they own it
@@ -513,6 +538,8 @@ Could accidental, or malicious.
 So traffic is misdirected, this is \textbf{BGP Hijacking}.
 \textbf{Resource public key infrastructure (RPKI)} is an attempt to secure internet routing.
 Lets an AS make a signed \textbf{Route Origin Authorisation (ROA)} \- a digital signature
+
+\vspace{\baselineskip}
 
 % 9d
 \textbf{Intra-domain Routing}
@@ -532,7 +559,6 @@ Must quickly notice failure and switch to backup path.
 \textbf{Fast failover} \- pre-calculate alternative paths to allow rapid switchover
 \textbf{Equal cost multipath routing} \- if two paths with the same cost, alternate traffic between them
 Care needed if order is important.
-
 
 \clearpage
 
