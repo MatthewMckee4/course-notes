@@ -548,14 +548,71 @@ To address these challenges, the Internet is in the middle of a significant chan
     \item CDNs and overlays
 \end{itemize}
 
+\clearpage
+
+\subsection*{Past Exam Questions}
+
+\textbf{TCP with data}
+
+\begin{enumerate}
+    \item byte offset messed up
+    \item ossification, syn packets dont expect data
+    \item security, spoofing attacks, attacker sends malicious data in syn with forged IP address
+    \item if you send data with syn and it gets lost, it complicates retransmission logic
+    \item save on RTT, send instantly
+\end{enumerate}
 
 
+\textbf{Saving congestion window}
+\begin{enumerate}
+    \item for most cases, this will be bad
+    \item connection may timeout, and go back to slow start
+    \item if the new congestion window is the same size, thats perfect
+    \item if the new congestion window is smaller, there will be lots of packets loss, congestion avoidance will cut the window size bu a lot
+    \item if the new congestion window is larger, its okay, congestion avoidance will increase the window size (maybe slowly)
+\end{enumerate}
 
 
+\textbf{Server push}
+\begin{enumerate}
+    \item example is user requests html file, then server pushes the css and js files
+    \item this will reduce latency as the client wont have to request the other files separately
+    \item this will reduce the number of RTT times
+    \item not great impact as you only save on one request to the server
+    \item you could measure improvements by total time to request an html file in this example
+    \item could be sending more data than the client needs
+    \item this will use up bandwidth for possibly unused data
+    \item if the user has cached data, then the server push will be wasted
+\end{enumerate}
 
 
+\textbf{IPv4 vs IPv6}
+\begin{enumerate}
+    \item future proofing
+    \item more addresses, probably unnecessary
+    \item routing tables will be a lot bigger when storing IPv6 addresses
+    \item Open Shortest Path First routing will make it so routing tables takes up more physical memory
+    \item larger headers in general
+\end{enumerate}
 
 
+\textbf{DNS lookup}
+\begin{enumerate}
+    \item if the client or someone near the client has requested the domain recently, then the value will be cached
+    \item when the client first requests the domain, the local DNS server will make a recursive query via the DNS root server
+    \item the response will also include a time to live value, which is the time period for which the value is cached
+\end{enumerate}
+
+
+\textbf{DNS transport protocols}
+\begin{enumerate}
+    \item DNS over HTTPS allows for making DNS queries to any server
+    \item very hard to block DNS over HTTPS
+    \item DNS over UDP, TCP reliability isn't needed \- if no answer, retransmit the request, no connection
+    \item DNS over TLS, slower but more secure, two handshakes
+    \item DNS over TCP, slow but more secure, one handshake
+    \item DNS over TCP, TLS, UDP all used a fixed resolver determined by the OS
+\end{enumerate}
 
 
 
