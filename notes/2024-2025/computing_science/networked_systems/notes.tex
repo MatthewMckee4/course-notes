@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage[margin=10px]{geometry}
+\usepackage{graphicx}
 \usepackage{enumitem}
 \setlength{\parindent}{0pt}
 \setlist{itemsep=0.05em, topsep=0.2em}
@@ -38,7 +39,7 @@
 \textbf{Network Layer:} provides routing, addressing, and packet switching. Internet Protocol (IP).
 \textbf{IPv4:} 32-bit address space. Fragmentation difficult at high data rates.
 \textbf{IPv6:} 128-bit address space. No in-network fragmentation. Simple header format.
-\textbf{Routing:} Each network administered separately \- an autonomous system (AS), different technologies and policies.
+\textbf{Routing:} Each network administered separately {-} an autonomous system (AS), different technologies and policies.
 \textbf{Inter-domain Rounting:} Route advertisements are sent to the routing table of the destination. Border Gateway Protocol (BGP). Advertisements have AS-path.
 
 
@@ -92,11 +93,11 @@ Records the mapping, so the reverse changes can be made to any incoming replies 
 \vspace{\baselineskip}
 % 2d
 \textbf{NAT Breaks Applications}:
-Client-server applications with server behind NAT fail – need explicit port forwarding
+Client-server applications with server behind NAT fail {-} need explicit port forwarding
 Hard-coding IP addresses, rather than DNS names, in configuration files and application is a bad idea
 Outgoing connections create state in NAT, so replies can be translated to reach the correct host on the private network.
 No state for incoming connections.
-UDP not connection-oriented; NAT can’t detect the end of a flow, so use short timeout to cleanup state once UDP flow has stopped
+UDP not connection-oriented; NAT can't detect the end of a flow, so use short timeout to cleanup state once UDP flow has stopped
 
 \vspace{\baselineskip}
 % 2e
@@ -109,7 +110,7 @@ Peers systematically \textbf{probe connectivity}, try to estrablish a connection
 \textbf{NAT binding discovery}: Requesting a server to tell you the public IP address and port number that you're on.
 \textbf{Candidate Exchange}: Each host discovers its candiate IP addresses/port. Peers exchange candidate addresses.
 They make TCP connections to the relay server and exchange data over those connections, to reduce latency and to preserve privacy.
-\textbf{The ICE algorithm}: try \texttt{connect()} with each candidate address, until a connection is established.
+\textbf{The ICE algorithm}: try \texttt{connect ()} with each candidate address, until a connection is established.
 Connection requests sent from a host that passes through a NAT will open a binding that allows a response, even if the connection fails.
 
 \clearpage
@@ -204,7 +205,7 @@ Initial – initiates connection, starts TLS handshake,
 0-RTT – idempotent data sent with initial handshake, when resuming a session,
 Handshake – completes connection establishment,
 Retry – used to force address validation
-The is one short header packet defined in QUIC:
+The is one short header packet defined in QUIC\@:
 1-RTT – Used for all packets sent after the TLS handshake is complete
 QUIC packet contain an encrypted sequence of frames
 
@@ -223,7 +224,7 @@ and a SessionTicket QUIC 0-RTT packet included in the same UDP datagram contains
 \textbf{Data Transfer}. After handshake has finished, QUIC switches to sending short header packets
 The short header contains a Packet Number field, Packet numbers increase by one for each packet sent.
 ACK frames indicate received packet numbers. QUIC packet numbers count packets sent; TCP sequence numbers count bytes of data sent.
-QUIC never retransmits packets – retransmits frames sent in lost packets in new packets, with new packet numbers
+QUIC never retransmits packets {-} retransmits frames sent in lost packets in new packets, with new packet numbers
 QUIC sends acknowledgements of received packets in ACK frames.
 Sent inside a long- or short-header packets; unlike TCP, not part of headers.
 Indicate sequence numbers of QUIC packets that were received, not frames
@@ -231,7 +232,7 @@ Data is sent within STREAM frames, sent within QUIC packets, contains a stream i
 
 \vspace{\baselineskip}
 % 4d
-\textbf{QUIC over UDP}. Why run QUIC over UDP? To ease end-system deployment.
+\textbf{QUIC over UDP}. Why run QUIC over UDP\@? To ease end-system deployment.
 To work around protocol ossification.
 Entire packet except invariant fields and the last 7-bits of the first byte is encrypted.
 QUIC authenticates all data.
@@ -241,7 +242,7 @@ Reduces risk of ossification; easy to deploy.
 Supports multiple streams within a single connection.
 \textbf{Why is QUIC problematic?}.
 Libraries and support new, poorly documented, and frequently buggy.
-CPU usage is high compared to TLS-over-TCP.
+CPU usage is high compared to TLS-over-TCP\@.
 
 \clearpage
 
@@ -249,7 +250,7 @@ CPU usage is high compared to TLS-over-TCP.
 
 % 5a
 \textbf{Packet Loss in the Internet}.
-The Internet is a best effort packet delivery network – it is unreliable.
+The Internet is a best effort packet delivery network {-} it is unreliable.
 IP packets may be lost, delayed, reordered, or corrupted in transit.
 Only put functionality that is absolutely necessary in the network, leave everything else to end systems.
 If a connection is to be reliable, it cannot guarantee timeliness.
@@ -260,8 +261,8 @@ If a connection is to be timely, it cannot guarantee reliability.
 \textbf{Unreliable Data Using UDP}.
 The \texttt{sendto ()} call sends a single datagram.
 Each call to \texttt{sendto ()} can send to a different address, even though they use the same socket.
-The \texttt{recv ()} call may be used to read a single datagram, but doesn’t provide the source address of the datagram.
-Most code uses \texttt{recvfrom ()} instead – this fills in the source address of the received datagram.
+The \texttt{recv ()} call may be used to read a single datagram, but doesn't provide the source address of the datagram.
+Most code uses \texttt{recvfrom ()} instead {-} this fills in the source address of the received datagram.
 UDP does not attempt to provide sequencing, reliability, or timing recovery.
 
 \vspace{\baselineskip}
@@ -272,11 +273,11 @@ TCP sends acknowledgements for segments as they are received; retransmits lost d
 TCP will recover original transmission order if segments are delayed and arrive out of order.
 \textbf{TCP Segments and Sequence Numbers}. Data is split into segments, with a sequence number, each placed in a TCP packet.
 Sequence numbers start from the value sent in the TCP handshake.
-Segments sent to acknowledge each received segment – contains acknowledgment number indicating sequence number of the next
+Segments sent to acknowledge each received segment {-} contains acknowledgment number indicating sequence number of the next
 contiguous byte expected.
 Can send delayed acknowledgements if there is no data to send in reverse direction.
-\textbf{Loss Detection}: TCP treats a triple duplicate acknowledgement – four consecutive acknowledgements for the same sequence
-number – as an indication of packet loss
+\textbf{Loss Detection}: TCP treats a triple duplicate acknowledgement {-} four consecutive acknowledgements for the same sequence
+number {-} as an indication of packet loss
 \textbf{Head-of-line Blocking in TCP}: TCP segments are sent in order, if a segment is lost, all subsequent segments are held up.
 
 \vspace{\baselineskip}
@@ -308,7 +309,7 @@ TCP uses window-based congestion control.
 % 6b
 \textbf{TCP Reno}.
 \textbf{Congestion window}: number of packets to be sent before an acknowledgement arrives.
-\textbf{Initial window} is typically 1-10 packets.
+\textbf{Initial window} is typically 1--10 packets.
 Use \textbf{slow start} by doubling the congestion window after each acknowledgement until a packet is lost,
 then reset sending rate to last know good rate.
 The switch to \textbf{congestion avoidance}: linear increase (+1) in window size until a packet is lost, then multiplicative decrease (*0.5)
@@ -323,7 +324,7 @@ Performs poorly on fast long-distance networks.
 % 6c
 \textbf{TCP Cubic}.
 More aggresive (multiplicative decrease 0.7).
-$W_{\text{cubic}} = C (t \- K)^3 + W_{\text{max}}$.
+$W_{\text{cubic}} = C {(t - K)}^3 + W_{\text{max}}$.
 $W_{\text{max}}$ window size before packet loss.
 $t$ time since packet loss.
 $K$ time to increase window back to $W_{\text{max}}$.
@@ -335,8 +336,8 @@ $C = 0.4$ constant to control fairness to Reno.
 Watches for the increase in delay as the queue starts to fill up and slows down before the queue overflows.
 Still uses slow start.
 Measure BaseRTT, Calculate ExpectedRate = w / BaseRTT, measure ActualRate.
-If ExpectedRate \- ActualRate < R1 then additive increase to window.
-If ExpectedRate \- ActualRate > R2 then additive decrease to window.
+If ExpectedRate {-} ActualRate < R1 then additive increase to window.
+If ExpectedRate {-} ActualRate > R2 then additive decrease to window.
 Since Reno and Cubic are aggressive, this forces Vegas to slow down and the cycle repeats until rate drops to zero.
 So Vegas is not used. TCP Bottleneck Bandwidth \& RTT attempts to make delay-based congestion work.
 
@@ -361,28 +362,40 @@ Time packets spend propagating down links between routers.
 
 % 7a
 \textbf{Real-time Media Over The Internet}.
-\textbf{Real-time Traffic} must be delivered by a certain time, must be loss tolerant.
-For streaming this may mean that the content takes a few seconds to load but is smooth once it starts.
+
+Real-time Traffic must be delivered by a certain time, must be \textbf{loss tolerant}.
+It requires \textbf{predicable timing}.
+
+For \textbf{streaming applications}, the content may take a few seconds to load but should be smooth once it starts.
 Trade-off between frame rate and frame quality.
-Interactive converencing has tight latency bounds.
-One-way mouth-to-ear delay \~150ms maximum for telephony.
+
+\textbf{Interactive converencing} has tight latency bounds.
+One-way mouth-to-ear delay \textbf{$\sim$150ms} maximum for telephony.
 Video converencing want to lip-sync audio and video.
-Audio should be no more than 15ms ahead or 45ms behind.
-Speech coding data rate can be 10s of kbps, but should be \~100ms.
-Video frame rate can be between 25 and 60fps.
-Many transfers are elastic \- faster is better, but it doesn't matter what rate the congestion control selects.
-Real-time traffic is inelasitc, has a minimum and maximum rate.
+Audio should be no more than \textbf{15ms} ahead or \textbf{45ms} behind.
+Speech coding data rate can be 10s of kbps, but should be \textbf{$\sim$100ms}.
+Video frame rate can be between \textbf{25} and \textbf{60fps}.
+
+Many transfers are \textbf{elastic} {-} faster is better, but it doesn't matter what rate the congestion control selects.
+Real-time traffic is \textbf{inelastic}, has a minimum and maximum rate.
+
 Reserving network capacity makes using the network more expensive.
 
 \vspace{\baselineskip}
 % 7b
 \textbf{Interactive Applications}
+
+\textbf{Speech data} is highly loss tolerant, loss concealment can hide 10\%--20\% packets loss.
+\textbf{Video} packet loss is hard to conceal.
+
+\textbf{Media Transmission Path}
 Frames of media data are captured periodically.
 Codec compresses media frames.
 Compressed frames fragmented into packets.
 Transmitted using RTP inside UDP packets.
 RTP protocol adds timing and sequencing, source identification, payload identification.
 Transmitted over the network.
+
 UDP packets containing RTP protocol data arrive separated according to sender.
 Channel coder repairs loss using forward error correction.
 Playout buffer used to reconstruct order, smooth timing.
@@ -395,7 +408,9 @@ Each packet should be independently usable
 
 \vspace{\baselineskip}
 % 7c
-\textbf{WebRTC} Data Channel provides a peer-to-peer data channel.
+\textbf{WebRTC}
+
+Data Channel provides a peer-to-peer data channel.
 A signalling protocol is needed to find the peer and establish the paths.
 The control protocol needs to describe the communication session expected.
 \textbf{Session description protocol (SDP)} provides a standard format for such data.
@@ -409,7 +424,8 @@ SIP was designed to express options and alternatives.
 
 \vspace{\baselineskip}
 % 7d
-\textbf{Streaming Video:}
+\textbf{Streaming Video}
+
 RTP and RTSP offer low latency, but HTTPS is used for easier CDN support despite higher latency.
 \textbf{Content Delivery:}
 CDNs are optimized for HTTP, not RTP\@.
@@ -441,7 +457,7 @@ Responses include a \textbf{time to live} that allows a resolver to cache the va
 \vspace{\baselineskip}
 % 8b
 The set of top-level domains is controlled by the \textbf{Internet Corporation for Assigned Names and Numbers (ICANN)}.
-ICANN is \textbf{political} \- many countries and organisations want to influence how domain names are managed and allocated.
+ICANN is \textbf{political} {-} many countries and organisations want to influence how domain names are managed and allocated.
 Types of TLDs:
 \textbf{Country code} (e.g. \.uk, \.fr, \.us),
 \textbf{generic} (e.g. \.com, \.net, \.org),
@@ -449,13 +465,13 @@ Types of TLDs:
 \textbf{special-use} (e.g. \.example, \.invalid, \.localhost).
 
 DNS names should be available in any language. Initial TLDs and sub-domains were in ASCII, but UTF-8 ought to be allowed
-DNS should, in principle, work with UTF-8 name \- in practice it doesn't, due to protocol ossification
+DNS should, in principle, work with UTF-8 name {-} in practice it doesn't, due to protocol ossification
 The set of 13 servers that advertise the name servers for the top level domains
 
 \vspace{\baselineskip}
 % 8c
 \textbf{DNS Security}
-Two approaches to securing DNS.
+Two approaches to securing DNS\@.
 \textbf{Transport security}: make DNS requests and recieve replies over TLS\@.
 \textbf{Record security}: add a digital signature to DNS responses that client can verify to check the data is valid.
 Need both transport and record security for fully secure DNS\@.
@@ -500,7 +516,7 @@ Requires global distribution of CDN proxy caches.
 Each resource hosted by the CDN has a unique DNS name.
 Directs to local cache based on IP address.
 Locate the nearest CDN node using anycast routing.
-The CDN uses multiple data centres \- all using the same IP addresses.
+The CDN uses multiple data centres {-} all using the same IP addresses.
 
 \vspace{\baselineskip}
 % 9b
@@ -525,30 +541,38 @@ Used to compute appropriate interdomain routes to each destination AS\@.
 eBGP routers advertise lists of IP address ranges (“prefixes”) and their associated AS-level paths
 \textbf{Internal BGP (iBGP)} propagates this information to routers within an AS\@.
 iBGP distributes information to internal routers on how to reach external destinations.
-Gao-Rexford rules specify what routes are advertised.
+Gao-Rexford rules specify what routes are advertised.`'
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{assets/gao-rexford-filtering-rules.png}
+    \caption{Gao-Rexford filtering rules}
+    \label{fig:gao-rexford}
+\end{figure}
+
 Each AS exchanges routing information with neighbours.
-Each AS applies policy to choose what routes to use:
+Each AS applies policy to choose what routes to use.
 Each AS applies polocy to determine what routes to advertise.
 
 \vspace{\baselineskip}
 % 9c
 \textbf{Routing Security}
-Any AS participating in BGP routing can announce any address prefix \- whether or not they own it
+Any AS participating in BGP routing can announce any address prefix {-} whether or not they own it
 Could accidental, or malicious.
 So traffic is misdirected, this is \textbf{BGP Hijacking}.
 \textbf{Resource public key infrastructure (RPKI)} is an attempt to secure internet routing.
-Lets an AS make a signed \textbf{Route Origin Authorisation (ROA)} \- a digital signature
+Lets an AS make a signed \textbf{Route Origin Authorisation (ROA)} {-} a digital signature
 
 \vspace{\baselineskip}
 
 % 9d
 \textbf{Intra-domain Routing}
 
-Distance vector \- the \textbf{Routing Information Protocol (RIP)}
+Distance vector {-} the \textbf{Routing Information Protocol (RIP)}
 Nodes maintain a vector containing the distance to every other node in network.
 Not widely used as it is not scalable. Simple to implement, suffers from slow convergence.
 
-Link state \- \textbf{Open Shortest Path First routing (OSPF)}
+Link state {-} \textbf{Open Shortest Path First routing (OSPF)}
 Nodes know the links to their neighbours, and cost of using those links.
 Ensures all nodes know the entire network topology.
 Each nodes uses Dijkstra's algorithm to compute the shortest path to every other node.
@@ -556,8 +580,8 @@ More complex, requires each router to store complete network map. Much faster co
 
 Challenges. Construction work is good at breaking cables. Good network desings have multiple paths from source to destination.
 Must quickly notice failure and switch to backup path.
-\textbf{Fast failover} \- pre-calculate alternative paths to allow rapid switchover
-\textbf{Equal cost multipath routing} \- if two paths with the same cost, alternate traffic between them
+\textbf{Fast failover} {-} pre-calculate alternative paths to allow rapid switchover
+\textbf{Equal cost multipath routing} {-} if two paths with the same cost, alternate traffic between them
 Care needed if order is important.
 
 \clearpage
@@ -620,7 +644,7 @@ Care needed if order is important.
 \begin{enumerate}
     \item DNS over HTTPS allows for making DNS queries to any server
     \item very hard to block DNS over HTTPS
-    \item DNS over UDP, TCP reliability isn't needed \- if no answer, retransmit the request, no connection
+    \item DNS over UDP, TCP reliability isn't needed {-} if no answer, retransmit the request, no connection
     \item DNS over TLS, slower but more secure, two handshakes
     \item DNS over TCP, slow but more secure, one handshake
     \item DNS over TCP, TLS, UDP all used a fixed resolver determined by the OS
@@ -632,10 +656,50 @@ Care needed if order is important.
     \item media has a minimum rate, below which it cannot be used
     \item if the congestion control algorithm cannot sustain this rate, real-time traffic cannot be used
     \item media also has a maximum rate, cannot consume more than this, limited by frame rate and resolution
-    \item the compressed data is sent in packets
-    \item the packets are sent out at different times
+    \item frames of media data are encoded and sent periodically.
+\end{enumerate}
+
+\clearpage
+
+\textbf{Video Conference while downloading a file}
+
+\textit{Assume the TCP connection uses the Cubic congestion control algorithm, and the network capacity is enough to comfortably transmit the video data alone without packet loss.}
+
+\begin{enumerate}
+    \item during slow start, the video quality should remain high
+    \item as slow start gets closer to the maximum rate, the quality will decrease,
+    \item when the TCP connection gets its first packet loss, assuming a faultless connection, this will occur when the buffer of the client is full. The video quality will be at its worst.
+    \item Then TCP Cubic will decrease its sending rate to 0.7 of the previous rate, so the video
+    quality will increase slightly
+    \item the video quality will then oscillate, getting better when the TCP connection encounters packet loss, and getting worse when the TCP connection is increasing its sending rate
 \end{enumerate}
 
 
+\textbf{Interactive video conferencing using UDP over TCP}
+
+\begin{enumerate}
+    \item UDP is lower latency, where TCP has to wait for acknowledgements
+    \item UDP doesn't have build in congestion control
+    \item UDP is very loss tolerant, and doesnt retransmit lost packets, useful for video conferencing as if a packets is lost, its no use later on.
+    \item UDP doesnt enfore in-order delivery, so it discards out of order packets
+    \item TCP with cubic could be more useful in a video call like a live lecture, where only one person is talking and streaming for most of the call, this means everyone else can recieve a reliable stream of the lecture
+\end{enumerate}
+
+\textbf{Difference between intra-domain routing and inter-domain routing}
+
+\begin{enumerate}
+    \item inter-domain routing is used to find the best path between two different ASes
+    \item inter-domain routing is used between organisations
+    \item intra-domain routing is used to find the best path within a single AS
+    \item intra-domain routing is used inside an organisations network.
+\end{enumerate}
+
+\textbf{Gao-Rexford filtering rules}
+
+\begin{enumerate}
+    \item Routes from customers advertised to everyone
+    \item Routes from peers and providers only advertised to customers
+    \item Designed to optimise profit, not routing efficiency {-} don't advertise expensive routes
+\end{enumerate}
 
 \end{document}
