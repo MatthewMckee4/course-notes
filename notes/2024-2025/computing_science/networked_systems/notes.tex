@@ -207,7 +207,9 @@ Connection requests sent from a host that passes through a NAT will open a bindi
 \subsection*{Secure Communications}
 
 % 3a
-\textbf{The Need for Secure Communications}. Numerous organisations monitor network traffic.
+\textbf{The Need for Secure Communications}
+
+Numerous organisations monitor network traffic.
 Mechanisms that protect privacy against malicious attackers will also prevent monitoring.
 Preventing protocol ossification: network operators deploy middleboxes to monitor or modify traffic.
 These middleboxes must inderstand the protocols, this creates ossification.
@@ -215,36 +217,57 @@ The more of a protocol that is encrypted, the easier it is to change.
 
 \vspace{\baselineskip}
 % 3b
-\textbf{Principles of Secure Communication}. Avoid eavesdropping, tampering, and spoofing.
+\textbf{Principles of Secure Communication}
+
+How to deliver message from sender to receiver securely:
+
+\begin{itemize}
+    \item \textbf{Avoid eavesdropping}: encrypt to provide confidentiality
+    \item \textbf{Avoid tampering}: authentiate to ensure the message is not modified in transit
+    \item \textbf{Avoid spoofing}: validate identity of sender
+\end{itemize}
+
 Use encryption to make data useless if intercepted.
+
 \textbf{Symmetric Cryptography}: Same key used for encryption and decryption. Very fast, suitable for bulk data.
+
 \textbf{Public-Key Cryptography}: Different keys for encryption and decryption. Very slow.
+
 \textbf{Hybrid Cryptography}: combines the strengths of public-key and symmetric encryption:
 a small symmetric key is securely shared using slower public-key encryption,
 and then that key is used for fast, secure communication using symmetric encryption.
 This approach ensures both confidentiality and performance.
+
 \textbf{Digital Signatures}: Sender generates a digital signature,
 sender calcualte the cryptographic hash of the message,
 sender encrypts the hash with their private key.
 message and its digital signature are sent to the receiver using hybrid encryption.
 Reciever decrypts the message,
 reciever calcualtes the cryptographic hash of the message,
-reciever decrypts the digitalsignature using the senders public key,
+reciever decrypts the digital signature using the senders public key,
 if the signature is valid and the message is unchanged, the reciever can be sure that the message was sent by the claimed sender.
+
 \textbf{Public key infrastructure (PKI)} verifies digital signatures.
 
 \vspace{\baselineskip}
 % 3c
-\textbf{Transport Layer Security (TLS)} is used to encrypt and authenticate data carried within a TCP connection.
-TLS handshake runs within a TCP connection. ClientHello is sent with the ACK, ServerHello is sent in response, Finished message concludes.
-ClientHello signals TLS v1.2 but header indicates TLS v1.3, provides the cryptographic algorithms the client supports,
-provides the name of the server to which the client is connecting, no data.
-ServerHello provides the cryptographic algorithm the server supports, from the ones the client supports,
-provides the servers public key and digital signature.
-Finished provides clients public key.
-TLS record protocol: splits the data into records ($< 2^{14}$ bytes), encrypts each record with a record layer key.
-Does not provide record boundaries.
-If a client and server have previously communicated, they can re-use a key (0-RTT).
+\textbf{Transport Layer Security (TLS)}
+
+Used to encrypt and authenticate data carried within a TCP connection.
+TLS handshake runs within a TCP connection.
+
+\textbf{ClientHello} is sent with the ACK, \textbf{ServerHello} is sent in response, \textbf{Finished} message concludes.
+
+\textbf{ClientHello} signals TLS v1.2 but header indicates TLS v1.3, provides the cryptographic algorithms the client supports, provides the name of the server to which the client is connecting, no data.
+
+\textbf{ServerHello} provides the cryptographic algorithm the server supports, from the ones the client supports, provides the servers public key and digital signature.
+
+\textbf{Finished} provides clients public key, may contain data sent from client to server.
+
+\textbf{TLS record protocol}: splits the data into records ($< 2^{14}$ bytes), encrypts each record with a record layer key. Does not provide record boundaries.
+
+\textbf{0-RTT}: If a client and server have previously communicated, they can re-use a key (0-RTT).
+
 \textbf{Limitations of TLS}: does not encrypt server name, operates within TCP connection, relies on a PKI to validate public keys.
 
 
@@ -253,57 +276,81 @@ If a client and server have previously communicated, they can re-use a key (0-RT
 \subsection*{Improving Secure Connection Establishment}
 
 % 4a
-\textbf{Limitations of TLS}.
-Connection establishment is still relatively slow, and so first data is sent 2x RTT after the start.
-Connection establishment leaks potentially sensitive metadata
-The protocol is ossified due to middlebox interference
-\textbf{0-RTT Connection Reestablishment}: reuse a preshared key agreed in previous TLS session.
-Server sends a PreSharedKey with a SessionTicket to identify the key
-When reestablishing a connection: Client sends SessionTicket, data encrypted using corresponding
-PreSharedKey, along with ClientHello. The server uses SessionTicket to find saved PreSharedKey,
+\textbf{Limitations of TLS}
+
+TLS still has some limitations:
+\begin{itemize}
+    \item Connection establishment is still relatively slow, and so first data is sent 2x RTT after the start.
+    \item Connection establishment leaks potentially sensitive metadata
+    \item The protocol is ossified due to middlebox interference.
+\end{itemize}
+
+\textbf{0-RTT Connection Reestablishment}
+
+Reuse a preshared key agreed in previous TLS session.
+Server sends a \textbf{PreSharedKey} with a \textbf{SessionTicket} to identify the key.
+When reestablishing a connection: Client sends \textbf{SessionTicket}, data encrypted using corresponding
+\textbf{PreSharedKey}, along with \textbf{ClientHello}. The server uses \textbf{SessionTicket} to find saved \textbf{PreSharedKey},
 decrypt the data.
-0-RTT data sent with ClientHello using a PreSharedKey is not forward secret.
-If a session where PreSharedKey is distributed is compromised,
-0-RTT data sent using that key in future connections will also be compromised
-\textbf{TLS Metadata Leakage}: server name and PreSharedKey are not encrypted
-\textbf{TLS Protocol Ossification}: Some TLS servers fail if ClientHello uses unexpected version number.
+0-RTT data sent with \textbf{ClientHello} using a \textbf{PreSharedKey} is not forward secret.
+If a session where \textbf{PreSharedKey} is distributed is compromised,
+0-RTT data sent using that key in future connections will also be compromised.
+
+\textbf{TLS Metadata Leakage}: server name and \textbf{PreSharedKey} are not encrypted
+
+\textbf{TLS Protocol Ossification}: Some TLS servers fail if \textbf{ClientHello} uses unexpected version number.
+
 TLS 1.3 says its using TLS 1.2, but it says in the header that it is using TLS 1.3.
+
 \textbf{How to Avoid Protocol Ossification}:
 \textbf{GREASE}: Generate random extensions and sustain extensibility: send random extensions that are ignored.
 
 \vspace{\baselineskip}
 % 4b
-\textbf{QUIC Transport Protocol}:
-What’s wrong with TLS v1.3 over TCP?,
-Slow to connect – due to sequential TCP and TLS handshakes,
-Leaks some metadata,
-Ossified and hard to extend
-QUIC aims to replace TLS v1.3 and TCP with a single secure transport protocol,
+\textbf{QUIC Transport Protocol}
+
+What's wrong with TLS v1.3 over TCP\@?
+\begin{itemize}
+    \item Slow to connect {-} due to sequential TCP and TLS handshakes
+    \item Leaks some metadata
+    \item Ossified and hard to extend
+\end{itemize}
+
+QUIC aims to replace TLS v1.3 and TCP with a single secure transport protocol.
 Reduce latency by overlapping TLS and transport handshake,
 Avoid metadata leakage via pervasive encryption,
 Avoid ossification via systematic application of GREASE and encryption
+
 QUIC replaces TCP, TLS, and parts of HTTP
 QUIC sends and receives streams of data within a connection.
-Up to 262 different streams in each direction in a single QUIC connection
-A connection comprises QUIC packets sent within UDP datagrams
+
+Up to $2^{62}$ different streams in each direction in a single QUIC connection
+A connection comprises QUIC packets sent within UDP datagrams.
+
 \textbf{QUIC Headers}. QUIC packets can be long header packets or short header packets.
-Long header packets are used to establish a connection.
-Four different long-header packet types, denoted
-by the TT field in the header:,
-Initial – initiates connection, starts TLS handshake,
-0-RTT – idempotent data sent with initial handshake, when resuming a session,
-Handshake – completes connection establishment,
-Retry – used to force address validation
+\textbf{Long header} packets are used to establish a connection.
+\textbf{Short header} packets are used for all packets sent after the TLS handshake is complete.
+Four different long-header packet types, denoted by the TT field in the header:
+Initial {-} initiates connection, starts TLS handshake,
+0-RTT {-} idempotent data sent with initial handshake, when resuming a session,
+Handshake {-} completes connection establishment,
+Retry {-} used to force address validation.
 The is one short header packet defined in QUIC\@:
-1-RTT – Used for all packets sent after the TLS handshake is complete
-QUIC packet contain an encrypted sequence of frames
+1-RTT {-} Used for all packets sent after the TLS handshake is complete. QUIC packet contain an encrypted sequence of frames
+
+\textbf{QUIC Frames}: QUIC packet contain an encrypted sequence of frames.
+
 
 \vspace{\baselineskip}
 % 4c
 \textbf{QUIC Connection Establishment}. A QUIC connection proceeds in two phases: handshake and data transfer.
+
 \textbf{C} $\rightarrow$ \textbf{S}: QUIC Initial packet
+
 \textbf{S} $\rightarrow$ \textbf{C}: QUIC Initial and Handshake Packet
+
 \textbf{C} $\rightarrow$ \textbf{S}: QUIC Initial, Handshake, and 1-RTT Packet
+
 Initial packet contains a CRYPTO frame that contains TLS ClientHello or ServerHello, also synchronises the client and server state.
 QUIC Initial packets also carry optional Token Server can refuse the initial connection attempt,
 and send a Retry packet containing a Token.
