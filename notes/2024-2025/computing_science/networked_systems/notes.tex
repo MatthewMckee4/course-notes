@@ -2,8 +2,10 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amsthm}
-\usepackage[margin=2px]{geometry}
+\usepackage[margin=10px]{geometry}
+\usepackage{enumitem}
 \setlength{\parindent}{0pt}
+\setlist{itemsep=0.1em, topsep=0.2em}
 
 \title{Networked Systems}
 \author{}
@@ -11,7 +13,7 @@
 
 \begin{document}
 
-\footnotesize
+% \footnotesize
 
 \subsection*{The Changing Internet}
 
@@ -52,6 +54,8 @@
 \textbf{Application Layer:} provides the interface to the application. Deliver email, stream video, etc.
 \textbf{Happy Eyeballs}: The process of trying multiple connections to a server to find one that is available.
 
+
+\clearpage
 
 \subsection*{Connection Establishment in a Fragmented Network}
 
@@ -104,6 +108,7 @@ They make TCP connections to the relay server and exchange data over those conne
 \textbf{The ICE algorithm}: try \texttt{connect()} with each candidate address, until a connection is established.
 Connection requests sent from a host that passes through a NAT will open a binding that allows a response, even if the connection fails.
 
+\clearpage
 
 \subsection*{Secure Communications}
 
@@ -147,6 +152,8 @@ Does not provide record boundaries.
 If a client and server have previously communicated, they can re-use a key (0-RTT).
 \textbf{Limitations of TLS}: does not encrypt server name, operates within TCP connection, relies on a PKI to validate public keys.
 
+
+\clearpage
 
 \subsection*{Improving Secure Connection Establishment}
 
@@ -228,6 +235,7 @@ Supports multiple streams within a single connection.
 Libraries and support new, poorly documented, and frequently buggy.
 CPU usage is high compared to TLS-over-TCP.
 
+\clearpage
 
 \subsection*{Reliability and Data Transfer}
 
@@ -273,6 +281,7 @@ Acknowledgements can be delayed.
 Acknowledgements contain ranges.
 Order is not preserved between streams within a QUIC connection.
 
+\clearpage
 
 \subsection*{Lowering Latency}
 
@@ -330,6 +339,7 @@ Routers signal congestion before queues overflow.
 Time packets spend in queues.
 Time packets spend propagating down links between routers.
 
+\clearpage
 
 \subsection*{Real-time and Interactive Applications}
 
@@ -395,6 +405,7 @@ Smaller chunks reduce latency but waste space due to frequent large I-frames.
 \textbf{Future:}
 WebRTC (low latency RTP in browsers) and QUIC (YouTube uses it) are the future for video.
 
+\clearpage
 
 \subsection*{Naming and the Tussle for Control}
 
@@ -450,6 +461,7 @@ Difficult to block DNS over HTTPS as it looks like any other HTTPS request, thou
 What Domains Should Exist?
 Who Controls the Root Servers?
 
+\clearpage
 
 
 \subsection*{Networks and Internet Routing}
@@ -522,32 +534,6 @@ Must quickly notice failure and switch to backup path.
 Care needed if order is important.
 
 
-
-
-The course has focussed on how the Internet can change and evolve to address coming challenges:
-
-\begin{itemize}
-    \item How to establish connections in a fragmented network?
-    \item How can encryption protect against pervasive monitoring and prevent transport ossification?
-    \item How can we reduce latency and support real-time and interactive content?
-    \item How can we adapt to the vagaries of wireless networks?
-    \item How can we identify and distribute content? How can we manage the tussle for control of the DNS and naming?
-    \item How can we manage interdomain routing to efficiently delivery content?
-    \item How can we re-decentralise the network?
-\end{itemize}
-
-
-To address these challenges, the Internet is in the middle of a significant change:
-
-\begin{itemize}
-    \item IPv6 as a basis for routing and forwarding evolution
-    \item TLS 1.3 to simplify and improve security
-    \item QUIC as a basis for future transport evolution, avoiding protocol ossification
-    \item HTTP/3 as a basis for web evolution
-    \item DNS over encryption (HTTPS, TLS, QUIC) for secure name resolution
-    \item CDNs and overlays
-\end{itemize}
-
 \clearpage
 
 \subsection*{Past Exam Questions}
@@ -612,6 +598,16 @@ To address these challenges, the Internet is in the middle of a significant chan
     \item DNS over TLS, slower but more secure, two handshakes
     \item DNS over TCP, slow but more secure, one handshake
     \item DNS over TCP, TLS, UDP all used a fixed resolver determined by the OS
+\end{enumerate}
+
+
+\textbf{Multimedia data bursty behaviour}
+\begin{enumerate}
+    \item media has a minimum rate, below which it cannot be used
+    \item if the congestion control algorithm cannot sustain this rate, real-time traffic cannot be used
+    \item media also has a maximum rate, cannot consume more than this, limited by frame rate and resolution
+    \item the compressed data is sent in packets
+    \item the packets are sent out at different times
 \end{enumerate}
 
 
