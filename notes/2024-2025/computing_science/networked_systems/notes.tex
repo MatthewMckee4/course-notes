@@ -161,6 +161,9 @@ Peer-to-peer connetion establishment is \textbf{difficult} due to network addres
 
 \textbf{NAT} is a work around for the shortage of IPv4 addresses, it allows several devices to share a single public IP address.
 ISP assigns new range of IP addressses to customer.
+The way sub-network addressing was supposed to work, is that we would have enough IP addresses so that we could have
+unique global IP addresses for each device.
+
 Records the mapping, so the reverse changes can be made to any incoming replies as they traverse the NAT in the reverse direction.
 
 \vspace{\baselineskip}
@@ -255,6 +258,7 @@ if the signature is valid and the message is unchanged, the reciever can be sure
 
 Used to encrypt and authenticate data carried within a TCP connection.
 TLS handshake runs within a TCP connection.
+TLS doesnt encrypt TCP headers.
 
 \textbf{ClientHello} is sent with the ACK, \textbf{ServerHello} is sent in response, \textbf{Finished} message concludes.
 
@@ -310,11 +314,9 @@ TLS 1.3 says its using TLS 1.2, but it says in the header that it is using TLS 1
 \textbf{QUIC Transport Protocol}
 
 What's wrong with TLS v1.3 over TCP\@?
-\begin{itemize}
-    \item Slow to connect {-} due to sequential TCP and TLS handshakes
-    \item Leaks some metadata
-    \item Ossified and hard to extend
-\end{itemize}
+Slow to connect {-} due to sequential TCP and TLS handshakes,
+Leaks some metadata,
+Ossified and hard to extend.
 
 QUIC aims to replace TLS v1.3 and TCP with a single secure transport protocol.
 Reduce latency by overlapping TLS and transport handshake,
@@ -343,7 +345,9 @@ The is one short header packet defined in QUIC\@:
 
 \vspace{\baselineskip}
 % 4c
-\textbf{QUIC Connection Establishment}. A QUIC connection proceeds in two phases: handshake and data transfer.
+\textbf{QUIC Connection Establishment}
+
+A QUIC connection proceeds in two phases: handshake and data transfer.
 
 \textbf{C} $\rightarrow$ \textbf{S}: QUIC Initial packet
 
@@ -352,15 +356,20 @@ The is one short header packet defined in QUIC\@:
 \textbf{C} $\rightarrow$ \textbf{S}: QUIC Initial, Handshake, and 1-RTT Packet
 
 Initial packet contains a CRYPTO frame that contains TLS ClientHello or ServerHello, also synchronises the client and server state.
-QUIC Initial packets also carry optional Token Server can refuse the initial connection attempt,
-and send a Retry packet containing a Token.
-Client must then retry the connection, providing the Token in its Initial packet
+
+QUIC Initial packets also carry optional Token.
+Server can refuse the initial connection attempt, and send a Retry packet containing a Token.
+Client must then retry the connection, providing the Token in its Initial packet.
+
 QUIC supports TLS 0-RTT session re-establishment: QUIC Initial packet contains CRYPTO frame with a TLS ClientHello
 and a SessionTicket QUIC 0-RTT packet included in the same UDP datagram contains a STREAM frame carrying idempotent 0-RTT data:
-\textbf{Data Transfer}. After handshake has finished, QUIC switches to sending short header packets
+
+
+\textbf{Data Transfer}. After handshake has finished, QUIC switches to sending short header packets.
 The short header contains a Packet Number field, Packet numbers increase by one for each packet sent.
+
 ACK frames indicate received packet numbers. QUIC packet numbers count packets sent; TCP sequence numbers count bytes of data sent.
-QUIC never retransmits packets {-} retransmits frames sent in lost packets in new packets, with new packet numbers
+QUIC never retransmits packets {-} retransmits frames sent in lost packets in new packets, with new packet numbers.
 QUIC sends acknowledgements of received packets in ACK frames.
 Sent inside a long- or short-header packets; unlike TCP, not part of headers.
 Indicate sequence numbers of QUIC packets that were received, not frames
@@ -368,8 +377,10 @@ Data is sent within STREAM frames, sent within QUIC packets, contains a stream i
 
 \vspace{\baselineskip}
 % 4d
-\textbf{QUIC over UDP}. Why run QUIC over UDP\@? To ease end-system deployment.
-To work around protocol ossification.
+\textbf{QUIC over UDP}
+
+Why run QUIC over UDP\@? To ease end-system deployment.
+To work around protocol ossification due to middleboxes.
 Entire packet except invariant fields and the last 7-bits of the first byte is encrypted.
 QUIC authenticates all data.
 \textbf{Why is QUIC desirable?}.
@@ -385,8 +396,9 @@ CPU usage is high compared to TLS-over-TCP\@.
 \subsection*{Reliability and Data Transfer}
 
 % 5a
-\textbf{Packet Loss in the Internet}.
-The Internet is a best effort packet delivery network {-} it is unreliable.
+\textbf{Packet Loss in the Internet}
+
+The Internet is a best effort packet delivery network {-} \textbf{it is unreliable}.
 IP packets may be lost, delayed, reordered, or corrupted in transit.
 Only put functionality that is absolutely necessary in the network, leave everything else to end systems.
 If a connection is to be reliable, it cannot guarantee timeliness.
@@ -394,61 +406,106 @@ If a connection is to be timely, it cannot guarantee reliability.
 
 \vspace{\baselineskip}
 % 5b
-\textbf{Unreliable Data Using UDP}.
-The \texttt{sendto ()} call sends a single datagram.
-Each call to \texttt{sendto ()} can send to a different address, even though they use the same socket.
-The \texttt{recv ()} call may be used to read a single datagram, but doesn't provide the source address of the datagram.
-Most code uses \texttt{recvfrom ()} instead {-} this fills in the source address of the received datagram.
+\textbf{Unreliable Data Using UDP}
+
+The $sendto()$ call sends a single datagram.
+Each call to $sendto()$ can send to a different address, even though they use the same socket.
+The $recv()$ call may be used to read a single datagram, but doesn't provide the source address of the datagram.
+Most code uses $recvfrom()$ instead {-} this fills in the source address of the received datagram.
 UDP does not attempt to provide sequencing, reliability, or timing recovery.
+
+The \textbf{protocol built on UDP} is responsible for correcting the order, detecting duplicates and repairing loss.
+The protocol running within UDP generally includes a sequence number to support this.
 
 \vspace{\baselineskip}
 % 5c
-\textbf{Reliable Data Using TCP}.
+\textbf{Reliable Data Using TCP}
+
 TCP ensures data delivered reliably and in order.
 TCP sends acknowledgements for segments as they are received; retransmits lost data.
 TCP will recover original transmission order if segments are delayed and arrive out of order.
+
 \textbf{TCP Segments and Sequence Numbers}. Data is split into segments, with a sequence number, each placed in a TCP packet.
+TCP packets are sent in IP packets.
 Sequence numbers start from the value sent in the TCP handshake.
+
+Calls to $send()$ don't directly map to TCP segments.
+If data given to $send()$ is small, TCP might wait to send the data, combining it with later data into a single larger segment.
+
 Segments sent to acknowledge each received segment {-} contains acknowledgment number indicating sequence number of the next
 contiguous byte expected.
+If a packet is lost, subsequenc packets will generate duplicate acknowledgements.
 Can send delayed acknowledgements if there is no data to send in reverse direction.
+
+If data is being sent, but no acknowledgement return, then either reciever or network has failed.
+TCP treats \textbf{a timeout} as an indication of packet loss and retransmits unacknowledged segments.
 \textbf{Loss Detection}: TCP treats a triple duplicate acknowledgement {-} four consecutive acknowledgements for the same sequence
-number {-} as an indication of packet loss
+number {-} as an indication of packet loss.
+
 \textbf{Head-of-line Blocking in TCP}: TCP segments are sent in order, if a segment is lost, all subsequent segments are held up.
+Significant latency increase.
 
 \vspace{\baselineskip}
 % 5d
-\textbf{Reliable Data Transfer with QUIC}.
+\textbf{Reliable Data Transfer with QUIC}
+
 QUIC delivers several ordered reliable byte streams within a single connection.
-Each QUIC packet has a packet number.
+Order is not preserved between streams within a QUIC connection.
+
+Each QUIC packet has a \textbf{packet number}.
 Within each space, packet number starts at zero, increases by one for each packet sent.
-QUIC doesn’t preserve message boundaries in streams.
-If data written to stream is too small for a packet, it may be
-delayed and sent with other data to fill complete packet.
+QUIC doesn't preserve message boundaries in streams.
+If data written to stream is too big for a packet, it will be split across multiple packets.
+If data written to stream is too small for a packet, it may be delayed and sent with other data to fill complete packet.
 Acknowledgements can be delayed.
 Acknowledgements contain ranges.
-Order is not preserved between streams within a QUIC connection.
+Like TCP Selective Acknowledgement extension.
+
+QUIC does \textbf{not retransmit lost packets}. Every packet has a unique packet numner and is only transmitted once.
+Packets are declared lost when at least three later packets have been acknowledged.
+QUIC transmits lost data in new packets with \textbf{new packet numbers}.
+
+\textbf{Head-of-line Blocking in QUIC}: QUIC segments are sent in order, if a segment is lost, all subsequent segments are held up.
+Significant latency increase.
 
 \clearpage
 
 \subsection*{Lowering Latency}
 
 % 6a
-\textbf{TCP Congestion Control}.
+\textbf{TCP Congestion Control}
+
 \textbf{Principles}: packet loss as a congestion signal, additive increase, multiplicative decrease.
+
 \textbf{IP Routers} perform \textbf{Routing} (receive packets and determine route to destination) and
 \textbf{Forwarding} (enqueue packet on outgoing link).
-\textbf{ACK clocking}: each acknowledgement `clocks out' the next packet.
+\textbf{Queues shrink} if packets are forwarded faster then they arrive.
+\textbf{Queueing delay} is packets arrrive faster than they can be forwarded.
+\textbf{Packets are discarded if the queue is full}.
+Congestion control uses packet loss as a congestion signal.
+
+\textbf{ACK clocking}: each acknowledgement `clocks out' the next packet. TCP uses window-based congestion control.
+
+\textbf{AIMD Algorithm}: Additive Increase, Multiplicative Decrease.
+
 TCP uses window-based congestion control.
+Maintains a \textbf{sliding window} onto the available data that determines how much can be sent according to the AIMD algorithm.
+Ideally the sliding window is $bandwidth \times delay$.
+Each returning acknowledgement for new data slides the window along, releasing next packet for transmission → if window sized
+correctly, each acknowledgement arrives just in time to release next packet.
+Slow start then congestion avoidance.
+Gives approximate equal share of the bandwidth to each flow sharing a link.
 
 \vspace{\baselineskip}
 % 6b
-\textbf{TCP Reno}.
+\textbf{TCP Reno}
+
 \textbf{Congestion window}: number of packets to be sent before an acknowledgement arrives.
-\textbf{Initial window} is typically 1--10 packets.
+\textbf{Initial window} is typically 1{-}10 packets.
 Use \textbf{slow start} by doubling the congestion window after each acknowledgement until a packet is lost,
 then reset sending rate to last know good rate.
-The switch to \textbf{congestion avoidance}: linear increase (+1) in window size until a packet is lost, then multiplicative decrease (*0.5)
+
+Then switch to \textbf{congestion avoidance}: linear increase (+1) in window size until a packet is lost, then multiplicative decrease (*0.5)
 If a packet is lost and detected via timeout: reset to initial window size.
 $timeout = \max(1 second, average RTT + (4 x RTT variance))$
 Effective at keeping bottleneck link fully utilised.
@@ -458,7 +515,8 @@ Performs poorly on fast long-distance networks.
 
 \vspace{\baselineskip}
 % 6c
-\textbf{TCP Cubic}.
+\textbf{TCP Cubic}
+
 More aggresive (multiplicative decrease 0.7).
 $W_{\text{cubic}} = C {(t - K)}^3 + W_{\text{max}}$.
 $W_{\text{max}}$ window size before packet loss.
@@ -468,7 +526,9 @@ $C = 0.4$ constant to control fairness to Reno.
 
 \vspace{\baselineskip}
 % 6d
-\textbf{TCP Vegas: Delay-based Congestion Control}
+\textbf{TCP Vegas}
+
+\textbf{Delay-based Congestion Control}.
 Watches for the increase in delay as the queue starts to fill up and slows down before the queue overflows.
 Still uses slow start.
 Measure BaseRTT, Calculate ExpectedRate = w / BaseRTT, measure ActualRate.
@@ -479,7 +539,8 @@ So Vegas is not used. TCP Bottleneck Bandwidth \& RTT attempts to make delay-bas
 
 \vspace{\baselineskip}
 % 6e
-\textbf{Explicit Congestion Notification (ECN)}.
+\textbf{Explicit Congestion Notification (ECN)}
+
 Why not have the network tell TCP congestion is occurring? ECN field in IP header.
 00 doesnt support.
 01 ECN capable.
@@ -488,7 +549,8 @@ Routers signal congestion before queues overflow.
 
 \vspace{\baselineskip}
 % 6f
-\textbf{Impact of propagation delay on latency}.
+\textbf{Impact of propagation delay on latency}
+
 Time packets spend in queues.
 Time packets spend propagating down links between routers.
 
@@ -666,6 +728,7 @@ Locate the nearest CDN node using \textbf{anycast routing}.
 \textbf{Anycast IP address} is a network addressing and routing method in which multiple servers share the same IP address,
 and traffic is routed to the nearest or best-preforming server based on routing protocols.
 This provides better latency as clients are automatically routed to the nearest server.
+Each data centre advertises its addresses via BGP\@.
 
 
 \vspace{\baselineskip}
@@ -899,8 +962,177 @@ Care needed if order is important.
     \item lost packets must traverse the whole link again, taking up bandwidth
 \end{itemize}
 
+\textbf{TCP Acknowledgements}
+
+\textit{And selective acknowledgements}
+\begin{itemize}
+    \item A TCP acknowledgement (ACK) is sent when a packet arrives that contains new data; the
+    acknowledgement number indicates next contiguous sequence number expected
+    \item TCP selective acknowledgements (SACK blocks) are a TCP extension that allows a receiver
+    to signal receipt of non-contiguous packets in addition to the standard ACK
+    \item SACK blocks are useful because they give the sender information that it needs to avoid
+    unnecessary retransmissions when a triple duplicate ACK is received
+    \item SACK blocks don't affect the congestion control algorithm, they just change what packets
+    are retransmitted
+\end{itemize}
+
+\textbf{TCP receive window}
+
+\textit{impact of window scaling}
+\begin{itemize}
+    \item The receive window denotes the amount of buffer space the receiver has available to hold
+    data received on a TCP connection
+    \item The range available in the TCP header proved to be too small for receivers on high-speed
+    networks so a window scale of n increases the signalled window by a factor or 2n
+    to allow for larger windows
+\end{itemize}
 
 
+\textbf{Difference between receive window and congestion window}
+\begin{itemize}
+    \item The receive window is the available buffer space at the receiver
+    \item the congestion window is an estimate of the available network capacity
+    \item performance is limited by whichever is smaller; the receiver needs enough buffering to match the network if the
+    full performance is to be reached
+\end{itemize}
+
+\textbf{Most packets in the internet are similar sizes}
+\textit{large number 40 bytes, large number 1500 bytes}
+\begin{itemize}
+    \item packets of 40 bytes will most likely be TCP ACK packets, 20 bytes for the TCP header, 20 bytes for the IP header
+    \item the maximum transmission unit (MTU) is 1500 bytes, so any packet larger than this will be fragmented
+    \item most traffic patterns involve control packets or data packets, so this makes sense that few packets are not of those sizes
+\end{itemize}
+
+\textbf{Explain 0-RTT in TLS}
+
+\textit{why it improves performance? Risks? do benefits outweigh risks?}
+\begin{itemize}
+    \item 0-RTT connection re-establishment works by sharing a key in one session
+    (the PreSharedKey), that is then used to send encrypted data along with the initial
+    TLS ClientHello message in the following session
+    \item 0-RTT connection re-establishment improves performance because it allows an ini-
+    tial request to be sent to the server along with the first TLS handshake packet (the
+    ClientHello), and for the reply to be included with the ServerHello, removing one RTT
+    \item The risks with 0-RTT re-establishment is that any data sent along with the
+    ClientHello is subject to reply attacks, and is not forward secret since it
+    reused a key from the previous session
+    \item  Whether the benefits of 0-RTT connection re-establishment outweigh the cost is a
+    judgement call, and answers may legitimately argue in either way. There is
+    available for stating an opinion, and for providing a reasoned justification.
+\end{itemize}
+
+\clearpage
+
+\textbf{Why are QUIC headers encrypted?}
+\begin{itemize}
+    \item QUIC encrypts transport headers to protect privacy and to prevent protocol
+    ossification
+    \item the privacy concern is to avoid metadata leakage that exposes sensitive information about participants.
+    \item governments and other organisations may want to monitor this data
+    \item a TCP-related example would be that an observer who can see packets and their
+    acknowledgements can infer distance from sender to receiver based on packet timing,
+    and this is known to be useful for geolocation. A TLS-related example would be that
+    the Server Name Indication (SNI) field is unencrypted.
+    \item  The key point around ossification is that devices in the network soon start of rely on the
+    presence, and format, of exposed transport header fields. This makes it diffi-
+    cult to change the protocol after initial deployments. Any reasonable example
+    of ossification is accepted, including difficulties extending TLS version negotiation for
+    TLS 1.3 or the introduction of SACK blocks or ECN\@.
+\end{itemize}
+
+\textbf{Why is the threshhold for retransmission of lost packets in TCP set to 3?}
+\begin{itemize}
+    \item Delayed packets cause duplicate sequence numbers. The threshold
+    is chosen to be three duplicate acknowledgements because otherwise packet reordering
+    would cause unnecessary retransmission.
+    \item The threshold of three consecutive duplicate acknowledgements was chosen based on
+    measurements of the packet loss and reordering in the network. Reordering
+    of consecutive packets is common enough to be worthwhile accommodating in the
+    protocol; further reordering is not.
+    \item Setting the threshold to two duplicate acknowledgements would make it more likely
+    that the sender would retransmit a packet unnecessarily in response to packet reordering
+    \item Setting the threshold to four duplicate acknowledgements would make it more likely that
+    a retransmission would be unnecessarily delayed when a loss has occurred.
+\end{itemize}
+
+
+\textbf{Explain explicit congestion notification (ECN)}
+\begin{itemize}
+    \item ECN is a signal that the network is starting to become congested, but is not
+    yet sufficiently overloaded that packets need to be discarded.
+    \item The sender sets the ECN bits in the IP header to ECT (0) or ECT (1) to indicate that it
+    supports ECN\@.
+    \item If there is congestion, some router within the network changes
+    will change this to ECN-CE to inform the receiver.
+    \item On receipt of an ECN-CE mark, a TCP receiver sets the ECN Echo (ECE) bit in the
+    TCP header of the segment it generates to acknowledge that data.
+    \item On receipt of a TCP segment with the ECE bit set, the sender reduces its congestion
+    window in the same way it would if a packet was lost.
+\end{itemize}
+
+
+\textbf{Why is ECN beneficial for interactive conferencing?}
+\begin{itemize}
+    \item ECN feedback allows the sender to react to congestion early, so UDP packet
+    loss can be avoided. This improves quality of the audio and video, since UDP
+    is unreliable and doesn't retransmit lost packets.
+    \item In addition, since the router queues are no longer full to overflowing, the queueing
+    latency within the network is reduced. This is beneficial for interactive video
+    conferencing, since latency makes an interactive call difficult.
+\end{itemize}
+
+\textbf{What would happen if the DNS root servers failed?}
+\begin{itemize}
+    \item The important point here is that DNS records have a TTL and are widely
+    cached. Accordingly, things would keep working as before the failure until
+    the cache entries time out, although applications would immediately be unable
+    to lookup new names that were not in the cache. You'd therefore expect to
+    see a gradual increase in DNS lookup failures over time, as the cache entries expire.
+\end{itemize}
+
+\textbf{Why was DNS deployed over UDP a good idea?}
+
+\textit{why they are changing?}
+\begin{itemize}
+    \item UDP used to be a good choice because it was fast and low overhead since the
+    request and response would each fit into a single packet.
+    \item TCP offers no benefit in terms of reliability compared to just resending a request if no answer is received, and there is not enough data for congestion control to work.
+    \item DNS is moving to alternative transport protocols because: (1) With the deployment
+    of DNS security and authenticated DNS responses, DNS replies are now too large to
+    fit into a single UDP packet [2 marks]; (2) It is desirable to encrypt and authenticate
+    \item DNS requests and responses, and this is easier to do is running over some transport that
+    provides these features (e.g., TLS over TCP).
+\end{itemize}
+
+\textbf{Explain what is DNS-over-HTTPS and why its controversial}
+
+\begin{itemize}
+    \item DNS-over-HTTPS is DNS requests sent within HTTPS to some server within
+    the network that can perform the DNS lookup and send the reply within the HTTPS
+    response.
+    \item It's controversial because it circumvents the local DNS resolver and any policy that
+    resolver with enforce, and because there are privacy implications with a
+    central DNS resolver that can track queries.
+    \item Up to are available for broader discussion of these issues and whether
+    deployment of DNS-over-HTTPS is a good idea. Answers may legitimately argue for
+    or against this proposition. Likely answers are that DNS-over-HTTPS is beneficial
+    because it protects against phishing attacks from malicious local resolvers; equally, it
+    might be harmful because it prevents local resolvers from applying desirable policies or
+    local laws that the central server is unaware of. Marks will be assigned for reasoned
+    technical argument.
+\end{itemize}
+
+\textbf{Locating the nearest CDN using DNS vs anycast}
+
+\textit{When large number of people and geographical locations are changing rapidly}
+\begin{itemize}
+    \item Both must use the resolver to get the IP address of the CDN
+    \item DNS will have a lot of load
+    \item DNS routing uses the DNS to locate the nearest CDN
+    \item local caching will mean some users will locate a CDN not close to them
+    \item anycast will always locate the nearest CDN, using BGP
+\end{itemize}
 
 
 \end{document}
