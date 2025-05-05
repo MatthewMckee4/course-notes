@@ -299,6 +299,8 @@ decrypt the data.
 0-RTT data sent with \textbf{ClientHello} using a \textbf{PreSharedKey} is not forward secret.
 If a session where \textbf{PreSharedKey} is distributed is compromised,
 0-RTT data sent using that key in future connections will also be compromised.
+0-RTT data sent with \textbf{ClientHello} using a \textbf{PreSharedKey} is subject to replay attacks.
+Ensure data sent in the first message on 0-RTT is not sensitive.
 
 \textbf{TLS Metadata Leakage}: server name and \textbf{PreSharedKey} are not encrypted
 
