@@ -6,7 +6,7 @@
 \usepackage{graphicx}
 \usepackage{enumitem}
 \setlength{\parindent}{0pt}
-\setlist{itemsep=0.05em, topsep=0.2em}
+\setlist{itemsep=0.03em, topsep=0.1em}
 
 \title{Networked Systems}
 \author{}
@@ -870,7 +870,14 @@ Care needed if order is important.
     \item frames of media data are encoded and sent periodically.
 \end{itemize}
 
-\clearpage
+\textbf{Most packets in the internet are similar sizes}
+\textit{large number 40 bytes, large number 1500 bytes}
+\begin{itemize}
+    \item packets of 40 bytes will most likely be TCP ACK packets, 20 bytes for the TCP header, 20 bytes for the IP header
+    \item the maximum transmission unit (MTU) is 1500 bytes, so any packet larger than this will be fragmented
+    \item most traffic patterns involve control packets or data packets, so this makes sense that few packets are not of those sizes
+\end{itemize}
+
 
 \textbf{Video Conference while downloading a file}
 
@@ -941,6 +948,8 @@ Care needed if order is important.
     \item the client may also want to try a mix of IPv6 and IPv4 addresses
 \end{itemize}
 
+\clearpage
+
 \textbf{How does the addition of QUIC to the network affect connection establishment}
 \begin{itemize}
     \item QUIC only requires a single handshake, to establish an encrpyted connection, whereas TCP + TLS requires two handshakes
@@ -996,14 +1005,6 @@ Care needed if order is important.
     full performance is to be reached
 \end{itemize}
 
-\textbf{Most packets in the internet are similar sizes}
-\textit{large number 40 bytes, large number 1500 bytes}
-\begin{itemize}
-    \item packets of 40 bytes will most likely be TCP ACK packets, 20 bytes for the TCP header, 20 bytes for the IP header
-    \item the maximum transmission unit (MTU) is 1500 bytes, so any packet larger than this will be fragmented
-    \item most traffic patterns involve control packets or data packets, so this makes sense that few packets are not of those sizes
-\end{itemize}
-
 \textbf{Explain 0-RTT in TLS}
 
 \textit{why it improves performance? Risks? do benefits outweigh risks?}
@@ -1022,12 +1023,22 @@ Care needed if order is important.
     available for stating an opinion, and for providing a reasoned justification.
 \end{itemize}
 
+
+\textbf{What would happen if the DNS root servers failed?}
+\begin{itemize}
+    \item The important point here is that DNS records have a TTL and are widely
+    cached. Accordingly, things would keep working as before the failure until
+    the cache entries time out, although applications would immediately be unable
+    to lookup new names that were not in the cache. You'd therefore expect to
+    see a gradual increase in DNS lookup failures over time, as the cache entries expire.
+\end{itemize}
+
 \clearpage
+
 
 \textbf{Why are QUIC headers encrypted?}
 \begin{itemize}
-    \item QUIC encrypts transport headers to protect privacy and to prevent protocol
-    ossification
+    \item QUIC encrypts transport headers to protect privacy and to prevent protocol ossification
     \item the privacy concern is to avoid metadata leakage that exposes sensitive information about participants.
     \item governments and other organisations may want to monitor this data
     \item a TCP-related example would be that an observer who can see packets and their
@@ -1069,26 +1080,6 @@ Care needed if order is important.
     TCP header of the segment it generates to acknowledge that data.
     \item On receipt of a TCP segment with the ECE bit set, the sender reduces its congestion
     window in the same way it would if a packet was lost.
-\end{itemize}
-
-
-\textbf{Why is ECN beneficial for interactive conferencing?}
-\begin{itemize}
-    \item ECN feedback allows the sender to react to congestion early, so UDP packet
-    loss can be avoided. This improves quality of the audio and video, since UDP
-    is unreliable and doesn't retransmit lost packets.
-    \item In addition, since the router queues are no longer full to overflowing, the queueing
-    latency within the network is reduced. This is beneficial for interactive video
-    conferencing, since latency makes an interactive call difficult.
-\end{itemize}
-
-\textbf{What would happen if the DNS root servers failed?}
-\begin{itemize}
-    \item The important point here is that DNS records have a TTL and are widely
-    cached. Accordingly, things would keep working as before the failure until
-    the cache entries time out, although applications would immediately be unable
-    to lookup new names that were not in the cache. You'd therefore expect to
-    see a gradual increase in DNS lookup failures over time, as the cache entries expire.
 \end{itemize}
 
 \textbf{Why was DNS deployed over UDP a good idea?}
