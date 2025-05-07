@@ -216,7 +216,7 @@ $\|x\|_\infty = \max_{i=1}^{n} |x_i|$
 $\|x\|_{-\infty} = \min_{i=1}^{n} |x_i|$
 \textbf{Normalisation} $x' = \frac{x}{\|x\|_p}$
 
-\textbf{Feature Vectors} The representation of `features' which define properties as points
+\textbf{Feature Vectors} The representation of features which define properties as points
 in a vector space; critical in machine learning.
 
 \textbf{Cosine Distance}
@@ -253,6 +253,7 @@ Interpretation of covariance matrix:
 We can also get it from using $np.cov$.
 
 \textbf{Covariance Ellipses}
+
 This matrix captures the spread of data, including any correlations between dimensions.
 It can be seen as capturing an ellipse that represents a dataset. The \textbf{mean vector} represents
 the centre of the ellipse, and the covariance matrix represents the shape of the ellipse.
@@ -260,24 +261,77 @@ This ellipse is often called the error ellipse, and is a very useful summary of 
 
 The covariance matrix represents a (inverse) transformation of a unit sphere to an ellipse covering the data.
 
+\clearpage
+
 \subsection*{Linear Algebra 2 \small\textcolor{gray}{Week 5}}
 
-\textbf{Adjacency Matrices} square matrix of $|V| \times |V|$ size (where $|V| =$ vertices) where no edge from $V_i$ to $V_j$ means 0 and existing edges mean 1
-\textbf{Out-degree} sum across the rows
-\textbf{In-degree} sum across the columns
-\textbf{Symmetric matrix} means an undirected graph
-directed graph can be turned into an undirected one using: $A` = A + A^T$.
-The Laplacian matrix of a graph is $L = D - A$, where $D$ is the degree matrix and $A$ is the adjacency matrix.
-$D_{ii} = \sum_{j=1}^{|V|} A_{ij}$
-\textbf{A Sparse Matrix} is a matrix with a large number of zero elements, the oppisite is a \textbf{Dense Matrix}.
-\textbf{A Stochastic Matrix} is a square matrix of non-negative numbers with each row summing to 1.
-\textbf{A Doubly Stochastic Matrix} is a square matrix of non-negative numbers with each row and column summing to 1.
+\textbf{Adjacency Matrices} square matrix of $|V| \times |V|$ size where no edge from $V_i$ to $V_j$ means 0 and existing edges mean 1
+
+\textbf{Computing graph properties}
+
+There are some graph properties which we can compute easily from the adjacency matrix.
+\begin{itemize}
+    \item \textbf{Out-degree} sum across the rows
+    \item \textbf{In-degree} sum across the columns
+    \item \textbf{Symmetric matrix} means an undirected graph
+    \item directed graph can be turned into an undirected one using: $A' = A + A^T$.
+    \item If there are non-zero elements on the diagonal, that means there are self-loops.
+\end{itemize}
+
+\textbf{Edge weighted graphs}
+
+We can think of graphs as representing flows of `mass' through a network of verticies.
+
+\begin{itemize}
+    \item If the total flow out of a vertex is $> 1$, i.e. Its row sums to $> 1$, then it is a source of mass; for example it is manufacturing things.
+    \item If the total flow out of a vertex is $< 1$, i.e. Its row sums to $< 1$, then it is a sink; for example it is consuming things.
+    \item If the total flow out of the vertex is exactly $1$, i.e. Its row sums to exactly $1$, then it conserves mass; it only ever re-routes things.
+\end{itemize}
+
+\textbf{The degree matrix and the Laplacian}
+
+The \textbf{degree matrix} $D$ is a diagonal matrix whose diagonal elements are the sum of the weights of the edges connected
+to each vertex. That is, we compute the degree matrix by summing the rows of the adjacency matrix.
+
+\[
+D_{ii} = \sum_{j=1}^{|V|} A_{ij}
+\]
+
+The \textbf{Laplacian matrix} of a graph is defined as the difference betweent he degree matri and the adjacency matrix.
+We usualy compute it for the undirected graphs, where the adjacency matrix is symmetric. The Laplacian matrix is defined as:
+
+\[
+L = D - A
+\]
+
+It is of great importance in analysing the properties of graphs.
+Subtracting the degree matrix adjusts the weighting so that a balance between the global and the local structure of the graph is achieved.
+The Laplacian matrix is used in many graph algorithms, particularly when examining the flow of informatino or mass through a network.
+
+\textbf{More matrix `classes'}
+\begin{itemize}
+    \item \textbf{A Sparse Matrix} is a matrix with a large number of zero elements, the oppisite is a \textbf{Dense Matrix}.
+    \item \textbf{A Stochastic Matrix} is a square matrix of non-negative numbers with each row summing to 1.
+    \item \textbf{A Row-Stochastic Matrix} is a stochastic matrix where each row sums to 1.
+    \item \textbf{A Column-Stochastic Matrix} is a stochastic matrix where each column sums to 1.
+    \item \textbf{A Doubly Stochastic Matrix} is a square matrix of non-negative numbers with each row and column summing to 1.
+\end{itemize}
+
+\vspace{\baselineskip}
+
+\textbf{Eigenvectors and Eigenvalues}
+
 \textbf{Eigenvector} of A is a vector that is only scaled when is applied to it, not rotated.
+
 \textbf{Eigenvalue} of A is how much the eigenvector is scaled by when is applied to it.
 $A\vec{x} = \lambda  \vec{x}$.
+
 \textbf{Power Iteration}
 $\vec{x_n} = \frac{A \vec{x_{n-1}}}{\|A\vec{x_{n-1}}\|_\infty}$.
+
+The power iteration method enables us to calulate the leading eigen
 $evals, evecs = np.linalg.eigh(A)$.
+
 The \textbf{eigenspectrum} is just the sequence of absolute eigenvalues, ordered by magnitude.
 
 \textbf{Principle Components Analysis}
