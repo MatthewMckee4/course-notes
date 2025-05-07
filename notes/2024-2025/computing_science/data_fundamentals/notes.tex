@@ -189,7 +189,6 @@ However, it is important to use transparency judiciously, as excessive transpare
 \textbf{Distinct layers} superimposed on the same set of coords.
 \textbf{Distinct facets} on separate sets of coords.
 
-
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.2\textwidth]{assets/layered-faceted.png}
@@ -202,14 +201,12 @@ However, it is important to use transparency judiciously, as excessive transpare
 
 \textbf{Error Bars} can be shown as the \textbf{standard deviation}, \textbf{standard error}, \textbf{confidence interval}, or \textbf{nonparametric interval}.
 
-
 \clearpage
 
 \subsection*{Linear Algebra \small\textcolor{gray}{Week 4}}
 
+\textbf{Embedding} The representation of objects as points in a vector space.
 
-\textbf{Weighted Sums of Vectors}
-$\lambda_1 \mathbf{x}_1 + \lambda_2 \mathbf{x}_2 + \cdots + \lambda_n \mathbf{x}_n$
 \textbf{Linear interpolation}
 $lerp(x_1, x_2, \alpha) = (1 - \alpha)x_1 + (\alpha)x_2$
 
@@ -219,17 +216,49 @@ $\|x\|_\infty = \max_{i=1}^{n} |x_i|$
 $\|x\|_{-\infty} = \min_{i=1}^{n} |x_i|$
 \textbf{Normalisation} $x' = \frac{x}{\|x\|_p}$
 
+\textbf{Feature Vectors} The representation of `features' which define properties as points
+in a vector space; critical in machine learning.
+
 \textbf{Cosine Distance}
 $\cos \theta = \frac{\mathbf{x} \cdot \mathbf{y}}{||\mathbf{x}|| \, ||\mathbf{y}||}$
 
-\textbf{Variance}
-$\sigma^2 = \frac{1}{N - 1} \sum_{i=0}^{N-1} {(x_i - \mu)}^2$
+\textbf{Covariance Matrices}
 
-\textbf{Covariance Matrices}.
-We compute the covariance of every dimension with every other dimension.
-$\Sigma_{ij} = \frac{1}{N - 1} \sum_{k=1}^{N} (X_{ki} - \mu_i)(X_{kj} - \mu_j)$.
-You can also use $np.cov$.
+As well as the \textbf{mean vector} we saw earlier, we can also generalise the idea of \textbf{variance},
+which measures the spread of a dataset, to the multidimensional ase. Variance is the sum of squared differences
+of each element from the mean of the vector.
 
+\[\sigma^2 = \frac{1}{N - 1} \sum_{i=0}^{N-1} {(x_i - \mu)}^2\]
+
+This is a measure of how `spread out' a vector of values $x$ is. The \textbf{standard deviation} $sigma$
+is the square root of the \textbf{variance} and is more often used because it is in the same units as the
+elements of $x$.
+
+In the multidimensional case, to get a useful measure of spread of the $N \times d$ data matrix $X$, we need to
+compute the \textbf{covariance} of every dimension with every other dimension. This is the average squared
+difference of each column of data from the average of every column. This forms a 2D array $\sum$, which
+has entries in element i, j.
+
+\[\Sigma_{ij} = \frac{1}{N - 1} \sum_{k=1}^{N} (X_{ki} - \mu_i)(X_{kj} - \mu_j)\]
+
+As we will discuss shortly, this is a \textit{special form} of matrix: it is square symmetric and positive
+semi-definite.
+
+Interpretation of covariance matrix:
+\begin{itemize}
+    \item Diagonal elements are variances of each dimension.
+    \item Off-diagonal elements are covariances between dimensions.
+\end{itemize}
+
+We can also get it from using $np.cov$.
+
+\textbf{Covariance Ellipses}
+This matrix captures the spread of data, including any correlations between dimensions.
+It can be seen as capturing an ellipse that represents a dataset. The \textbf{mean vector} represents
+the centre of the ellipse, and the covariance matrix represents the shape of the ellipse.
+This ellipse is often called the error ellipse, and is a very useful summary of high-dimensional data.
+
+The covariance matrix represents a (inverse) transformation of a unit sphere to an ellipse covering the data.
 
 \subsection*{Linear Algebra 2 \small\textcolor{gray}{Week 5}}
 
