@@ -1,5 +1,6 @@
 #set document(title: "Professional Software Development")
 #set page(margin: 20pt)
+#set quote(block: true)
 
 = Professional Software Development
 
@@ -250,3 +251,92 @@ Refactor when implementing new functionality, correcting defects, code reviews, 
 *Compounding growth*: The rate of growth is proportional to the number of users.
 *Churn*: The percentage of users lost after successive time periods.
 *Optimizing growth cycle*: Quantify each stage of the growth cycle and see which stages can be improved. Gauge effects and continue.
+
+#pagebreak()
+
+== Case Study
+
+You are working with a startup software company that is developing a new software product for coordinating multiple autonomous unmanned aerial vehicles (aUAVs), commonly referred to as drone swarms. The team comprises a team lead, four developers and a product owner, who is also the founder of the company.
+
+Market research has shown that there is existing software for controlling drones in flight and that this has been used to create aerial light displays. The startup has decided to focus on the use of drone swarms for tasks in remote inhospitable environments. For example, swarms could be used to survey large areas of remote land where resources (such as timber or minerals) might be extracted, or assist search and rescue operations to find casualties. Larger drones might be used in a swarm to dispense water to control wild fires.
+
+All of these applications will have to account for the physical constraints on the drones, such as their need to be recharged at different times, the impact of weather and the performance characteristics of different drones in the swarm.
+
+The hardware components of the system comprise the drones themselves, equipped with a GPS and camera, a base station for sending communications to the drones, and a ruggedised laptop that will be used to control the swarm and also process the data collected.
+
+So far, the architecture for the part of the system that coordinates the swarm has been implemented. Each drone establishes a connection to the base station so that it can receive instructions and send back data from its sensors. Instructions might tell the drone to fly in a particular direction, or go to a specific location. The software on the base station maintains control of several drones simultaneously, ensuring they don't collide. The software on the drone is responsible for processing the received commands.
+
+You join the team as a Scrum Master at the point where they have been working on the user interface. The team have developed the following user journey to portray the overall vision for the project.
+
+#quote[
+    Kerry is the drone swarm operator for a mountain search and rescue team. The team have been called out to rescue two casualties following an avalanche in a mountainous area. Kerry switches on the drones and the base station at the bottom of the large search area. She configures the drones with the location of the base station so they can return when they need recharging. Using the controller she opens a mapping screen and selects survey mode. She then specifies a geographic region for the swarm to survey. The drone swarm launches and automatically organises itself into formation to complete the survey, which results in a new map layer composed of tiles of aerial photographs from different drones gradually appearing on the screen.
+
+    Image recognition software on the laptop begins to identify tiles that might contain the casualty. Kerry selects each of these tiles in turn and chooses to open an album of photos taken of the location by the drones. The initial area for search doesn't contain any casualties so Kerry instructs the swarm to expand the survey area.
+
+    When she finds a tile that she think contains a casualty she instructs the swarm to take a lower level detailed image of the exact location. One drone in the swarm flies lower and takes this picture, which gets returned to the laptop. Kerry tags the tile locations that contain the casualties. Kerry creates a "case" from the tile and photo collection and adds additional notes, such as the possible identity of the casualty, or if they appear to be conscious.
+
+    Next Kerry informs the team leader who splits the team into parties to continue to monitor the most likely locations of the casualties. Kerry divides the swarm into sub-swarms. Then she sets each swarm to "loiter" mode at the likely locations. Each swarm maintains two drones "on-point" whilst the others return to the base station for recharging. The swarms swap over when the active drones need recharging.
+
+    Once both the casualties are safely recovered the swarm is ordered to return to the base station for collection.
+]
+
+The UI will be written in a cross-platform framework that provides reusable components, such as Flutter. This will communicate with a backend API that will send instructions to the swarm.
+
+The team follows a Scrum software development process. The team triage the user stories they have written for the user interface during a backlog grooming session.
+
+First, each story is estimated following the Planning Poker method. The team lead reads out the story then each team member writes an estimate in person hours on a sticky note, before sharing this with the team. Stories can vary in scale considerably, so estimates can sometimes be many hundred person-hours. If the team are close to each other (within 10 person-hours) then the average is taken as the estimate, else the team go for another round of estimation. This continues until the team reach an acceptable consensus. Unsurprisingly, disagreement is most common for larger user stories, but the team usually coalesce on the median estimate from the first round after a short while.
+
+Next, an individual developer identifies tasks necessary to realise the user story and records these on the team's issue tracker. An example task might be to add a new screen to the user interface, or extend the API to accept a new command. The developer then prioritises the tasks and assigns them to themselves. The tasks are also recorded on the user story as the "Definition of Done." Once all the issues have been created the team starts the sprint.
+
+The following code for tracking information about a drone in the user interface was developed during the sprint.
+
+```java
+public class Drone {
+    private final Set<Drone> swarm;
+    private Coordinate location;
+    private Long timestamp;
+    private Double batteryLevel;
+    private Clock clock;
+
+    public Drone(Set<Drone> swarm, Clock clock) {
+        this.swarm = swarm;
+        this.clock = clock;
+    }
+
+    public Coordinate getLocation() {return location;}
+
+    public void update(Long timestamp, Coordinate location, Double batteryLevel) {
+        this.timestamp = timestamp;
+        this.location = location;
+        this.batteryLevel = batteryLevel;
+    }
+
+    public Double distanceTo(Drone drone) {
+        return this.getLocation().distanceTo(drone.getLocation());
+    }
+
+    public Drone getNearestDrone() {
+        Drone result = null;
+        Double minDistance = MAX_VALUE;
+        for (Drone drone : this.swarm) {
+            if (drone == this) continue;
+            Double distance = drone.distanceTo(this);
+            if (distance < minDistance)
+                result = drone;
+                minDistance = distance;
+        }
+        return result;
+    }
+
+    public DroneStatus getStatus(){
+        Drone nearest = getNearestDrone();
+        Boolean veryClose = nearest != null &&
+                nearest.distanceTo(this) < 50.0;
+        if (this.batteryLevel < 10.0 || veryClose)
+            return CRITICAL;
+        else if (this.clock.millis() - this.timestamp > 60000)
+            return UNKNOWN;
+        else return OPERATIONAL;
+    }
+}
+```
