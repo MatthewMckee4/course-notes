@@ -1,13 +1,13 @@
 #set document(title: "Professional Software Development")
 #set page(margin: 20pt)
-#set text(size: 10pt)
-#set par(justify: true)
 
-= Intro
+= Professional Software Development
+
+== Intro
 
 *Software is intrinsically*: complex, intangible, malleable, scalable and evolutionary.
 
-= Agile Team Organisation
+== Agile Team Organisation
 
 *What is Agile?* Small teams, frequent structured meetings, small deliveries, customer engagement.
 Maintenance techniques like continual testing, analysis, refactoring.
@@ -39,7 +39,7 @@ establish cost estimates and priorities.
 *Review* the project in the sprint review meeting and the process in the retrospective. Deliver and demonstrate new version to customer.
 summarise completed work, identify new feature set.
 
-= Change Management
+== Change Management
 
 *Control items* are any artifacts that a software engineer might directly edited.
 
@@ -58,7 +58,7 @@ and provides clear visibility of project process.
 *Staging branches* are used after making a commit to the main branch, some testing is done here then a push is made to the deployment branch.
 Manage branches by deleting them and squash commiting.
 
-= Customer Management
+== Customer Management
 
 *First customer meeting*: decide on rules of engagement, clarify overall goals, identify stakeholders, determine appropriate IP ownership,
 identify any significant risks, decide on goals for first sprint.
@@ -67,7 +67,7 @@ identify any significant risks, decide on goals for first sprint.
 
 *Customer meetings*: set an agenda, use time boxing, have roles.
 
-= Requirements Management
+== Requirements Management
 
 Cannot isolate the requirements from the implementation.
 
@@ -79,7 +79,7 @@ Cannot isolate the requirements from the implementation.
 
 *User stories*: a short description of a feature from the user's perspective. Used to document the requirements for a software system.
 
-= Software Process Improvement
+== Software Process Improvement
 
 *Process improvement frameworks*: *ISO 9001*, *Six Sigma*, *CMMI*.
 
@@ -89,7 +89,7 @@ It is important to vary the retrospective structure.
 
 *How* this is done: gather data, analyse data, identify root causes, implement changes.
 
-= Code Reviews
+== Code Reviews
 
 *Purpose* is to detect defects, identify refactoring opportunities, develop a shared understanding of the codebase.
 
@@ -97,7 +97,7 @@ It is important to vary the retrospective structure.
 Should choose one of: corrective, adaptive, preventative, perfective.
 A code review should adhere to architectural patterns and re-use existing code.
 
-= Build, Release and Dependency Management
+== Build, Release and Dependency Management
 
 A software project should have a *build configuration file*. This specifies targets (resolve dependencies, compile code, test binary),
 mappings (relationship between source and generated artifacts), tasks (actions to satisfy mappings, e.g. execute a specific compiler).
@@ -118,7 +118,7 @@ Published (APIs that can be externally access but not explicitly documented as b
 
 *Migration plans and scripts*: adapting existing code to use new published APIs.
 
-= Continuous Integration
+== Continuous Integration
 
 *Integration hell*: Spending more time re-integrating features, than in creating the features.
 
@@ -131,7 +131,7 @@ Published (APIs that can be externally access but not explicitly documented as b
 Limitations include lack of realism, too many simultaneous users, network endpoints and data sets inaccessible outside of production.
 Multiple staging environments may be needed when several components, each of which intended for use on a different platform, exist.
 
-= Static Analysis, Readability and Design Quality
+== Static Analysis, Readability and Design Quality
 
 *Static vs Dynamic analysis*: The former is applied on program artefacts at rest, while the latter is conducted during execution.
 
@@ -141,7 +141,7 @@ Multiple staging environments may be needed when several components, each of whi
 
 *Inheritance depth and width*: Deep inheritance suggests an over-abstraction of the class.
 
-= Behaviour-driven development
+== Behaviour-driven development
 
 *Given*: To set up the test case fixture, initialize the necessary components and dependencies required for the test. This may include creating mock objects, setting up the database state, or configuring the environment to ensure that the test runs in isolation.
 
@@ -149,7 +149,7 @@ Multiple staging environments may be needed when several components, each of whi
 
 *Then*: After executing the test case, assert the expected outcomes. This includes checking the state of the system, verifying that the correct outputs are produced, and ensuring that any side effects (such as changes to the database or external systems) are as expected. Use assertions to confirm that the actual results match the expected results.
 
-= Evaluating Test Suites
+== Evaluating Test Suites
 
 The more *effective* a test is, the less *efficient* it becomes.
 
@@ -161,7 +161,7 @@ The more *effective* a test is, the less *efficient* it becomes.
 *Survivor mutants*: successfully pass all tests and are undetected.
 *Undetermined mutants*: programs that do not halt.
 
-= System Scale Testing
+== System Scale Testing
 
 *Reliability testing*: PFD (probability of failure on access), meantime to failure (time for system to fail from initiation,
 or time be-tween failures; good metric when repair is expensive), down-time (useful when system is high-demand).
@@ -179,7 +179,7 @@ or time be-tween failures; good metric when repair is expensive), down-time (use
 
 *Feedback from the wild*: Crash reporting, A/B testing.
 
-= Software Architecture
+== Software Architecture
 
 *Software component*: refers to a software bundle of self contained state and behaviours with well defined interfaces. Some components require functions provided by other components.
 
@@ -227,13 +227,13 @@ A Plugin provides an interface to the core application.
 Loader component instantiates and configures the component for use by the main application, using the registry supplied specification.
 Inner platform effect.
 
-= Software Refactoring
+== Software Refactoring
 
 Refactor when implementing new functionality, correcting defects, code reviews, trying to understand a software artefact.
 
 *Code smells*: cloning, complex structures, long parameter lists, excessive comments
 
-= Software Licensing
+== Software Licensing
 
 *A software license* can cover ownership, distribution rights, usage rights, liability, etc.
 
@@ -241,7 +241,7 @@ Refactor when implementing new functionality, correcting defects, code reviews, 
 *Warranty*: The length of time for which certain functionality can be expected/resolved.
 *Liability*: Where the responsibility lies.
 
-= Startup Growth Engineering
+== Startup Growth Engineering
 
 *Basic compounding growth loop*: Users attract other to consider product *if and only if* some of them use the product.
 *Direct-invitational loop*: Users invite their colleagues *if and only if* some invitees sign-up.

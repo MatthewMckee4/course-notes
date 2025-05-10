@@ -1,7 +1,5 @@
 #set document(title: "Networked Systems")
-#set page(margin: 2pt)
-
-#set text(size: 8pt)
+#set page(margin: 20pt)
 
 = Database Fundamentals & Relational Model
 
