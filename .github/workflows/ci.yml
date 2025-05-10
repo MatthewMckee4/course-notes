@@ -11,9 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Build LaTeX
-      uses: xu-cheng/latex-action@v3
-      with:
-        work_in_root_file_dir: true
-        root_file: |
-          **/*.tex
+    - uses: typst-community/setup-typst@v4
+
+    - name: Build Typst
+      run: make compile

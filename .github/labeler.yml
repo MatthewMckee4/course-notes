@@ -1,7 +1,3 @@
-Networked Systems:
-- changed-files:
-  - any-glob-to-any-file: notes/2024-2025/computing_science/networked_systems/**
-
 Database Systems:
 - changed-files:
   - any-glob-to-any-file: notes/2024-2025/computing_science/database_systems/**
@@ -10,21 +6,9 @@ Professional Software Development:
 - changed-files:
   - any-glob-to-any-file: notes/2024-2025/computing_science/professional_software_development/**
 
-Data Fundamentals:
-- changed-files:
-  - any-glob-to-any-file: notes/2024-2025/computing_science/data_fundamentals/**
-
 Systems Programming:
 - changed-files:
   - any-glob-to-any-file: notes/2024-2025/computing_science/systems_programming/**
-
-Text as Data:
-- changed-files:
-  - any-glob-to-any-file: notes/2024-2025/computing_science/text_as_data/**
-
-Algebra:
-- changed-files:
-  - any-glob-to-any-file: notes/2024-2025/maths/algebra/**
 
 Github Actions:
 - changed-files:
