@@ -37,9 +37,9 @@ Rank 1 tensor is 1D array.
 
 *Float Exceptions*
 
-Invalid operation, divide by zero, overflow, underflow, inexact, invalid operation.
+Invalid operation, divide by zero, overflow, underflow, inexact, invalid operation. Trapped
 
-- inf - inf = nan (invalid operation)
+- inf - inf = nan, sqrt(-1) = nan (invalid operation)
 - x+y will have large error if x and y have different magnitudes (magnitude error), loss of precision
 - x-y will have large error if $x tilde.eq.rev y$ (cancellation error)
 
@@ -162,7 +162,7 @@ However, it is important to use transparency judiciously, as excessive transpare
 
 *Aspect Ratio* can be very important, images should never be stretched or squashed.
 
-*Log scales* can be useful when datasets span orders of magnitude.
+*Log scales* can be useful when data span orders of magnitude. Semilog-y is useful when one axis has wide range of values.
 
 *Symlog* modified logarithmic scale to allow for negative values.
 
@@ -180,7 +180,7 @@ However, it is important to use transparency judiciously, as excessive transpare
 *Distinct facets* on separate sets of coords.
 
 #figure(
-  image("assets/layered-faceted.png", width: 25%),
+  image("assets/layered-faceted.png", width: 23%),
   caption: [Layered and Faceted]
 )
 
@@ -522,11 +522,17 @@ check the objective function,
 if $L(theta) ≤ L(theta^*)$, then $theta^* = theta$.
 ```
 
-*Pros*: Can get trapped in local minima. requires no knowledge of the objective function.
-Very simple to implement. Better than grid search.
 
-*Cons*: Extremely inefficient. Must be possible to draw random samples from the parameter space.
-Results do not necessarily get better over time.
+*Pros*:
+Works for any continuous parameter space.
+Requires no knowledge of the objective function.
+Trivial to implement.
+
+*Cons*:
+Incredibly ineffcient
+Must specify search space bounds in advance.
+Highly biased to finding things near the “early corners” of the space.
+Depends heavily on number of divisions chosen.
 
 
 
@@ -558,8 +564,8 @@ changes to it. Hill climbing that takes random samples near the current best par
 
 *Cons*: hard to choose how much of an adjustment to make. Can get stuck in local minima.
 Struggles with objective function regions that are flat. Requires approximately continous objective function.
-
-
+Hard to get over ridges.
+Takes long to converge.
 
 
 
@@ -1036,6 +1042,7 @@ We can see this as tweaking the parameters of some predefined module until it be
 
 *Bayesian Inference* approaches explicitly encode belief about the behaviour of the mysterious entity using probability distributions.
 In Bayesian models, we assume a distribution over the parameters themselves, and consider the parameters to be random variables.
+We model a distribution over the parameters, then we can sample from it to generate new data.
 
 *Population*: The complete set of individuals or items of interest.
 *Parameters*: Numerical characteristics of the population.
@@ -1182,6 +1189,7 @@ $ f_n = f_s/2 $
  where $f_s$ is the sampling rate.
 
 *Aliasing* is the phenomenon where high frequencies are misinterpreted as lower frequencies.
+If something exceeds the nyquist limit, it will be misinterpreted as a lower frequency.
 
 *Noise* is unwanted information in a signal.
 *Signal-to-Noise Ratio (SNR)* is the ratio of the power of the signal to the power of the noise.
@@ -1230,6 +1238,11 @@ convolution of any function with the delta function does not change
 the original function:
 
 $ f * delta = f $
+
+*COnvolution kernel*
+
+In $x * y$, we can consider $x$ to be the signal to be transformed, and $y$ to be the operation to be performed.
+$y$ is called the *convolution kernel*.
 
 *Smoothing* is a type of convolution that uses a Gaussian kernel to blur the image.
 
@@ -1293,6 +1306,8 @@ And multiplying this matrix by the vector $x$.
 $ f(omega) = D_f x[t] $
 
 *Discrete Fourier Transform (DFT)*
+
+$ sum_(k=0)^(N-1) [x[j]cos(-2pi j k/N) + i x[j]sin(-2 pi j k/N)] $
 
 The Discrete Fourier Transform works on discrete measurements. It has complex components representing phase and magnitude. The frequency is calculated as $"freq" = (f_N k)/N$. In terms of computational complexity, the DFT requires $O(N^2)$ operations, while the Fast Fourier Transform (FFT) requires only $O(N log N)$ operations when N is a power of 2.
 
