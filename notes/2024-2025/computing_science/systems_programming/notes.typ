@@ -1,6 +1,5 @@
 #set document(title: "Systems Programming")
-#set text(size: 10pt)
-#set page(margin: 2pt)
+#set page(margin: 20pt)
 
 = Systems Programming
 
