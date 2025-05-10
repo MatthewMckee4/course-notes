@@ -1,46 +1,40 @@
-\documentclass{article}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath}
-\usepackage[margin=2px]{geometry}
-\title{Systems Programming}
-\author{}
-\date{}
+#set document(title: "Systems Programming")
+#set text(size: 10pt)
+#set page(margin: 2pt)
 
-\begin{document}
+= Systems Programming
 
-\small
+== Compiling
 
-\subsection*{Compiling}
-
-The preprocessor expands macros and includes files (`-E').
-In the compiling stage, the source code is parsed and turned into an intermediate representation (`-emit-llvm -S').
-Machine-specific assembly code is generated (`-S').
-Machine code is generated in an object file (`-c').
+The preprocessor expands macros and includes files (`-E`).
+In the compiling stage, the source code is parsed and turned into an intermediate representation (`-emit-llvm -S`).
+Machine-specific assembly code is generated (`-S`).
+Machine code is generated in an object file (`-c`).
 The linker combines object files and libraries to create an executable,
 checks all functions have machine code available, complains if not.
-`clang -o hello hello.c'.
-`-Werror' makes all warnings errors.
-`-Wall' enables all warnings.
+`clang -o hello hello.c`.
+`-Werror` makes all warnings errors.
+`-Wall` enables all warnings.
 
-\subsection*{Fundamental of C}
+== Fundamental of C
 
-\subsubsection*{Basic Program Structure and I/O}
-int main (int argc, char* argv[]). \%d is a decimal integer. \%s is a string. \%c is a character. \%f is a floating point number.
-\%.f is a double-precision floating point number.
+=== Basic Program Structure and I/O
+`int main (int argc, char* argv[])`. %d is a decimal integer. %s is a string. %c is a character. %f is a floating point number.
+%.f is a double-precision floating point number.
 
-\subsubsection*{Data Types and Strings}
+=== Data Types and Strings
 char 1 byte, int 4 bytes, float 4 bytes, double 8 bytes.
-Strings have a null terminator, one extra byte: `\texttt{\textbackslash o}'
+Strings have a null terminator, one extra byte: `\0`
 Use strcmp to compare strings.
-include \textless stdbool.h\textgreater{} for bools.
+include <stdbool.h> for bools.
 
-\subsubsection*{Scopes and Lifetimes}
+=== Scopes and Lifetimes
 a pair of curly braces is a block, and introduces a lexical scope.
 variables declared inside a block are local to that block.
 Lifetimes, automatic: ends at the end of the block,
 static: ends at the end of the program.
 
-\subsubsection*{Stack and Heap Allocation}
+=== Stack and Heap Allocation
 allocated on the stack, or heap, at runtime, using dynamic memory allocation (malloc).
 Returining pointers to local variables is dangerous, as the local variable will go out of
 scope when the function returns and the pointer will point to invalid memory.
@@ -52,21 +46,21 @@ Dynamic arrays are allocated on the heap, using malloc for allocation and free f
 Struct is sequence of members, passed by value.
 Array, passed by reference.
 
-\subsubsection*{Manual Memory Management Challenges}
+=== Manual Memory Management Challenges
 Challenges with manual memory management: double free errors, dangling pointers, memory leaks.
 64-bit architecture: addresses are 64-bit. In practice, 48 bits are used.
 
-\subsubsection*{Pointers and Their Usage}
+=== Pointers and Their Usage
 Dereferencing a pointer: Access the value stored at the memory address.
 Dereferencing a void pointer: Forbidden as the type of the pointer is unknown, the user must cast the pointer
 to the correct type before dereferencing it.
-Make a pointer (int* p = \&x).
-int param[] and int *param are the same.
-float * const ptr: ptr is a constant pointer to a float.
-const float * ptr: ptr is a pointer to a constant float.
-const float * const ptr: ptr is a constant pointer to a constant float.
-ptr[i] and * (ptr + i) are the same.
-\texttt{ptr->member} is the same as (*ptr).member.
+Make a pointer `(int* p = &x)`.
+`int param[]` and int `*param` are the same.
+float `* const ptr`: ptr is a constant pointer to a float.
+const float `* ptr`: ptr is a pointer to a constant float.
+const float `* const ptr`: ptr is a constant pointer to a constant float.
+ptr[i] and `* (ptr + i)` are the same.
+`ptr->member` is the same as (`*ptr`).member.
 Dereferencing a pointer is unsafe.
 Dereferencing a void pointer is forbidden.
 Heap is part of memory reserved for dynamic allocation.
@@ -74,10 +68,10 @@ It is safe to call free (NULL).
 If we don't call free, we leak memory.
 Returning a pointer to a local variable is dangerous.
 
-\subsubsection*{Function Pointers}
-Function pointers \texttt{(return type (*func) (arg\_types))}.
+=== Function Pointers
+Function pointers `(return type (*func) (arg_types))`.
 
-\subsection*{Errors}
+== Errors
 
 Segmentation faults: accessing memory that is not allocated, or accessing memory that is protected.
 Causes for segmentation faults: Dangling pointers, dereferencing NULL, writing to read-only memory,
@@ -85,70 +79,70 @@ buffer overflow, stack/heap overflow.
 Memory Sanitizer, Address Sanitizer, Leak Sanitizer.
 To check where an error occurs, use GDB, use -g flag when compiling.
 
-\subsection*{Memory Management and Ownership}
+== Memory Management and Ownership
 
 RAII: Resource Acquisition Is Initialisation.
 Use constructor to allocate memory, destructor to free it.
-For storing a value, use unique\_ptr for unique ownership, shared\_ptr for shared ownership.
+For storing a value, use unique_ptr for unique ownership, shared_ptr for shared ownership.
 Ownership is the concept of managing the lifecycle of resources, particularly memory.
 
-\subsection*{Concurrency}
+== Concurrency
 
-\subsubsection*{Concurrency vs. Parallelism}
+=== Concurrency vs. Parallelism
 Concurrency is about dealing with lots of things at once.
 Concurrency is a programming paradigm.
 Parallelism is about doing lots of things at once.
 Parallelism is about making programs faster.
 
-\subsubsection*{Threads and Processes}
+=== Threads and Processes
 Processes are instances of a program.
 Threads are instances of a process.
 Multiple threads can be executed simultaneously.
 Threads share the same address space.
 Processes have their own address space, the OS ensures this.
 
-\subsubsection*{Mutual Exclusion and Critical Regions}
+=== Mutual Exclusion and Critical Regions
 Mutual exclusion is the mechanism that ensures that only one thread can access a resource at a time.
 Mutual exclusion is used to protect critical sections of code.
 Example showing the need for mutual exclusion: removal of elements from a linked list.
 Critical region is the part of the code that updates some shared state.
 
-\subsubsection*{Locks and Deadlocks}
+=== Locks and Deadlocks
 Locks: before entering a critical region, acquire a lock.
 After leaving a critical region, release the lock.
 Deadlock: two threads are waiting for each other to release a lock.
 Bust Waiting: one thread is waiting for another thread to release a lock, wastes CPU cycles.
 
-\subsubsection*{Condition Variables and Coordination}
+=== Condition Variables and Coordination
 use condition variables to wake up threads that are waiting for a condition to be true.
 Important thread coordination aspects:
 partitioning: what parts of the computation should be separatel evaluated,
 data sharing: what data to share between threads,
 synchronisation: ensuring threads can cooperate without interference.
 
-\subsubsection*{Semaphores}
+=== Semaphores
 Semaphores: a semaphore is a variable that is used to control access to a shared resource.
 A semaphore holds an integer counter and provides two atomic operations: wait and signal.
 
-\subsubsection*{Auto Keyword and Lambda Functions}
+=== Auto Keyword and Lambda Functions
 Auto keyword: auto keyword is used to let the compiler deduce the type of a variable from the initializer.
-Lambda functions: \texttt{([capture] (parameters) -> return type { body })}.
-Pass by pointer: \texttt{([l\_ptr = \&l])}.
-Capture all variables by value: \texttt{([=] (parameters) -> return type { body })}.
-Capture all variables by reference: \texttt{([\&] (parameters) -> return type { body })}.
-Capture a specific variable by value: \texttt{([x] (parameters) -> return type { body })}.
-Capture a specific variable by reference: \texttt{([\&x] (parameters) -> return type { body })}.
+Lambda functions: `([capture] (parameters) -> return type { body })`.
+Pass by pointer: `([l_ptr = &l])`.
+Capture all variables by value: `([=] (parameters) -> return type { body })`.
+Capture all variables by reference: `([&] (parameters) -> return type { body })`.
+Capture a specific variable by value: `([x] (parameters) -> return type { body })`.
+Capture a specific variable by reference: `([&x] (parameters) -> return type { body })`.
 
-\subsubsection*{Asynchronous Programming (std::async, std::future, std::promise, std::packaged\_task)}
-Std::async: \texttt{std::async(std::launch::async, function, args...)}
+=== Asynchronous Programming (std::async, std::future, std::promise, std::packaged_task)
+Std::async: `std::async(std::launch::async, function, args...)`
 Async tasks are executed in a separate thread.
 
-Std::future: \texttt{std::future<T> f = std::async(std::launch::async, function, args...)}
+Std::future: `std::future<T> f = std::async(std::launch::async, function, args...)`
 Future is a promise to return a value later, a value that is not yet computed.
 
 future.get(): blocks until the future is ready.
 
-Std::promise: \texttt{std::promise<T> p}
+Std::promise: `std::promise<T> p`
 Promise is a container for a future value.
 
 A promise allows you to provide a value once it has been computed.
@@ -156,7 +150,5 @@ A promise allows you to provide a value once it has been computed.
 Without future and promise the value would have to be explicitly protected by a
 mutex and a condition variable that could be used to wait for the value to be computed.
 
-Std::packaged\_task: \texttt{std::packaged\_task<T> pt(function)}
+Std::packaged_task: `std::packaged_task<T> pt(function)`
 Packaged task is a task that can be executed later.
-
-\end{document}

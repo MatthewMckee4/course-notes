@@ -112,7 +112,7 @@ function_name() OVER (PARTITION BY column1 ORDER BY column2)
 == Physical Design and Hashing
 
 *Organisation based Optimisation*. Records are grouped together formating a Block, a file is a group of blocks.
-blocking factory = $floor(|B| / |R|)$. Number of blocks required = $ceil(|num tuples| / blocking factor)$.
+blocking factory = $floor(|B| / |R|)$. Number of blocks required = $ceil(|"tuples"| / "blocking factor")$.
 *Linked Allocation*: Each block has a pointer to the next block.
 
 == File Structures
@@ -152,7 +152,7 @@ Can also use chain pointers to link records in the same block (sorted linked lis
 
 *B-Tree: Index on non-ordering key*: B-Tree node order p splits the searching space up to p subspaces
 
-*Node Definition*: $Node := {P_1, (K_1, Q_1), P_2, (K_2, Q_2), ..., P_(p-1), (K_(p-1), Q_(p-1)), P_p}$
+*Node Definition*: $"Node" := {P_1, (K_1, Q_1), P_2, (K_2, Q_2), ..., P_(p-1), (K_(p-1), Q_(p-1)), P_p}$
 
 *B+ Tree: Index on non-ordering key*: Internal nodes have no data pointers, only leaf nodes hold data pointers.
 Has higher fan out. Num pointers is blocking factor.
@@ -196,28 +196,28 @@ then go through the result set and apply the remaining predicates.
 *Cost-based Optimisation*: exploit statistical information to estimate the execution cost of a query.
 Important is information about each relation and attribute. NDV (Number of Distinct Values).
 
-*Selection Selectivity*: $0 <= sl(A) <= 1$
+*Selection Selectivity*: $0 <= "sl"(A) <= 1$
 *Selective Predictions*: Approximation of the selection selectivity. You oculd have no assumption about the data,
 could be uniformly distributed
 
-*Conjunctive Selectivity* (A = x and B = y): $sl(Q) = sl(A = x) * sl(B = y) in [0, 1]$
+*Conjunctive Selectivity* (A = x and B = y): $"sl"(Q) = "sl"(A = x) * "sl"(B = y) in [0, 1]$
 
-*Disjunctive Selectivity* (A = x or B = y): $sl(Q) = sl(A = x) + sl(B = y) - sl(A = x) * sl(B = y) in [0, 1]$
+*Disjunctive Selectivity* (A = x or B = y): $"sl"(Q) = "sl"(A = x) + "sl"(B = y) - "sl"(A = x) * "sl"(B = y) in [0, 1]$
 
-*Selection Selectivity*: $1/NDV(A) = 1/n$
+*Selection Selectivity*: $1/"NDV"(A) = 1/n$
 
-*Selection Cardinality*: $(1/NDV(A)) * r = r/n$
+*Selection Cardinality*: $(1/"NDV"(A)) * r = r/n$
 
 *Selection Cost Refinement*: Be more accurate: express cost as a function of {s(A)}
 
 *Binary Search on sorted relation*: If A is a key, then expected cost is $log_2(r)$.
-If A is not a key, then expected cost is $log_2(b) + ceil((r * sl(A))/f) - 1$.
+If A is not a key, then expected cost is $log_2(b) + ceil((r * "sl"(A))/f) - 1$.
 
-*Multilevel primary index* with range A >= x: cost: $t + ceil((r * sl(A))/f) - 1$.
+*Multilevel primary index* with range A >= x: cost: $t + ceil((r * "sl"(A))/f) - 1$.
 
-*Clustering Index* over a non key: cost: $t + ceil((r * sl(A))/f) - 1$.
+*Clustering Index* over a non key: cost: $t + ceil((r * "sl"(A))/f) - 1$.
 
-*B+ Tree* over a no ordering non key: cost: $t + m + r * sl(A)$.
+*B+ Tree* over a no ordering non key: cost: $t + m + r * "sl"(A)$.
 
 *B+ Tree* over a no ordering key: cost: $t + 1$.
 
@@ -225,4 +225,4 @@ If A is not a key, then expected cost is $log_2(b) + ceil((r * sl(A))/f) - 1$.
 
 *Hash file structure*: cost: $t + O(n)$.
 
-*Join Selectivity Theorem*: Given $n = NDV(A, R)$ and $m = NDV(B, S)$: js = $1/max(n, m)$, jc = $(|R| * |S|)/max(n, m)$.
+*Join Selectivity Theorem*: Given $n = "NDV"(A, R)$ and $m = "NDV"(B, S)$: js = $1/max(n, m)$, jc = $(|R| * |S|)/max(n, m)$.
