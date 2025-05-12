@@ -202,3 +202,90 @@ Suppose that $f$, $g: (K, infinity) arrow.r RR$ are differentiable functions wit
 $ lim_(x arrow.r infinity) (f'(x))/(g'(x)) = L arrow.r.double lim_(x arrow.r infinity) f(x)/g(x) = L $
 
 == Power Series
+
+=== Definition 3.1
+
+Let $(a_n)_(n=0)^infinity$ be real numbers. The *power series* with coefficients $(a_n)$ is the real function $f(x) = sum_(n=0)^infinity a_n x^n$. The domain of $f$ is given by
+
+$ "dom"(f) = {x in RR: sum_(n=0)^infinity a_n x^n " converges"} $
+
+and is called the *interval of convergence* of $f$.
+
+=== Lemma 3.2
+
+Let $f(x) = sum_(n=0)^infinity a_n x^n$ be a real power series. Suppose that for some $y in RR$, $f(y)$ converges. Then for all $x in RR$ with $|x| < |y|$, $f(x)$ converges absolutely.
+
+=== Theorem 3.3
+
+Let $f(x) = sum_(n=0)^infinity a_n x^n$ be a real power series. Then exactly one of the following holds:
+
+a) $f(x)$ converges only for $x = 0$;
+
+b) There exists $R in (0, infinity)$ such that $f(x)$ converges absolutely for $|x| < R$ and diverges for $|x| > R$;
+
+c) $f(x)$ converges absolutely for all $x in RR$.
+
+=== Definition 3.4
+
+The *radius of convergence* of $f$ is defined to be:
+
+a) $0$ in case a of Theorem 3.3;
+
+b) $R$ in case b of Theorem 3.3;
+
+c) $infinity$ in case c of Theorem 3.3.
+
+=== Proposition 3.5
+
+Let $f(x) = sum_(n=0)^infinity a_n x^n$ be a real power series. Suppose that $(|a_(n+1)|)/(|a_n|) arrow.r L$ as $n arrow.r infinity$.
+
+a) If $L = infinity$, then $f$ has radius of convergence $0$;
+
+b) If $0 < L < infinity$, then $f$ has radius of convergence $1/L$;
+
+c) If $L = 0$, then $f$ has radius of convergence $infinity$.
+
+=== Lemma 3.6
+
+Let $f(x) = sum_(n=0)^infinity a_n x^n$ be a power series and define a new power series by $g(x) = sum_(n=1)^infinity n a_n x^(n-1)$. Then $f$ and $g$ have the same radii of convergence.
+
+=== Theorem 3.7
+
+Let $f(x) = sum_(n=0)^infinity a_n x^n$ be a power series with radius of convergence $R > 0$. Then $f : (-R, R) arrow.r RR$ is differentiable and has
+
+$ f'(x) = sum_(n=1)^infinity n a_n x^(n-1), forall x in (-R, R) $
+
+=== Definition 3.8
+
+Define $exp : RR arrow.r RR$ by $exp(x) = sum_(n=0)^infinity x^n/(n!)$.
+
+=== Proposition 3.9
+
+Suppose $sum_(n=0)^infinity a_n$ and $sum_(n=0)^infinity b_n$ are absolutely convergent. Then defining $c_n = sum_(i=0)^n a_(n-i) b_i$, the series $sum_(n=0)^infinity c_n$ is absolutely convergent and
+
+$ sum_(n=0)^infinity c_n = (sum_(n=0)^infinity a_n)(sum_(n=0)^infinity b_n) $
+
+=== Lemma 3.10
+
+$exp : RR arrow.r (0, infinity)$ is bijective.
+
+=== Definition 3.11
+
+Define $log : (0, infinity) arrow.r RR$ as the inverse of $exp$.
+
+=== Theorem 3.12 (Taylor's theorem)
+
+Fix $n in NN$. Let $f$ be a real function such that $f, dots, f^((n-1))$ are defined and continuous on $[a, b]$ and $f^((n))$ is defined on $(a, b)$. Then there exists $c in (a, b)$ such that
+
+$ f(b) = f(a) + f'(a)(b - a) + f''(a) (b - a)^2/2 + dots + f^((n-1))(a) (b - a)^(n-1)/(n-1)! + f^((n))(c) (b - a)^n/n! $
+
+=== Definition 3.13
+
+Let $f$ be a real function which is infinitely differentiable at $0$. Then
+
+$ sum_(n=0)^infinity (f^((n))(0))/n! x^n = f(0) + f'(0)x + (f''(0))/2 x^2 + (f^((3))(0))/3 x^3 + dots $
+
+is called the *Maclaurin series* for $f$. We say that the Maclaurin series is valid at $x$ if it converges and equals $f(x)$, i.e.
+
+$ f(x) = sum_(n=0)^infinity (f^((n))(0))/n! x^n $
+
