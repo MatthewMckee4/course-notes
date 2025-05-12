@@ -86,3 +86,117 @@ Let $f$ be a real function and let $c, L in RR$.
 a) Suppose that $f(x) arrow.r L$ as $x arrow.r c^+$ and $f(x) arrow.r L$ as $x arrow.r c^-$. Then $f(x) arrow.r L$ as $x arrow.r c$.
 
 b) Suppose that for each $delta > 0$, $"dom"(f) inter (c - delta, c) != emptyset.rev$ and $"dom"(f) inter (c, c + delta) != emptyset.rev$. If $f(x) arrow.r L$ as $x arrow.r c$, then both $lim_(x arrow.r c^+) f(x) = L$ and $lim_(x arrow.r c^-) f(x) = L$.
+
+== Differentiability
+
+=== Definition 2.1
+
+Let $f$ be a real valued function and let $c in "dom"(f)$ be a point such that $"dom"(f)$ contains a neighbourhood of $c$. We say that $f$ is *differentiable at* $c$ if the limit
+
+$ lim_(x arrow.r c) (f(x) - f(c))/(x - c) $
+
+exists. In this case we call the value of this limit the *derivative of* $f$ *at* $c$ and write it as $f'(c)$.
+
+=== Definition 2.2
+
+Let $f$ be a real valued function. Say that $f$ is *differentiable* if it is differentiable at $c$ for all $c in "dom"(f)$. In this case the function $f': "dom"(f) arrow.r RR$ is called the *derivative of* $f$.
+
+=== Proposition 2.3
+
+Let $f$ be a real function which is differentiable at $c$. Then $f$ is continuous at $c$.
+
+=== Proposition 2.4
+
+Let $f$, $g$ be real functions and suppose that $f$ and $g$ are differentiable at $c$.
+
+a) For all $lambda in RR$, the function $lambda f$ is differentiable at $c$ and $(lambda f)'(c) = lambda f'(c)$.
+
+b) The function $f + g$ is differentiable at $c$ and $(f + g)'(c) = f'(c) + g'(c)$.
+
+c) The function $f g$ is differentiable at $c$ and $(f g)'(c) = f'(c)g(c) + f(c)g'(c)$.
+
+d) If $g(c) != 0$, then the function $f/g$ is differentiable at $c$ and $(f/g)'(c) = (f'(c)g(c) - f(c)g'(c))/(g(c)^2)$.
+
+=== Proposition 2.5
+
+Let $I$ and $J$ be intervals in $RR$ and let $f: I arrow.r J$ be a continuous bijection. Then $f^(-1): J arrow.r I$ is continuous.
+
+=== Proposition 2.6 (Inverse function theorem)
+
+Let $I$, $J$ be intervals, and let $f: I arrow.r J$ be a continuous bijection with $f$ differentiable at $c$. Suppose that $f'(c) != 0$. Then $f^(-1)$ is differentiable at $d = f(c)$ and
+
+$ (f^(-1))'(d) = 1/(f'(c)) $
+
+=== Proposition 2.7 (The chain rule)
+
+Let $f$, $g$ be real functions such that $g$ is differentiable at $c in RR$ and $f$ is differentiable at $g(c)$. Then $f compose g$ is differentiable at $c$ and
+
+$ (f compose g)'(c) = f'(g(c))g'(c) $
+
+=== Lemma 2.8 (Rolle's Theorem)
+
+Suppose that $f: [a, b] arrow.r RR$ be continuous on $[a, b]$ and differentiable on $(a, b)$. Suppose that $f(a) = f(b)$. Then there exists $c in (a, b)$ with $f'(c) = 0$.
+
+=== Proposition 2.9
+
+Let $f$ be a real function which is differentiable at $c$. Suppose that there exists $mu > 0$ such that either:
+
+a) $f(x) <= f(c)$ whenever $x in (c - mu, c + mu)$, i.e. $a = f(c)$ is a local maximum of $f$.
+
+b) $f(x) >= f(c)$ whenever $x in (c - mu, c + mu)$, i.e. $a = f(c)$ is a local minimum of $f$.
+
+Then $f'(c) = 0$.
+
+=== Theorem 2.10 (Mean value theorem)
+
+Suppose that $f: [a, b] arrow.r RR$ is continuous on $[a, b]$ and differentiable on $(a, b)$. Then there exists some point $c in (a, b)$ with
+
+$ f'(c) = (f(b) - f(a))/(b - a) $
+
+=== Corollary 2.11 (Constant value theorem)
+
+Let $f: [a, b] arrow.r RR$ be continuous on $[a, b]$ and differentiable on $(a, b)$. If $f'(x) = 0$ for all $x in (a, b)$, then $f$ is constant.
+
+=== Definition 2.12
+
+Let $f$ be a real function and $A$ a subset of $"dom"(f)$. Say that
+
+a) $f$ is *strictly increasing* on $A$ if $f(x) < f(y)$ for all $x$, $y in A$ with $x < y$.
+
+b) $f$ is *strictly decreasing* on $A$ if $f(x) > f(y)$ for all $x$, $y in A$ with $x < y$.
+
+c) $f$ is *increasing* on $A$ if $f(x) <= f(y)$ for all $x$, $y in A$ with $x < y$.
+
+d) $f$ is *decreasing* on $A$ if $f(x) >= f(y)$ for all $x$, $y in A$ with $x < y$.
+
+As we know from calculus, these notions are related to the derivative.
+
+=== Proposition 2.13
+
+Let $f: [a, b] arrow.r RR$ be continuous on $[a, b]$ and differentiable on $(a, b)$.
+
+a) If $f'(x) > 0$ for all $x in (a, b)$, then $f$ is strictly increasing on $[a, b]$.
+
+b) If $f'(x) >= 0$ for all $x in (a, b)$, then $f$ is increasing on $[a, b]$.
+
+c) If $f'(x) < 0$ for all $x in (a, b)$, then $f$ is strictly decreasing on $[a, b]$.
+
+d) If $f'(x) <= 0$ for all $x in (a, b)$, then $f$ is decreasing on $[a, b]$.
+
+=== Lemma 2.14 (Cauchy mean value theorem)
+
+Suppose that $f$ and $g$ are real functions which are continuous on $[a, b]$ and differentiable on $(a, b)$ with $g'(c) != 0$ for $c in (a, b)$. Then there exists $c in (a, b)$ such that
+
+$ (f'(c))/(g'(c)) = (f(b) - f(a))/(g(b) - g(a)) $
+
+=== Theorem 2.15 (L'Hôpital's rule)
+
+Let $f$ and $g$ be real functions, continuous on a neighbourhood $N$ of $c$ and differentiable on $N backslash {c}$ which satisfy $f(c) = g(c) = 0$ and $g'(x) != 0$ for $x in N backslash {c}$. For $L in RR$,
+
+$ lim_(x arrow.r c) (f'(x))/(g'(x)) = L arrow.r.double lim_(x arrow.r c) f(x)/g(x) = L $
+
+=== Theorem 2.16
+
+Suppose that $f$, $g: (K, infinity) arrow.r RR$ are differentiable functions with $f(x) arrow.r infinity$ and $g(x) arrow.r infinity$ as $x arrow.r infinity$ and $g'(x) != 0$ for all $x > K$. For $L in RR$,
+
+$ lim_(x arrow.r infinity) (f'(x))/(g'(x)) = L arrow.r.double lim_(x arrow.r infinity) f(x)/g(x) = L $
