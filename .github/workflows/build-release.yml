@@ -21,27 +21,17 @@ jobs:
       run: make compile
 
     - name: Rename PDFs with folder names
-      run: |
-        find . -name "*.pdf" -type f | while read pdf; do
-          dir=$(dirname "$pdf")
-          base=$(basename "$pdf")
-          if [ "$dir" != "." ]; then
-            mv "$pdf" "${dir}/${dir##*/}-${base}"
-          fi
-        done
-      shell: bash
+      run: make rename
 
     - name: List PDFs
-      run: |
-        find . -name "*.pdf" -type f
-      shell: bash
+      run: tree
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       if: github.ref == 'refs/heads/main'
       with:
         files: |
-          ./notes/2024-2025/computing_science/*/*-notes.pdf
+          ./notes/**/**/*-notes.pdf
         tag_name: pdf-${{ github.sha }}
         name: PDF Build ${{ github.event.head_commit.timestamp }}
         draft: false

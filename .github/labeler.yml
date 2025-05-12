@@ -1,14 +1,14 @@
 Database Systems:
 - changed-files:
-  - any-glob-to-any-file: notes/2024-2025/computing_science/database_systems/**
+  - any-glob-to-any-file: notes/year_3/computing_science/database_systems/**
 
 Professional Software Development:
 - changed-files:
-  - any-glob-to-any-file: notes/2024-2025/computing_science/professional_software_development/**
+  - any-glob-to-any-file: notes/year_3/computing_science/professional_software_development/**
 
 Systems Programming:
 - changed-files:
-  - any-glob-to-any-file: notes/2024-2025/computing_science/systems_programming/**
+  - any-glob-to-any-file: notes/year_3/computing_science/systems_programming/**
 
 Github Actions:
 - changed-files:
