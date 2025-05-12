@@ -31,7 +31,7 @@ jobs:
       if: github.ref == 'refs/heads/main'
       with:
         files: |
-          ./notes/**/**/*-notes.pdf
+          ./notes/**/**/*_notes.pdf
         tag_name: pdf-${{ github.sha }}
         name: PDF Build ${{ github.event.head_commit.timestamp }}
         draft: false

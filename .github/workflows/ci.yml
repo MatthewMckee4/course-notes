@@ -15,3 +15,18 @@ jobs:
 
     - name: Build Typst
       run: make compile
+
+    - name: Rename PDFs with folder names
+      run: make rename
+
+    - name: List PDFs
+      run: tree
+
+
+    - name: Upload PDFs as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: pdf-notes
+        path: ./notes/**/**/*_notes.pdf
+        retention-days: 5
+
