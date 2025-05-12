@@ -21,7 +21,7 @@ Frequent review of software process.
 
 *Roles in Scrum*: Product Owner, Scrum Master, Team Manager, Quality Assurance manager, Chief Architect, Developer.
 
-*Managing work in Scrum*: Work is organisted into releases and sprints.
+*Managing work in Scrum*: Work is organised into releases and sprints.
 Begin first sprint with a project launch meeting.
 Begin a sprint with a planning meeting, end with review meeting and retrospective.
 Stand-ups take place throughout the sprint to review progress.
@@ -40,25 +40,6 @@ establish cost estimates and priorities.
 *Review* the project in the sprint review meeting and the process in the retrospective. Deliver and demonstrate new version to customer.
 summarise completed work, identify new feature set.
 
-== Change Management
-
-*Control items* are any artifacts that a software engineer might directly edited.
-
-*Centralised version control system* has a single centralised repository somewhere on a server.
-Each dev has a local copy. Changes are pushed to the central repo.
-
-*Distributed version control system* has a repository on each machine.
-Each repo can be linked to other repos.
-
-*Commits* are saved with a hash for uniquely identifying the changes.
-
-*Branching* is used for maintaining multiple development lines.
-*Trunk-based development* invloves commiting to one main branch, useful for reducing merge conflicts, requires developers to make smaller changes,
-and provides clear visibility of project process.
-*Feature Branching* is more convenient for managing code reviews.
-*Staging branches* are used after making a commit to the main branch, some testing is done here then a push is made to the deployment branch.
-Manage branches by deleting them and squash commiting.
-
 == Customer Management
 
 *First customer meeting*: decide on rules of engagement, clarify overall goals, identify stakeholders, determine appropriate IP ownership,
@@ -72,7 +53,7 @@ identify any significant risks, decide on goals for first sprint.
 
 Cannot isolate the requirements from the implementation.
 
-*Actors*: categories of users, motiviation.
+*Actors*: categories of users, motivation.
 
 *Non-functional requirements*: can be expressed as user stories.
 
@@ -80,11 +61,47 @@ Cannot isolate the requirements from the implementation.
 
 *User stories*: a short description of a feature from the user's perspective. Used to document the requirements for a software system.
 
+*Assessing User Story Quality* - *INVEST*:
+- *Independent*: no dependencies on other stories.
+- *Negotiable*: can be changed.
+- *Valuable*: provides value to the customer.
+- *Estimable*: can be estimated.
+- *Small*: can be completed in a single sprint.
+- *Testable*: can be tested.
+
+
+== Change Management
+
+*Control items* are any artifacts that a software engineer might directly edited.
+
+*Centralised version control system* has a single centralised repository somewhere on a server.
+Each dev has a local copy. Changes are pushed to the central repo.
+
+*Distributed version control system* has a repository on each machine.
+Each repo can be linked to other repos.
+
+*Commits* are saved with a hash for uniquely identifying the changes.
+
+*Branching* is used for maintaining multiple development lines.
+*Trunk-based development* involves committing to one main branch, useful for reducing merge conflicts, requires developers to make smaller changes,
+and provides clear visibility of project process.
+*Feature Branching* is more convenient for managing code reviews.
+*Staging branches* are used after making a commit to the main branch, some testing is done here then a push is made to the deployment branch.
+Manage branches by deleting them and squash committing.
+
+== Software Licensing
+
+*A software license* can cover ownership, distribution rights, usage rights, liability, etc.
+
+*Copyright*: The legal right to control the reproduction of a creative work for a specific time; varies between jurisdictions
+*Warranty*: The length of time for which certain functionality can be expected/resolved.
+*Liability*: Where the responsibility lies.
+
 == Software Process Improvement
 
 *Process improvement frameworks*: *ISO 9001*, *Six Sigma*, *CMMI*.
 
-*Goal* is to arrive at the root cause when discussing challenges in ret-rospectives.
+*Goal* is to arrive at the root cause when discussing challenges in retrospectives.
 These meetings, unfortunately, are infrequent by nature and issues early in the sprint may be hard to recall.
 It is important to vary the retrospective structure.
 
@@ -103,7 +120,15 @@ A code review should adhere to architectural patterns and re-use existing code.
 A software project should have a *build configuration file*. This specifies targets (resolve dependencies, compile code, test binary),
 mappings (relationship between source and generated artifacts), tasks (actions to satisfy mappings, e.g. execute a specific compiler).
 
-*Types of dependencies*: environmental, application
+A *mapping* is a relationship between a source and a target.
+
+Compiling should be *idempotent*: the same input should always produce the same output.
+
+*Types of dependencies*
+- environmental
+  - explicit: platform, language, runtime, libraries
+  - implicit: network, database, other services
+- application: project dependencies, other projects
 
 *Types of releases*: Core executable, Tailored executable, Optional extensions, Sources, Documentation (compositions).
 Bleeding edge/snapshot, Beta test release, Production release (schedule intent).
@@ -112,8 +137,9 @@ Bleeding edge/snapshot, Beta test release, Production release (schedule intent).
 Published (APIs that can be externally access but not explicitly documented as being part of the public API).
 
 *Specifying dependencies*: project almost always has transitive dependencies, do not rely on them.
+Over constrained dependencies are a risk, as they make it harder to resolve dependencies.
 
-*Semantic versioning*: major.minor.incremental[-tag]
+*Semantic versioning*: major.minor.patch[-tag]
 
 *Deprecated feature*: Left in for compatibility, but intended to be removed in future releases.
 
@@ -126,6 +152,7 @@ Published (APIs that can be externally access but not explicitly documented as b
 *Continuous Integration Practices*: change management, quality assurance, deployment.
 
 *Broken build*: the highest-priority for a team; other operations must momentarily cease.
+
 *Build times*: should be less than 10 minutes.
 
 *Staging platform*: Used to test software before being released to users.
@@ -172,9 +199,9 @@ or time be-tween failures; good metric when repair is expensive), down-time (use
 *Fuzz testing*: Providing unusual inputs.
 *Penetration testing*: An attacking team attempts to gain unauthorized access with the expected tools of a hacker.
 
-*Heterogenous systems*: The greater the variation in organisational culture the harder it is to develop a consistent testing programme. Despite agreed standards, variations inevitably occur.
+*Heterogeneous systems*: The greater the variation in organisational culture the harder it is to develop a consistent testing programme. Despite agreed standards, variations inevitably occur.
 
-*Social-technical systems*: incorporate both computer software and hardware, the computer system's users, and the surrounding organ-isational and cultural practices.
+*Social-technical systems*: incorporate both computer software and hardware, the computer system's users, and the surrounding organisational and cultural practices.
 
 *Systems of systems*: represents multiple heterogeneous semi-autonomous systems that cooperate or are coordinated to produce emergent effects.
 
@@ -187,9 +214,9 @@ or time be-tween failures; good metric when repair is expensive), down-time (use
 *Objects versus Components*:
 Components are specializations of the object-class type.
 Components are long-living entities, deployed for the full life-time of a software system.
-Component middle-ware allows components to distribute be-tween different component environments and different hard-ware.
-Cannot interact with component implementation directly likeyou can with objects.
-Each of the interfaces provided by a component may be re-alised by a different object within the component.
+Component middle-ware allows components to distribute between different component environments and different hardware.
+Cannot interact with component implementation directly like you can with objects.
+Each of the interfaces provided by a component may be realised by a different object within the component.
 
 *Why not componentize every object?*:
 Communication costs increase from mediating (middleware) component interaction.
@@ -197,30 +224,39 @@ Development costs: documentation of component interfaces need to be maintained.
 
 *Types of components*: general purpose, application specific.
 
-*Design by contract*: benefits of using the interface as offered by the providing com-ponent, obligations imposed on the component that uses the interface
+*Design by contract*: benefits of using the interface as offered by the providing component, obligations imposed on the component that uses the interface
 
-*Leaky abstractions*: whenever two component implementations (aprovider and a requirer of an interface) are wired together, theirfuture is influenced by assumptions on how theinterface will beutilizedandrealized.
+*Leaky abstractions*: whenever two component implementations (a provider and a requirer of an interface) are wired together, their future is influenced by assumptions on how the interface will be utilised and realised.
 
-*Architectural patterns*: Model View Control, Client-Server, Peer-to-Peer, Message-oriented architecture, Pipe and Filter, Plugin architecture.
+*Architectural patterns*
 
-*Thin-client architecture*: Purist approach to client-server. Clientscontain minimal logic.
+*Model View Control*:
+- Model: data and business logic
+- View: presentation of data
+- Controller: mediates between model and view
 
-*Fat-client architecture*: Clients perform more logic. Reduces com-munication with server by caching information.
+*Client-Server*:
+- Client: requests services from server
+- Server: provides services to clients
 
-*Peer-to-peer*: Resolves issue of resource scalibility. Every peer isa client and a server. All logic moved to clients (goes further thanfat-client).
+*Thin-client architecture*: Purist approach to client-server. Clients contain minimal logic.
+
+*Fat-client architecture*: Clients perform more logic. Reduces communication with server by caching information.
+
+*Peer-to-peer*: Resolves issue of resource scalability. Every peer is a client and a server. All logic moved to clients (goes further than fat-client).
 
 *Information processing patterns*: Message-oriented architecture, pipe and filter.
 
-*Message-oriented architectural pattern*: provides a basis for asyn-chronous communication.
-Communication occurs as discrete mes-sages passing through a message bus, which re-routes to the appro-priate client based on routing policy.
-*Message driven*: Computation in a component is the resultof message reception from another component.
-*Message broker*: Deciding which component receives the mes-sage
+*Message-oriented architectural pattern*: provides a basis for asynchronous communication.
+Communication occurs as discrete messages passing through a message bus, which re-routes to the appropriate client based on routing policy.
+*Message driven*: Computation in a component is the result of message reception from another component.
+*Message broker*: Deciding which component receives the message.
 
 *Pipe and Filter Architecture*: Each filter provides and implements the same interface, called the pipe.
 The filtered wired into an assembly form a pipeline.
 Data source component provides input and requires the pipe interface.
-Data sink component provides the pipe interface on the rightto accept the system's output on the right.
-To allow re-orderable filters each filter must provide and requirethe same interface.
+Data sink component provides the pipe interface on the right to accept the system's output on the right.
+To allow re-orderable filters each filter must provide and require the same interface.
 
 *Plugin architecture* maintains a flexible mechanism for extension.
 Plugins stored in plugin registry.
@@ -233,14 +269,6 @@ Inner platform effect.
 Refactor when implementing new functionality, correcting defects, code reviews, trying to understand a software artefact.
 
 *Code smells*: cloning, complex structures, long parameter lists, excessive comments
-
-== Software Licensing
-
-*A software license* can cover ownership, distribution rights, usage rights, liability, etc.
-
-*Copyright*: The legal right to control the reproduction of a creative work for a specific time; varies between jurisdictions
-*Warranty*: The length of time for which certain functionality can be expected/resolved.
-*Liability*: Where the responsibility lies.
 
 == Startup Growth Engineering
 
@@ -340,3 +368,5 @@ public class Drone {
     }
 }
 ```
+== Case Study Analysis
+
