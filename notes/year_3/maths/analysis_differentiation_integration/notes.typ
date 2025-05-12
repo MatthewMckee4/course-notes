@@ -200,3 +200,5 @@ $ lim_(x arrow.r c) (f'(x))/(g'(x)) = L arrow.r.double lim_(x arrow.r c) f(x)/g(
 Suppose that $f$, $g: (K, infinity) arrow.r RR$ are differentiable functions with $f(x) arrow.r infinity$ and $g(x) arrow.r infinity$ as $x arrow.r infinity$ and $g'(x) != 0$ for all $x > K$. For $L in RR$,
 
 $ lim_(x arrow.r infinity) (f'(x))/(g'(x)) = L arrow.r.double lim_(x arrow.r infinity) f(x)/g(x) = L $
+
+== Power Series
