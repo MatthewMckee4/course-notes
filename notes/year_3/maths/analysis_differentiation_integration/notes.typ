@@ -279,13 +279,121 @@ Fix $n in NN$. Let $f$ be a real function such that $f, dots, f^((n-1))$ are def
 
 $ f(b) = f(a) + f'(a)(b - a) + f''(a) (b - a)^2/2 + dots + f^((n-1))(a) (b - a)^(n-1)/(n-1)! + f^((n))(c) (b - a)^n/n! $
 
+This last term is known as the *Lagrange form of the remainder in Taylor's theorem*.
+
+Let $f$ be a real function and $x in RR$. Suppose that $f$ is infinitely differentiable on the interval between $0$ and $x$. Then for each $n$ we can write
+
+$ f(x) = sum_(i=0)^(n-1) (f^((i))(0) x^i)/(i!) + R_n (x) $
+
+where $R_n(x)$ is defined as the difference between $f(x)$ and $sum_(i=0)^(n-1) (f^((i))(0) x^i)/(i!)$. We call $R_n(x)$ the *remainder in Taylor's theorem*.
+
+When $x = 0$, note that $R_n(x) = 0$ for all $n$. When $x != 0$, Taylor's theorem (with $a = 0$ and $b = x$ if $x > 0$ and with $a = x$ and $b = 0$ when $x < 0$) finds some $c_n(x)$ between $0$ and $x$ with
+
+$ R_n (x) = (f^((n)) c_n (x) x^n)/(n!) $
+
+This is the *Lagrange form* of the remainder.
+
+
+The *Cauchy form* of the remainder is that there exists $c$ with
+
+$ R_n (x) = (f^((n))(c))/((n - 1)!) x(x - c)^(n-1) $
+
+The *integral form* of the remainder is that
+
+$ R_n (x) = 1/(n-1)! integral_0^x (x-t)^(n-1) f^((n)) (t) "dt" $
+
 === Definition 3.13
 
 Let $f$ be a real function which is infinitely differentiable at $0$. Then
 
-$ sum_(n=0)^infinity (f^((n))(0))/n! x^n = f(0) + f'(0)x + (f''(0))/2 x^2 + (f^((3))(0))/3 x^3 + dots $
+$ sum_(n=0)^infinity (f^((n))(0))/n! x^n = f(0) + f'(0)x + (f''(0))/2 x^2 + (f^((3))(0))/3! x^3 + dots $
 
 is called the *Maclaurin series* for $f$. We say that the Maclaurin series is valid at $x$ if it converges and equals $f(x)$, i.e.
 
 $ f(x) = sum_(n=0)^infinity (f^((n))(0))/n! x^n $
 
+#pagebreak()
+
+== Integration
+
+=== Definition 4.1
+
+Let $a < b$. A partition of $[a, b]$ is a finite subset of $[a, b]$ containing a and b. If $P$ and $Q$ are partitions, say Q is a
+refinement of $P$ if $P subset Q$.
+
+=== Definition 4.2
+
+Let $f : [a, b] arrow.r RR$ be a bounded function and let $P$ be the partition $a = x_0 < x_1 < dots < x_n = b$ of $[a, b]$. Write
+
+$ m_i = inf { f(x) : x in [x_(i-1), x_i] } $
+
+$ M_i = sup { f(x) : x in [x_(i-1), x_i] } $
+
+- The *lower Riemann sum* of $f$ with respect to $P$ is $L(f, P) = sum_(i=1)^n m_i (x_i - x_(i-1))$
+- The *upper Riemann sum* of $f$ with respect to $P$ is $U(f, P) = sum_(i=1)^n M_i (x_i - x_(i-1))$
+
+=== Lemma 4.3
+
+Let $f : [a, b] arrow.r RR$ be bounded below by $m$ and above by $M$.
+
+a) For any partition $P$ of $[a, b]$, $m(b - a) <= L(f, P) <= U(f, P) <= M(b - a)$.
+
+b) If $P$ and $Q$ are partitions of $[a, b]$ with $Q$ refining $P$, then $L(f, P) <= L(f, Q)$ and $U(f, Q) <= U(f, P)$.
+
+=== Definition 4.4
+
+Let $f : [a, b] arrow.r RR$ be bounded.
+
+The *lower Riemann integral* is
+
+$ L(f) = sup { L(f, P) : P "a partition of" [a, b] } $
+
+The *upper Riemann integral* is
+
+$ U(f) = inf { U(f, P) : P "a partition of" [a, b] } $
+
+=== Proposition 4.5
+
+Let $f : [a, b] arrow.r RR$ be bounded. Then $L(f) <= U(f)$.
+
+=== Definition 4.6
+
+Let $f : [a, b] arrow.r RR$ be bounded. Say that $f$ is *Riemann integrable* if $L(f) = U(f)$. In this case write $integral_a^b f(t) "dt"$ (or sometimes just $integral_a^b f$) for $L(f) = U(f)$ and call this the *Riemann integral* of $f$ on $[a, b]$.
+
+=== Theorem 4.7 (Riemann's ε condition)
+
+Let $f : [a, b] arrow.r RR$ be bounded. Then $f$ is Riemann integrable on $[a, b]$ if and only if for all $epsilon > 0$ there exists a partition $P$ of $[a, b]$ such that $U(f, P) - L(f, P) < epsilon$.
+
+=== Theorem 4.8
+
+Let $f : [a, b] arrow.r RR$ be monotonic (i.e. increasing or decreasing). Then $f$ is Riemann integrable on $[a, b]$.
+
+=== Theorem 4.9
+
+Let $f : [a, b] arrow.r RR$ be continuous. Then $f$ is Riemann integrable on $[a, b]$.
+
+=== Theorem 4.10
+
+Let $f$ and $g$ be Riemann integrable on $[a, b]$.
+
+a) For $lambda in RR$, $lambda f$ is Riemann integrable on $[a, b]$ and $integral_a^b (lambda f)(t) "dt" = lambda integral_a^b f(t) "dt"$.
+
+b) $f + g$ is Riemann integrable on $[a, b]$ and $integral_a^b (f(t) + g(t)) "dt" = integral_a^b f(t) "dt" + integral_a^b g(t) "dt"$.
+
+c) For $c in [a, b]$, $f$ is Riemann integrable on $[a, c]$ and on $[c, b]$ and $integral_a^c f(t) "dt" + integral_c^b f(t) "dt" = integral_a^b f(t) "dt"$.
+
+d) If $f(x) <= g(x)$ for all $x in [a, b]$, then $integral_a^b f(t) "dt" <= integral_a^b g(t) "dt"$.
+
+e) $|f|$ is Riemann integrable on $[a, b]$ and $|integral_a^b f(t) "dt"| <= integral_a^b |f(t)| "dt"$.
+
+=== Proposition 4.11
+
+Let $f : [a, b] arrow.r RR$ be Riemann integrable. Then the function $F : [a, b] arrow.r RR$ given by $F(x) = integral_a^x f(t) "dt"$ is continuous.
+
+=== Theorem 4.12 (The fundamental theorem of calculus)
+
+Let $f : [a, b] arrow.r RR$ be continuous. Then the function $F : [a, b] arrow.r RR$ given by $F(x) = integral_a^x f(t) "dt"$ is differentiable on $(a, b)$ with $F'(x) = f(x)$ for $x in (a, b)$.
+
+=== Corollary 4.13
+
+Let $f : [a, b] arrow.r RR$ be continuous and suppose that $G : [a, b] arrow.r RR$ is continuous on $[a, b]$ and differentiable on $(a, b)$ with $G'(x) = f(x)$ for $x in (a, b)$. Then $integral_a^b f(t) "dt" = G(b) - G(a)$.

@@ -115,6 +115,11 @@ It is important to vary the retrospective structure.
 Should choose one of: corrective, adaptive, preventative, perfective.
 A code review should adhere to architectural patterns and re-use existing code.
 
+Questions to ask during a review:
+- Does the code follow conventions?
+- Is the code self-documenting?
+- Is the code clean?
+
 == Build, Release and Dependency Management
 
 A software project should have a *build configuration file*. This specifies targets (resolve dependencies, compile code, test binary),
@@ -147,7 +152,7 @@ Over constrained dependencies are a risk, as they make it harder to resolve depe
 
 == Continuous Integration
 
-*Integration hell*: Spending more time re-integrating features, than in creating the features.
+*Integration hell*: Spending more time re-integrating features, than creating the features.
 
 *Continuous Integration Practices*: change management, quality assurance, deployment.
 
@@ -158,6 +163,10 @@ Over constrained dependencies are a risk, as they make it harder to resolve depe
 *Staging platform*: Used to test software before being released to users.
 Limitations include lack of realism, too many simultaneous users, network endpoints and data sets inaccessible outside of production.
 Multiple staging environments may be needed when several components, each of which intended for use on a different platform, exist.
+
+*A/B testing*: A/B testing is a method of comparing two versions of a web page or application to determine which one performs better. It involves randomly exposing different versions of the page or application to different users and measuring the results.
+
+*Chaos engineering*: The practice of performing experiments with a system to improve its robustness and reliability.
 
 == Static Analysis, Readability and Design Quality
 
