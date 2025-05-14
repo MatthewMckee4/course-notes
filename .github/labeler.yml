@@ -10,10 +10,6 @@ Systems Programming:
 - changed-files:
   - any-glob-to-any-file: notes/year_3/computing_science/systems_programming/**
 
-Analysis of Differentiation and Integration:
-- changed-files:
-  - any-glob-to-any-file: notes/year_3/maths/analysis_differentiation_integration/**
-
 Github Actions:
 - changed-files:
   - any-glob-to-any-file: .github/**
