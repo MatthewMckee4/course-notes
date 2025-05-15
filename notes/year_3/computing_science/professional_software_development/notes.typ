@@ -439,6 +439,34 @@ A Plugin provides an interface to the core application.
 Loader component instantiates and configures the component for use by the main application, using the registry supplied specification.
 Inner platform effect.
 
+== Sustainability
+
+computational resources have until recently effectively been treated as infinite
+
+growth in demand cannot be offset by increased power efficiency
+- Moore and Koomey's laws can't save us
+emission growth drivers in computing
+- high-definition video
+- AI (in particular generative LLMs)
+- mobile devices
+emission scopes
+- scope 1
+  - direct emissions from owned or controlled sources
+- scope 2
+  - emissions from the generation of purchased energy consumed by the company
+- scope 3
+  - all other indirect emissions that occur as a result of this process
+    - extraction and production of purchased materials
+    - use of the product
+calculations
+- total CO2 = emobdied CO2 + CO2 from use
+- embodied CO2 = sum of emissions from manufacturing of all parts
+- assuming a server in a data centre
+  - server CO2 from use = lifetime electricity consumption electricity carbon intensity
+  - but data centre has overhead, mostly cooling
+  - expressed as PUE, Power Usage Effectiveness, a number > 1
+  - total CO2 from use = PUE `*` server CO2 from use
+
 == DevOps
 
 *Considerations*
