@@ -53,13 +53,59 @@ identify any significant risks, decide on goals for first sprint.
 
 Cannot isolate the requirements from the implementation.
 
-*Actors*: categories of users, motivation.
+*Requirements* express what a system should and should not do and constitute the system boundary.
 
-*Non-functional requirements*: can be expressed as user stories.
+*Functional requirements* describe the actions that can be performed on a system by a user.
 
-*Functional requirements*: what the system does.
+*Non-functional requirements* describe observable properties.
+
+Requirements describe what a system should do. The design describes how the system should do it.
+Requirements should be specified independently of design.
+
+Requirements should be demonstrated in tests. Drives acceptance testing.
+
+Formal specifications are harder as a basis of negotiation, but can be useful for testing.
+
+*Actors*: categories of users.
+Avoid actors that are too specific.
+Include actors goals, frustrations, and motivations.
+Essential for justifying the existence of features.
+Can help to identify one of the types of system stakeholders to negotiate requirements with.
 
 *User stories*: a short description of a feature from the user's perspective. Used to document the requirements for a software system.
+
+"As an [actor], I want to  [action on or by the system] so that [rationale]."
+
+Every action on a system should be a user story, many user stories would be duplicated, effort would be wasted on acceptance testing.
+
+*Story Prioritisation - MOSCOW*:
+- Must have - minimum critical set of features.
+- Should have - important, and doing without would not be ideal.
+- Could have - useful, stretch goals.
+- Would be nice to have - currently outwith project scope.
+
+*Estimating Tasks*:
+Helps identify poorly understood tasks and force requirements.
+- Some methods - Delphi methods, market testing, empirical methods, algorithmic methods.
+
+*Planning Poker*
+Used to estimate times for user stories.
+
+*Scenarios*
+
+Useful for describing workflows, specifying acceptance tests.
+
+```
+Given [a fixture]
+And [another fixture]
+And [...]
+When [an action is performed on a feature]
+And [another action is performed on a feature]
+And [...]
+Then [a condition is holds]
+And [another condition holds]
+And [...]
+```
 
 *Assessing User Story Quality* - *INVEST*:
 - *Independent*: no dependencies on other stories.
@@ -68,7 +114,6 @@ Cannot isolate the requirements from the implementation.
 - *Estimable*: can be estimated.
 - *Small*: can be completed in a single sprint.
 - *Testable*: can be tested.
-
 
 == Change Management
 
@@ -100,6 +145,26 @@ Manage branches by deleting them and squash committing.
 == Software Process Improvement
 
 *Process improvement frameworks*: *ISO 9001*, *Six Sigma*, *CMMI*.
+
+*Principles for agile process improvement*:
+- Measurement is domain specific
+- Improvement is an on-going activity
+- Requires whole team participation
+- Best effort assumption
+  - Working harder won't improve the process
+  - Blaming is pointless and counterproductive
+- Root causes, not symptoms
+
+*5 Whys*
+
+*Improving Process Improvement*
+
+Retrospective meetings can become stale - important to:
+- Vary the structure
+- Reflect on the retrospective itself
+- Experiment with different frequencies
+- Allow other team members to facilitate
+
 
 *Goal* is to arrive at the root cause when discussing challenges in retrospectives.
 These meetings, unfortunately, are infrequent by nature and issues early in the sprint may be hard to recall.
@@ -138,8 +203,13 @@ Compiling should be *idempotent*: the same input should always produce the same 
 *Types of releases*: Core executable, Tailored executable, Optional extensions, Sources, Documentation (compositions).
 Bleeding edge/snapshot, Beta test release, Production release (schedule intent).
 
-*Types of APIs*: Private, Public
-Published (APIs that can be externally access but not explicitly documented as being part of the public API).
+*Types of APIs*
+
+*Published* (APIs that can be externally access but not necessarily explicitly documented as being part of the public API).
+
+*Public* (APIs that can be externally accessed and documented as part of the public API).
+
+*Private* (APIs that are not intended to be used by external code).
 
 *Specifying dependencies*: project almost always has transitive dependencies, do not rely on them.
 Over constrained dependencies are a risk, as they make it harder to resolve dependencies.
@@ -168,9 +238,85 @@ Multiple staging environments may be needed when several components, each of whi
 
 *Chaos engineering*: The practice of performing experiments with a system to improve its robustness and reliability.
 
+== Behaviour Driven Development
+
+*Reasons for testing*
+
+- Detection of defects
+- Support the design and implementation of a module
+- Prevent the introduction of defects
+- Document the behaviour of a system
+- Demonstrate that a system meets it specification
+
+Acceptance or system tests are typically performed on a fully integrated system and are as a consequence, relatively costly.
+
+Integration tests sit somewhere in the model, being performed on integrations of sub-sets of the system’s components. However, test doubles will still be used at this level.
+
+Behaviour driven development is the creation and maintenance of a requirements specification in a structured natural language (called Gherkin) from which test cases can be derived and automatically executed against a target implementation.
+
+User stories provide the high level outline for a feature. The scenarios each provides an example of a use case of the feature.
+
+BDD goes further by providing technical infrastructure for explicitly linking these artefacts to the implementation.
+
+BDD is therefore generally used for writing system or acceptance test cases for the purpose of supporting the design of a system with users, demonstrating the implementation meets the specification and documenting the behaviour.
+
+*Step types in scenarios*
+- *Given steps* describe how to set up the test case fixture before the test case is executed.
+- *When steps* describe the actions to be taken during the test case itself.
+- *Then steps* describe the assertions that are made about the state of the system and/or output at the end of the test case.
+
+```py
+
+@given('a bank account for "Alice"')
+def step_impl(context):
+    context.bank_accounts['Alice'] = BankAccount('Alice')
+
+
+@when(u'I deposit 100 GBP into the bank account for "Alice"')
+def step_impl(context):
+    context.bank_accounts['Alice'].deposit(100)
+
+
+@then('the bank account for "Alice" balance should be 100 GBP')
+def step_impl(context):
+    assert 100 == context.bank_accounts['Alice'].balance
+
+```
+
+*Parametrised Steps*
+
+```py
+@then('the bank account for "{account_name}" balance should be'
+      ' {expected_balance} GBP')
+def step_impl(context, account_name, expected_balance):
+    assert int(expected_balance) == \
+           context.bank_accounts[account_name].balance
+
+@When('I withdraw {amount} GBP from the bank account for "{Alice}"')
+def step_impl(context, amount, account_name):
+    context.bank_accounts[account_name].withdraw(amount)
+
+```
+
+*Defining a scenario*:
+```
+Scenario: Unauthorised overdraft
+  Given a bank account for "Alice" with an overdraft facility of 100 GBP
+  When I withdraw 101 GBP from the bank account for "Alice"
+  Then the bank account for "Alice" balance should be 0 GBP
+  And a failed transaction is recorded.
+```
+
+
 == Static Analysis, Readability and Design Quality
 
 *Static vs Dynamic analysis*: The former is applied on program artefacts at rest, while the latter is conducted during execution.
+
+*Code Coverage*
+
+$"effectiveness" = "unique LoC executed" / "total LoC"$
+
+$"efficiency" = "total LoC" / ("total LoC" + "LoC executed count")$
 
 *Fan-in (afferent coupling) complexity*: Number of inbound references to a class from other classes. Identifies the number of classes that will need to be modified if the subjected class is changed.
 
@@ -193,6 +339,26 @@ The more *effective* a test is, the less *efficient* it becomes.
 *Mutation testing*: works by representing the introduction of defects into a system as combinations of small-scale code mutations of the target system's code.
 
 *Mutant operations*: conditional operators with their boundary counterpart.
+
+*Types of mutations*
+
+- conditional operators with their boundary counterpart
+- variable values with default values
+- arithmetic operators with their boundary counterpart
+
+*How it works*
+
+The process begins with a baseline version of the software system and accompanying suite of test cases. The baseline system is said to be "green". This means that the system passes all the tests in the suite, and as far as the test suite can determine, is free of defects.
+
+Next, a large number of mutants of the target system are generated by applying random combinations of mutation operations to the system's code. These mutants can be applied to the system source code, binaries or any intermediates as most appropriate for the target programming language.
+
+A survivor may indicate some aspect of program logic that isn't covered by a test, or the mutant may be functionally equivalent to the original baseline.
+
+Undetermined mutants may be due to a runtime runtime error, or if the test run breaches a timeout threshold caused due to a mutant loop-continue condition, for example.
+
+Mutant survival rate provides an indication of how effective the test suite is at detecting the introduction of defects. The lower the survival rate, the more effective the test suite.
+
+Efficiency can be calculated as the number of killed mutants divided by the number of failed tests during the execution of a test suite. Ideally, there should be a 1-1 relationship between mutants and failed tests. If a single mutant causes a large number of tests to fail, it may indicate that the test cases overlap.
 
 *Killed mutants*: successfully detected by the test suite.
 *Survivor mutants*: successfully pass all tests and are undetected.
@@ -272,6 +438,41 @@ Plugins stored in plugin registry.
 A Plugin provides an interface to the core application.
 Loader component instantiates and configures the component for use by the main application, using the registry supplied specification.
 Inner platform effect.
+
+== DevOps
+
+*Considerations*
+
+- OS
+- File system layouts
+- Database
+- Language runtimes and interpreters
+
+*Feature flags* can be useful for handling when a new feature isn't actually available yet.
+Feature flags are useful more generally because they force developers to think explicitly about what happens if an external resource provides data in an unexpected way.
+It is important to clean up and remove feature flags once they are no longer required.
+
+*Deployment directly from SCM*
+
+There may be some downtime with redeploying, you should use release repository to store the compiled artifacts prior to deployment.
+
+*Managing Deployment Secrets*
+
+Store them in the CI/CD infrastructure.
+
+*Implementing Monitoring*
+
+Monitoring can cover a wide variety of aspects of system healthiness. Measuring node liveness can give early warning about the potential for a cascade failure if a number of replicated nodes suddenly stop responding. Resource usage can also help a team to plan increasing the capacity of their infrastructure if resource limits are close to being reached. User behaviour can also be indicative of problems (i.e. if all user interaction suddenly drops away) but can also point to opportunities for increased business value if particular features are identified as popular.
+
+One thing to be wary of is violating privacy policies or other regulations through monitoring. For example, logging data may contain records of personal information that is subject to GDPR.
+
+*Planning for recovery*
+
+Sometimes changes do still result in the introduction of defects. If these are not serious then it may be possible to fix the defect with a subsequent change. However, sometimes defects can cause serious failures, so a team needs to prepare for recovery and/or rollback of a change. This can involve a variety of activities.
+
+Some of these can be automated, although some will need careful consideration. For example, the team may need to consider how to handle data records that have been added to a table after a migration that may not be compatible with the old format.
+
+Chaos Engineering is a related software engineering approach that deliberately introduces failures into real software infrastructure to incentivise teams to build applications that are both robust to failures but also capable of rollback if needed.
 
 == Software Refactoring
 
@@ -377,5 +578,117 @@ public class Drone {
     }
 }
 ```
+#pagebreak()
+
 == Case Study Analysis
 
+#quote[
+  You are working with a startup software company that is developing a new software product for coordinating multiple
+  autonomous unmanned aerial vehicles (aUAVs), commonly referred to as drone swarms. The team comprises a team lead,
+  four developers and a product owner, who is also the founder of the company.
+]
+
+#pagebreak()
+
+#quote[
+  Market research has shown that there is existing software for controlling drones in flight and that this has been used to
+  create aerial light displays. The startup has decided to focus on the use of drone swarms for tasks in remote inhospitable
+  environments. For example, swarms could be used to survey large areas of remote land where resources (such as timber or
+  minerals) might be extracted, or assist search and rescue operations to find casualties. Larger drones might be used in a
+  swarm to dispense water to control wild fires
+]
+
+#pagebreak()
+
+#quote[
+  All of these applications will have to account for the physical constraints on the drones, such as their need to be recharged
+  at different times, the impact of weather and the performance characteristics of different drones in the swarm.
+]
+
+#pagebreak()
+
+#quote[
+  The hardware components of the system comprise the drones themselves, equipped with a GPS and camera, a base station for sending communications to the drones, and a ruggedised laptop that will be used to control the swarm and also process the data collected.
+]
+
+#pagebreak()
+
+#quote[
+  So far, the architecture for the part of the system that coordinates the swarm has been implemented. Each drone establishes a connection to the base station so that it can receive instructions and send back data from its sensors. Instructions might tell the drone to fly in a particular direction, or go to a specific location. The software on the base station maintains control of several drones simultaneously, ensuring they don't collide. The software on the drone is responsible for processing the received commands.
+]
+
+#pagebreak()
+
+#quote[
+  You join the team as a Scrum Master at the point where they have been working on the user interface. The team have developed the following user journey to portray the overall vision for the project.
+]
+
+#pagebreak()
+
+#quote[
+    Kerry is the drone swarm operator for a mountain search and rescue team. The team have been called out to rescue two casualties following an avalanche in a mountainous area. Kerry switches on the drones and the base station at the bottom of the large search area. She configures the drones with the location of the base station so they can return when they need recharging. Using the controller she opens a mapping screen and selects survey mode. She then specifies a geographic region for the swarm to survey. The drone swarm launches and automatically organises itself into formation to complete the survey, which results in a new map layer composed of tiles of aerial photographs from different drones gradually appearing on the screen.
+
+    Image recognition software on the laptop begins to identify tiles that might contain the casualty. Kerry selects each of these tiles in turn and chooses to open an album of photos taken of the location by the drones. The initial area for search doesn't contain any casualties so Kerry instructs the swarm to expand the survey area.
+
+    When she finds a tile that she think contains a casualty she instructs the swarm to take a lower level detailed image of the exact location. One drone in the swarm flies lower and takes this picture, which gets returned to the laptop. Kerry tags the tile locations that contain the casualties. Kerry creates a "case" from the tile and photo collection and adds additional notes, such as the possible identity of the casualty, or if they appear to be conscious.
+
+    Next Kerry informs the team leader who splits the team into parties to continue to monitor the most likely locations of the casualties. Kerry divides the swarm into sub-swarms. Then she sets each swarm to "loiter" mode at the likely locations. Each swarm maintains two drones "on-point" whilst the others return to the base station for recharging. The swarms swap over when the active drones need recharging.
+
+    Once both the casualties are safely recovered the swarm is ordered to return to the base station for collection.
+]
+
+== Analysis
+
+*INVEST*
+
+- Independent
+- Negotiable
+- Valuable
+- Estimable
+- Small
+- Testable
+
+*Good Smaller Stories*
+
+- As a drone swarm operator, I want to be able to configure the drones with the location of the base station so they can return
+when they need recharging.
+- As a drone swarm operator for surveying, I want to be able to select a geographic region for surveying, so I can focus the survey on a specific area.
+- As a drone swarm operator for surveying, I want drone swarms to automatically organise themself into formation, so I can have a new map layer composed of tiles of aerial photographs from different drones.
+- As a drone swarm operator for surveying, I want to be able to instruct the swarm to expand the survey area, so I can search for survey a wider area.
+- As a drone swarm operator for surveying, I want to be able to take a lower level detailed image of the exact location, so I can observe the tile in more detail.
+- As a drone swarm operator for surveying, I want pictures to be returned to the laptop, so I can view them as soon as possible.
+- As an operator, I want to be able to tag the tile locations that contain the objective, so I can group them together.
+- As a drone swarm operator, I want to be able to set each swarm to "loiter" mode at the likely locations, so I can continue to monitor them.
+- As a drone swarm operator for surveying, I want drones to return after the survey is complete, so they aren't surveying unnecessarily.
+
+*Bad Smaller Stories*
+- As an operator, I want to be able to inform the team leader who splits the team into parties to continue to monitor the most likely locations of the casualties.
+- As a drone swarm operator, I want new map layers to gradually appear on the screen
+  - Not independent, depends on the drone photographs
+  - There is no value (the user didn't mention why they want this)
+- As a drone operator for surveying, I want to be able to identify tiles that might contain the casualty (my objective)
+  - Not testable, as you can't just produce casualties (my objective) to try to identify
+- As a drone swarm operator for surveying, I want to be able to select each tile in turn and choose to open albums of photos taken of the location by the drones
+  - Not valuable, as the user doesn't mention why they want this
+- As an operator, I want to be able to create a "case" from the tile and photo collection and add additional notes, such as the possible identity of the casualty, or if they appear to be conscious
+  - Not valuable, as the user didn't mention why they want this
+  - Not small, it can be split into smaller stories
+- As a drone swarm operator, I want swarms to maintain two drones "on-point" whilst the others return to the base station for recharging.
+  - Not independent, depends on the drone loitering
+
+*Constraints*
+- The drones need to be recharged.
+- The impact of the weather
+- The performance characteristics of different drones in the swarm.
+
+*Issues with Planning Poker*
+- Estimates should not vary in scale considerably, tasks should be small enough that all team members estimate relatively close to each other.
+- Estimates should not be hundred person-hours, this is far too long.
+- An average should not be taken, you should discuss after each round and re-estimate.
+- The round should stop if you don't reach an acceptable consensus within a reasonable time.
+
+Developer should not assign all tasks to themselves.
+
+*Mutation Testing*
+
+*Behaviour Driven Development*
