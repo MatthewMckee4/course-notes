@@ -6,7 +6,7 @@ on:
     - main
     paths:
     - .github/workflows/build-release.yml
-    - '**/*.pdf'
+    - '**/*.typ'
     - Makefile
 
 jobs:
