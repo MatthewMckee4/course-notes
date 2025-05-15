@@ -582,72 +582,6 @@ public class Drone {
 
 == Case Study Analysis
 
-#quote[
-  You are working with a startup software company that is developing a new software product for coordinating multiple
-  autonomous unmanned aerial vehicles (aUAVs), commonly referred to as drone swarms. The team comprises a team lead,
-  four developers and a product owner, who is also the founder of the company.
-]
-
-#pagebreak()
-
-#quote[
-  Market research has shown that there is existing software for controlling drones in flight and that this has been used to
-  create aerial light displays. The startup has decided to focus on the use of drone swarms for tasks in remote inhospitable
-  environments. For example, swarms could be used to survey large areas of remote land where resources (such as timber or
-  minerals) might be extracted, or assist search and rescue operations to find casualties. Larger drones might be used in a
-  swarm to dispense water to control wild fires
-]
-
-#pagebreak()
-
-#quote[
-  All of these applications will have to account for the physical constraints on the drones, such as their need to be recharged
-  at different times, the impact of weather and the performance characteristics of different drones in the swarm.
-]
-
-#pagebreak()
-
-#quote[
-  The hardware components of the system comprise the drones themselves, equipped with a GPS and camera, a base station for sending communications to the drones, and a ruggedised laptop that will be used to control the swarm and also process the data collected.
-]
-
-#pagebreak()
-
-#quote[
-  So far, the architecture for the part of the system that coordinates the swarm has been implemented. Each drone establishes a connection to the base station so that it can receive instructions and send back data from its sensors. Instructions might tell the drone to fly in a particular direction, or go to a specific location. The software on the base station maintains control of several drones simultaneously, ensuring they don't collide. The software on the drone is responsible for processing the received commands.
-]
-
-#pagebreak()
-
-#quote[
-  You join the team as a Scrum Master at the point where they have been working on the user interface. The team have developed the following user journey to portray the overall vision for the project.
-]
-
-#pagebreak()
-
-#quote[
-    Kerry is the drone swarm operator for a mountain search and rescue team. The team have been called out to rescue two casualties following an avalanche in a mountainous area. Kerry switches on the drones and the base station at the bottom of the large search area. She configures the drones with the location of the base station so they can return when they need recharging. Using the controller she opens a mapping screen and selects survey mode. She then specifies a geographic region for the swarm to survey. The drone swarm launches and automatically organises itself into formation to complete the survey, which results in a new map layer composed of tiles of aerial photographs from different drones gradually appearing on the screen.
-
-    Image recognition software on the laptop begins to identify tiles that might contain the casualty. Kerry selects each of these tiles in turn and chooses to open an album of photos taken of the location by the drones. The initial area for search doesn't contain any casualties so Kerry instructs the swarm to expand the survey area.
-
-    When she finds a tile that she think contains a casualty she instructs the swarm to take a lower level detailed image of the exact location. One drone in the swarm flies lower and takes this picture, which gets returned to the laptop. Kerry tags the tile locations that contain the casualties. Kerry creates a "case" from the tile and photo collection and adds additional notes, such as the possible identity of the casualty, or if they appear to be conscious.
-
-    Next Kerry informs the team leader who splits the team into parties to continue to monitor the most likely locations of the casualties. Kerry divides the swarm into sub-swarms. Then she sets each swarm to "loiter" mode at the likely locations. Each swarm maintains two drones "on-point" whilst the others return to the base station for recharging. The swarms swap over when the active drones need recharging.
-
-    Once both the casualties are safely recovered the swarm is ordered to return to the base station for collection.
-]
-
-== Analysis
-
-*INVEST*
-
-- Independent
-- Negotiable
-- Valuable
-- Estimable
-- Small
-- Testable
-
 *Good Smaller Stories*
 
 - As a drone swarm operator, I want to be able to configure the drones with the location of the base station so they can return
@@ -688,7 +622,3 @@ when they need recharging.
 - The round should stop if you don't reach an acceptable consensus within a reasonable time.
 
 Developer should not assign all tasks to themselves.
-
-*Mutation Testing*
-
-*Behaviour Driven Development*
