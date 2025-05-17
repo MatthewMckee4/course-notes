@@ -357,13 +357,26 @@ The original index is the base or level 1 index. Any additional index is a multi
 Theorem 3: Given a Level-1 Index with blocking factor m entries/block, the multi-
 level index is of maximum level $t = log_m (b)$.
 
-*Multilevel Index*: Can become unbalanced
+#pagebreak()
 
-*B-Tree: Index on non-ordering key*: B-Tree node order p splits the searching space up to p subspaces
+= Indexing Methodology II #text(fill: gray, size: 10pt)[Week 7]
+
+Some *challenges* with multi level indexes are insertions, deletions and updates.
+So, all levels must be updated.
+
+*Multilevel Index*: Can become unbalanced, it does not adjust to keys distribution.
+
+== B-Tree: Index on non-ordering key
+
+B-Tree node order p splits the searching space up to $p > 2$ subspaces
 
 *Node Definition*: $"Node" := {P_1, (K_1, Q_1), P_2, (K_2, Q_2), ..., P_(p-1), (K_(p-1), Q_(p-1)), P_p}$
 
-*B+ Tree: Index on non-ordering key*: Internal nodes have no data pointers, only leaf nodes hold data pointers.
+#figure(image("assets/b-tree.png", width: 60%))
+
+*B+ Tree: Index on non-ordering key*
+
+Internal nodes have no data pointers, only leaf nodes hold data pointers.
 Has higher fan out. Num pointers is blocking factor.
 
 *Internal Node Definition*: $p := {P_1, K_1, P_2, K_2, ..., P_(p-1), K_(p-1), P_p}$.
@@ -372,6 +385,8 @@ Size of internal node is $p$ (pointer size) + $p-1$ (key size)
 *Leaf Node Definition*: $p_L := {(K_1, Q_1), (K_2, Q_2), ..., (K_(p_L), Q_(p_L)), P_"next"}$
 Size of leaf node is $p$ (pointer size) + $p$ (key size) + $p$ (sibling pointer size)
 
+#figure(image("assets/bplus-tree.png", width: 60%))
+
 When you have many duplicate keys, you should use underground (UG) layer, this means the leaf nodes point to blocks of pointers,
 which point to the actual data.
 
@@ -379,6 +394,10 @@ which point to the actual data.
 Divide and Conquer. Split a file of b blocks into L smaller sub-files. Load each sub-file into memory and sort it.
 Merge the sorted sub-files into a new sorted file.
 Cost is $O(2b(1 + log_M(L)))$. M is degree of merging, L is the number of initial sorted sub-files.
+
+#pagebreak()
+
+= Query Processing #text(fill: gray, size: 10pt)[Week 8]
 
 == Strategies for Select
 
