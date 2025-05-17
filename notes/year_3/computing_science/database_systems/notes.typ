@@ -115,6 +115,11 @@ Every non-prime attribute A in relation R:
 A relation is in BCNF if it is in 3NF and all determinants are primary keys: any attribute should be
 functionally dependent only on the Primary Key.
 
+Theorem 1: Let relation R not in BCNF and let X → A be the FD which causes a violation in BCNF.
+Then, the relation R should be decomposed into two relations:
+- R1 with attributes: R\{A} (all attributes in R apart from A)
+- R2 with attributes: {X} U {A} (put together X and A)
+
 #pagebreak()
 
 = SQL #text(fill: gray, size: 10pt)[Week 3]
@@ -225,44 +230,132 @@ WHERE RANKING = 1
 
 #pagebreak()
 
-== Physical Design and Hashing
+= Physical Design and Hashing #text(fill: gray, size: 10pt)[Week 5]
 
-*Organisation based Optimisation*. Records are grouped together formating a Block, a file is a group of blocks.
-blocking factory = $floor((|B|) / (|R|))$. Number of blocks required = $ceil((|"tuples"|) / "blocking factor")$.
+== Physical Storage Hierarchy
+
+- Primary storage: e.g., RAM: main memory, cache;
+- Secondary storage: e.g., hard-drive disks (HDD), solid-state disks (SSD);
+- Tertiary storage: e.g., optical drives.
+
+== Organisation based Optimisation
+
+Records are grouped together formatting a block, a file is a group of blocks.
+
+*Blocking Factor*
+
+A block is of a fixed length, normally 512 to 4096 bytes.
+
+$ "blocking factory (bfr)" = floor((B) / (R)) $
+
+where B is the block size and R is the record size.
+
+$ "number of blocks required" = ceil((|"records"|) / "bfr") $
+
 *Linked Allocation*: Each block has a pointer to the next block.
+
+*Expectation of Random Variable* (Used for Hashing): $E[X] = sum_(x) P(X=x) * x$
 
 == File Structures
 
-*Heap File*: Blocks are stored in an arbitrary order.
+=== Heap File
 
-*Ordered File*: Blocks are stored in a specific order.
-Inserting O(log n) + (move all the blocks),
-Retrieving (ordering field) O(log n), Retrieving (non-ordering field) O(n).
-Deleting (ordering field) O(n), non-ordering field O(log n).
-Can use chain pointers to link records in the same block (sorted linked list)
+Blocks are stored in an arbitrary order. new records are inserted at the end of the file (end of last block).
 
-*Hash File*: Blocks are stored in a hash table. Inserting O(1), Retrieving O(n), Deleting O(n).
-Can also use chain pointers to link records in the same block (sorted linked list)
+- *Inserting* (O(1))
+  - Very efficient. Load the last block into memory, insert the new record and write back.
+- *Retrieving* (O(n))
+  - Load a block into memory, search for the record, repeat.
+- *Deleting* (O(n))
+  - Find and load the block containing the record, delete the record and write back the block.
+  - This leaves *unused space* in the block.
+  - Use a deletion marker per record to indicate if the record has been deleted.
 
-*Expectation of Random Variable* (Used for Hashing) = $sum_(i=1)^n p_i x_i$
+=== Ordered File (Sequential File)
 
-== Indexing Methodology
+All records are physically sorted by an ordering field and kept stored at all times.
+
+- *Inserting* (O(log n) + O(n))
+  - Find the block to insert the record into, then you have to move all the records in the block to make space for the new record.
+  - Alternatively, you can use a chain pointer to link records in the same block.
+- *Retrieving* (O(log n))
+  - The block is found using binary search on the ordering field.
+- *Deleting* (O(n))
+  - Find the block, update the deletion marker and update the pointer to the next record. Periodically resort the file.
+- *Updating* on the ordering field (O(n))
+  - Find the block, update the record and re insert it.
+- *Updating* on a non-ordering field (O(n))
+  - Find the block, update the record and write back the block.
+
+=== Hash File
+
+Partition the records into M buckets, each bucket may have more than one block.
+Choose a hash function $y = h(x)$ to map the key $x$ to a bucket $y$.
+Ideally, the hash function should be uniform, but this is not always possible.
+Normally, collisions occur.
+
+- *Inserting* (O(1))
+  - Very efficient. Load the last block into memory, insert the new record and write back.
+- *Retrieving* (O(n))
+  - Hash, then load first block of the bucket. Then search and follow chain pointers.
+- *Deleting* (O(n))
+  - Hash, then load first block of the bucket. Then search and follow chain pointers. Delete the record and write back the block.
+  - Periodically pack together blocks of the same bucket to free up blocks with deleted records.
+- *Updating* (O(n))
+  - Update a record on the hash field: change the hashed-value! delete form the old bucket and insert to the new bucket.
+
+= Indexing Methodology I #text(fill: gray, size: 10pt)[Week 6]
+
+Create an index over an *index field*. The index is stored in a separate file. All index entries are unique and sorted.
+First search within the index to find the block pointer, then access the data block.
 
 *Dense Index*: An index entry for every record
 *Sparse Index*: An index entry for some records
 
 == Index Types
 
-- *Primary Index*: index field is ordering, key field of a sequential file.
-  Anchor records: Sparse index, one per block.
-- *Clustering Index*: index field is ordering, non-key field of a sequential file.
-  One index per distinct clustering value. Block pointer points at the first block of the cluster.
-  The other blocks of the same cluster are contiguous and accesed via chain pointers.
-- *Secondary Index*: index field is:
-  - non-ordering, key field, over an ordered or a non-ordered file.
-  - non-ordering, non-key field, over an ordered or a non-ordered file.
+=== Primary Index
 
-*Multilevel Index*: We can build a primary index over any index file.
+Index field is an ordered key field of a sequential file.
+
+Fixed length index entries $(K_i, P_i)$ where $K_i$ is the key value and $P_i$ is the block pointer.
+
+Anchor records: Sparse index, one per block.
+
+When an anchor record is deleted / updated, you must fully update the index.
+
+=== Clustering Index
+
+Index field is an ordered non-key field of a sequential file.
+
+One index per distinct clustering value. Block pointer points at the first block of the cluster. The other blocks of the same cluster are contiguous and accessed via chain pointers.
+
+=== Secondary Index
+
+Index field is:
+  - non-ordered, key field, over an ordered or a non-ordered file.
+  - non-ordered, non-key field, over an ordered or a non-ordered file.
+
+*Analysing an Index*
+
+Find the following information:
+- Index entry values (key field)
+- Index entry size
+- Index blocking factor
+- Number of blocks in the index file
+
+Compare the number of blocks in the index file with the number of blocks in the data file.
+
+=== Multilevel Index
+
+Since all index files are ordered on the indexing field, the indexing field is unique and each index entry is of fixed size.
+
+We can build a primary index over an index file.
+
+The original index is the base or level 1 index. Any additional index is a multilevel index. Our challenge is to find the best level of index.
+
+Theorem 3: Given a Level-1 Index with blocking factor m entries/block, the multi-
+level index is of maximum level $t = log_m (b)$.
 
 *Multilevel Index*: Can become unbalanced
 
