@@ -1,9 +1,14 @@
 #set document(title: "Networked Systems")
 #set page(margin: 20pt)
+#set text(size: 10pt)
 
-= Database Fundamentals & Relational Model
+#outline()
 
-*Data*: Structured, unstructed, semi-structured
+#pagebreak()
+
+= Database Fundamentals & Relational Model  #text(fill: gray, size: 10pt)[Week 1]
+
+*Data* can be structured, unstructured, semi-structured
 
 == Key Constraints
 
@@ -15,6 +20,8 @@
 *Entity Integrity Constraint*: Ensures that the primary key is not null.
 
 *Referential Integrity Constraint*: Ensures that the foreign key references a valid primary key in another relation
+
+*Semantic Integrity Constraints*: based on application semantics and cannot be expressed by the relational model.
 
 == Operations on Relations
 
@@ -32,16 +39,44 @@ When an operation violates integrity constraints, the system can:
 - *DELETE Violations*: Referential integrity when deleting referenced records; Options: Restrict: Block deletion; Propagate: Delete corresponding records; Set Null: Nullify foreign keys; Set Default: Use default values.
 - *UPDATE Violations*: Primary Key: Creating duplicate keys; Foreign Key: Setting invalid references; Resolution: Validate constraints first; Choose appropriate action (RESTRICT, CASCADE, etc.); Consider business impact.
 
+#pagebreak()
+
+= Functional Dependency & Normalisation Theory  #text(fill: gray, size: 10pt)[Week 2]
+
 == Guidelines for a Good Design
 
-- The attributes of a relation should make senese
-- Avoid redundant tuples
-- Relations should have as a few NULL values as possible
-- Design relations to avoid fictitious tuples after join
+*The attributes of a relation should make sense*
+- Attributes of different entities should not be in the same relation
+- Any relationship between relations should be represented only through foreign keys
+
+*Avoid redundant tuples*
+- wastes storage
+- operation anomalies: duplicates mut be kept consistent
+
+*Relations should have as a few NULL values as possible*
+- attributes that are frequently NULL should be placed in separate relations
+
+*Design relations to avoid fictitious tuples after join*
+
+== Theory of Functional Dependencies
 
 *Functional Dependency* is a formal metric of the degree of goodness of a relation schema.
-X → Y (X uniquely determines Y) holds if whenever two tuples have the same value for X, they must have the same value for Y
-If K is a Candiate Key, then K → R (A) for all attributes A in R
+*FD* is a constraint derived from the relationship between attributes.
+
+$X arrow.r Y$ (X uniquely determines Y) holds if whenever two tuples have the same value for $X$, they must have the same value for $Y$
+
+$ "if" "t1"["X"] = "t2"["X"] "then" "t1"["Y"] = "t2"["Y"] $
+
+$X arrow.r Y "in" R$ specifies a constraint on all instances of $R$ (principle).
+
+If $K$ is a Candidate Key, then $K → R (A)$ for all attributes $A$ in $R$
+
+- *Reflexivity*: If $Y subset X$, then $X → Y$
+- *Augmentation*: If $X → Y$, then $X union {Z} → Y union {Z}$ for any $Z$
+- *Transitivity*: If $X → Y$ and $Y → Z$, then $X → Z$
+
+A *prime attribute* is an attribute that is part of some candidate key.
+A *non-prime attribute* is an attribute that is not part of any candidate key.
 
 *Partial Dependency*: A non-key attribute A is partially dependent on the primary key K if A
 is dependent on a proper subset of K.
@@ -49,27 +84,60 @@ is dependent on a proper subset of K.
 *Transitive Dependency*: A non-key attribute A is transitively dependent on the primary key K
 if A is dependent on another non-key attribute B, and B is in turn dependent on K.
 
-*Normalization*: progressive decomposition of unsatisfactory (bad) relations by breaking
-up their attributes into smaller good relations. A prime attribute is an attribute that is part of some candidate key.
+== Normalization
 
-*First Normal Form (1NF)*: A relation is in 1NF if the domain of each attribute is atomic
-(cannot be decomposed) and each tuple is unique. This does not allow nested or multi-valued attributes.
+Progressive decomposition of unsatisfactory (bad) relations by breaking up their attributes into smaller good relations.
 
-*Second Normal Form (2NF)*: A relation is in 2NF if it is in 1NF and all non-key attributes are
-fully functionally dependent on the primary key.
+=== First Normal Form (1NF)
 
-*Third Normal Form (3NF)*: A relation is in 3NF if it is in 2NF and there are no transitive dependencies.
+A relation is in 1NF if the domain of each attribute is atomic (cannot be decomposed) and each tuple is unique. This does not allow nested or multi-valued attributes.
 
-*Boyce-Codd Normal Form (BCNF)*: A relation is in BCNF if it is in 3NF and all determinants are primary keys.
+Relations are still expected to have redundant and repeated data.
 
-== SQL
+=== Second Normal Form (2NF)
 
-*Database Schema and Table*: `CREATE SCHEMA` defines a namespace for database objects; `CREATE TABLE` defines the structure of a table.
+A relation R is in 2NF if every non-prime attribute A in R is fully functionally dependent on the primary key of R.
+
+Remove all prime attributes from the primary key, which cause partial dependencies.
+
+=== Third Normal Form (3NF)
+
+A relation is in 3NF if it is in 2NF and there are no transitive dependencies.
+
+=== Generalised Third Normal Form (G3NF)
+
+Every non-prime attribute A in relation R:
+- is fully functionally dependent on every candidate key in R.
+- is non-transitively dependent on every candidate key in R.
+
+=== Boyce-Codd Normal Form (BCNF)
+
+A relation is in BCNF if it is in 3NF and all determinants are primary keys: any attribute should be
+functionally dependent only on the Primary Key.
+
+#pagebreak()
+
+= SQL #text(fill: gray, size: 10pt)[Week 3]
+
+== SQL Commands
+
+*Database Schema and Table*
+
+`CREATE SCHEMA` defines a namespace for database objects
+
+`CREATE TABLE` defines the structure of a table.
+
 *Data Types*: `INTEGER`, `FLOAT`, `CHAR`, `VARCHAR`, `BOOLEAN`, `DATE`, `TIME`, `TIMESTAMP`
-*Constraints*: `PRIMARY KEY`, `FOREIGN KEY`, `UNIQUE`, `CHECK (condition)`, `NOT NULL`, `DEFAULT {value}`
-*Multi-set operators*: `UNION`, `INTERSECT`, `EXCEPT`
 
-Any value compared with NULL is unknown, should use `IS NULL` or `IS NOT NULL` to check for NULL values.
+*Value Constraints*: `CHECK (condition)`, `NOT NULL`, `DEFAULT {value}`
+
+*Key Constraints*: `PRIMARY KEY`, `UNIQUE`
+
+*Referential Constraints*: `FOREIGN KEY (column1) REFERENCES table2(column2)`, `ON DELETE CASCADE`, `ON UPDATE CASCADE`
+
+*Multi-set operators*: `UNION`, `INTERSECT`, `EXCEPT`, `DISTINCT`
+
+Any value compared with NULL is `UNKNOWN`, should use `IS NULL` or `IS NOT NULL` to check for NULL values.
 
 == Joins
 
@@ -83,34 +151,84 @@ Any value compared with NULL is unknown, should use `IS NULL` or `IS NOT NULL` t
 A query that is nested inside another query.
 
 - *In*: Returns true if the value is in the subquery. `WHERE column IN (SELECT column FROM table2)`
+- *All*: Returns true if all the values in the subquery are true. `WHERE column > ALL (SELECT column FROM table2)`
 - *Exists*: Returns true if the subquery returns at least one tuple. `WHERE EXISTS (SELECT * FROM table2 WHERE column = value)`
+
+We also have different scopes in nested queries
+
+= Advanced SQL #text(fill: gray, size: 10pt)[Week 4]
 
 *Aggregate Functions*: `COUNT`, `SUM`, `AVG`, `MAX`, `MIN`
 
 *Grouping*: `GROUP BY`
 
-*HAVING*: Used to filter groups based on aggregate functions.
+*Having*: `HAVING` is used to filter groups based on aggregate functions.
 
 == Window Functions
 
-`ROW_NUMBER()`, `RANK()`, `DENSE_RANK()`, `LEAD()`, `LAG()`.
-Window functions perform calculations across a set of rows related to the current row, providing a value for each row instead of summarizing data.
+Define analytic operators over a subset of rows that are *linked to the current row*.
 
+Define rows subset using `PARTITION BY` within the `OVER` clause.
+
+```sql
+SELECT column1, function_name()
+OVER (PARTITION BY column1 ORDER BY column2)
+FROM table1;
 ```
-function_name() OVER (PARTITION BY column1 ORDER BY column2)
-```
+
+`ROW_NUMBER()`, `RANK()`, `DENSE_RANK()`, `LEAD()`, `LAG()`.
 
 - *Function*: The calculation to perform (e.g., `ROW_NUMBER()` or `SUM()`).
 - *OVER*: Indicates the use of a window function.
 - *PARTITION BY*: Groups the data for the function. If omitted, the entire dataset is treated as one group.
 - *ORDER BY*: Determines the order of rows within each group.
-- *Window Frame*: Defines the rows to operate on. (ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
-(BETWEEN 1 PRECEDING AND 1 FOLLOWING)
+- *Window Frame*: Defines the rows to operate on. (`ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`) (`BETWEEN 1 PRECEDING AND 1 FOLLOWING`)
+
+`DENSE_RANK` specifies a unique & dense (no-gap) rank.
+
+Reuse queries by using `WITH` clause.
+
+#pagebreak()
+
+== SQL Query Examples
+
+Query: What is the rank of each department per month based on revenue?
+
+```sql
+SELECT DNO, MONTH, REVENUE,
+RANK() OVER(PARTITION BY DNO ORDER BY REVENUE DESC) AS Rank
+FROM FINANCE;
+```
+
+Query: What is the second highest revenue for each department?
+
+```sql
+SELECT DISTINCT DEPT, REV, TOP FROM(
+    SELECT DNO AS DEPT, MONTH, REVENUE AS REV,
+    DENSE_RANK() OVER(PARTITION BY DNO ORDER BY REVENUE DESC) AS TOP
+    FROM FINANCE) AS RES
+WHERE TOP = 2
+```
+
+Query: Which department has the highest number of employees?
+
+```sql
+SELECT DEPT, RANKING FROM(
+SELECT INN.DEPT AS DEPT,
+    RANK() OVER (ORDER BY INN.COUNTERS DESC) AS RANKING
+    FROM(
+        SELECT DNO AS DEPT, COUNT(*) AS COUNTERS
+        FROM EMPLOYEE GROUP BY DNO) AS INN
+) AS OUT
+WHERE RANKING = 1
+```
+
+#pagebreak()
 
 == Physical Design and Hashing
 
 *Organisation based Optimisation*. Records are grouped together formating a Block, a file is a group of blocks.
-blocking factory = $floor(|B| / |R|)$. Number of blocks required = $ceil(|"tuples"| / "blocking factor")$.
+blocking factory = $floor((|B|) / (|R|))$. Number of blocks required = $ceil((|"tuples"|) / "blocking factor")$.
 *Linked Allocation*: Each block has a pointer to the next block.
 
 == File Structures
