@@ -607,38 +607,267 @@ Hash the inner relation and then probe the hash table with the tuples of the out
 
 #pagebreak()
 
-= Query Optimisation #text(fill: gray, size: 10pt)[Week 9]
+= Query Optimisation I #text(fill: gray, size: 10pt)[Week 9]
 
-*Cost-based Optimisation*: exploit statistical information to estimate the execution cost of a query.
-Important is information about each relation and attribute. NDV (Number of Distinct Values).
+*Cost-based Optimisation*:
 
-*Selection Selectivity*: $0 <= "sl"(A) <= 1$
-*Selective Predictions*: Approximation of the selection selectivity. You could have no assumption about the data,
+Exploit statistical information to estimate the execution cost of a query.
+
+Information for each Relation:
+- number of records (r); (average) size of each record (R)
+- number of blocks (b); blocking factor (f) i.e., records per block
+- Primary File Organization: heap, hash, or sequential file
+- Indexes: primary, clustering index, secondary index, B+ Trees.
+Information for each Attribute A of each Relation:
+- Number of Distinct Values (NDV) n of attribute A
+- Domain range: [min(A), max(A)]
+- Type: continuous or discrete attribute; key or non-key
+- Level t of Index of the attribute A, if exists
+
+== Selection Selectivity
+
+selection selectivity $"sl"(A)$ of attribute $A$ is a real number $0 <= "sl"(A) <= 1$
+
+== Selection Cardinality
+
+Given r tuples and selection condition on attribute $A$, predict the expected number of tuples satisfying the condition.
+
+$"sc"(A) = r dot.c "sl"(A) in [0, r]$
+
+== Selective Predictions
+
+Approximation of the selection selectivity. You could have no assumption about the data,
 could be uniformly distributed
 
-*Conjunctive Selectivity* (A = x and B = y): $"sl"(Q) = "sl"(A = x) * "sl"(B = y) in [0, 1]$
+Equality condition on a non-key attribute: $"sl"(A = x) = 1/"NDV"(A)$
 
-*Disjunctive Selectivity* (A = x or B = y): $"sl"(Q) = "sl"(A = x) + "sl"(B = y) - "sl"(A = x) * "sl"(B = y) in [0, 1]$
+== Range Selection Selectivity
+
+- *Definition 1*: Domain range: $max(A) - min(A); A in [min(A), max(A)]$
+- *Definition 2*: Query range: $max(A) - x; x in [min(A), max(A)]$
+
+$"sl"(A >= x) = (max(A) - x) / (max(A) - min(A))$
+
+== Conjunctive Selectivity
+
+(A = x and B = y): $"sl"(Q) = "sl"(A = x) dot.c "sl"(B = y) in [0, 1]$
+
+== Disjunctive Selectivity
+
+(A = x or B = y): $"sl"(Q) = "sl"(A = x) + "sl"(B = y) - "sl"(A = x) dot.c "sl"(B = y) in [0, 1]$
 
 *Selection Selectivity*: $1/"NDV"(A) = 1/n$
 
-*Selection Cardinality*: $(1/"NDV"(A)) * r = r/n$
+*Selection Cardinality*: $(1/"NDV"(A)) dot.c r = r/n$
 
-*Selection Cost Refinement*: Be more accurate: express cost as a function of {s(A)}
+== Cost Selectivity Association
+
+The predicted number of blocks retrieved is a reciprocal function of n:
+
+$ceil( s / "bfr" ) = ceil( r / ("bfr" dot.c "NDV"(A)) ) = r / ("bfr" dot.c n)$
+
+== Selection Cost Refinement
+Be more accurate: express cost as a function of $s(A) = r/n$ or $P(A)$
 
 *Binary Search on sorted relation*: If A is a key, then expected cost is $log_2(r)$.
-If A is not a key, then expected cost is $log_2(b) + ceil((r * "sl"(A))/f) - 1$.
+If A is not a key, then expected cost is $log_2(b) + ceil((r dot.c "sl"(A))/"bfr") - 1$.
 
-*Multilevel primary index* with range A >= x: cost: $t + ceil((r * "sl"(A))/f) - 1$.
+*Multilevel primary index* of level t with range A >= x: cost: $t + ceil((r dot.c "sl"(A))/"bfr")$.
 
-*Clustering Index* over a non key: cost: $t + ceil((r * "sl"(A))/f) - 1$.
+*Clustering Index* over a non key: cost: $t + ceil((r dot.c "sl"(A))/"bfr")$.
 
-*B+ Tree* over a no ordering non key: cost: $t + m + r * "sl"(A)$.
+*B+ Tree* over a no ordering non key: cost: $t + m + r dot.c "sl"(A)$. (m block accesses to load the blocks of block pointers)
 
 *B+ Tree* over a no ordering key: cost: $t + 1$.
 
-*Multilevel primary index* with range A == x: cost: $t + 1$.
+*Multilevel primary index* with range A = x: cost: $t + 1$.
 
-*Hash file structure*: cost: $t + O(n)$.
+*Hash file structure*: cost: $t + m$ (m number of overflow blocks)
 
-*Join Selectivity Theorem*: Given $n = "NDV"(A, R)$ and $m = "NDV"(B, S)$: js = $1/max(n, m)$, jc = $(|R| * |S|)/max(n, m)$.
+== Query Optimization Examples
+
+=== Example 1: Complex Selection Query
+
+*Given*:
+- Employee relation: 10,000 records, 2,000 blocks, blocking factor = 5
+- Memory: 100 blocks
+- Access paths:
+  - Clustering index on Salary (3 levels)
+    - selectivity sl(Salary) = 0.002
+    - cardinality sSalary = 20 tuples per salary
+  - B+ Tree on DNO (2 levels)
+    - NDV(DNO) = 125
+    - cardinality sDno = 80 tuples per department
+    - selectivity sl(DNO) = 0.008
+  - B+ Tree on EXP (2 levels)
+    - NDV(EXP) = 2
+    - cardinality sEXP = 5000 tuples
+    - selectivity sl(EXP) = 0.5
+
+*Query*: `SELECT * FROM EMPLOYEE WHERE DNO = 5 AND SALARY = 30000 AND EXP = 0`
+
+*Analysis*:
+- Selection selectivity: sl(DNO=5) * sl(Salary=30K) * sl(EXP=0) = 0.000008 ($8 dot.c 10^-6$)
+- Selection cardinality: 0.08 employees (1 block out of 2000)
+
+*Alternative Plans*:
+1. Linear Search (P0): 2,000 block accesses
+2. Using DNO index (P1):
+   - Cost: xDNO + 1 + sDNO = 83 block accesses
+   - Intermediate result: 80 tuples (16 blocks) fits in memory
+3. Using Salary index (P2):
+   - Cost: xSalary + ceil(sSalary/f) = 7 block accesses
+   - Intermediate result: 20 tuples (4 blocks) fits in memory
+   - Best plan
+4. Using EXP index (P3):
+   - Cost: xEXP + 1 + sEXP = 5,003 block accesses
+   - Intermediate result: 5000 tuples (1000 blocks) exceeds memory
+   - Additional cost: 900 blocks for disk write-back
+   - Total cost: ≥ 5,903 block accesses
+
+=== Example 2: Complex OR Query
+
+*Query*: `SELECT * FROM EMPLOYEE WHERE DNO = 5 OR (SALARY >= 500 AND EXP = 0)`
+
+*Analysis*:
+- Memory: 1100 blocks
+- Salary range selectivity: (10000-500)/9900 = 0.959
+- EXP selectivity: 0.5
+- DNO selectivity: 0.008
+- Conjunctive selectivity (SALARY AND EXP): $0.959 dot.c 0.5 = 0.4795$
+- Combined selectivity: $"sl"("DNO") + "slc" - "sl"("DNO") dot.c "slc" = 0.4836$
+- Expected result: 4,836.6 employees (968 blocks)
+
+*Execution Plans*:
+1. Linear Search: 2,000 block accesses
+2. Plan A:
+   - DNO = 5: B+ Tree (83 blocks)
+   - EXP = 0 then SALARY >= 500: 5,003 blocks
+   - Total: 5,086 blocks
+3. Plan B:
+   - DNO = 5: B+ Tree (83 blocks)
+   - SALARY >= 500 then EXP = 0: 3,589 blocks
+   - Total: 3,672 blocks
+
+*Result*: Linear search (2,000 blocks) is optimal, even with increased memory
+
+#pagebreak()
+
+= Query Optimisation II #text(fill: gray, size: 10pt)[Week 10]
+
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto,),
+  grid.cell(
+    image("assets/join-1.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/join-2.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/join-3.png", width: 100%)
+  )
+)
+
+== Join Selectivity & Cardinality
+
+*Definition 1*: join selectivity (js) is the fraction of the matching tuples between the relations R and S out of the Cartesian cardinality ($|"concatenated tuples"|$):
+
+$"js" = |{r in R, s in S | r.A = s.B}| / |R| * |S|$
+
+*Definition 2*: join cardinality $"jc" := "js" dot.c |R| dot.c |S|$
+
+*Challenge 1*: Predict the join cardinality (jc) without executing the join query
+
+=== Join Selectivity Theorem
+
+Given $n = "NDV"(A, R)$ and $m = "NDV"(B, S)$:
+
+$ "js" = 1/max(n, m) $
+$ "jc" = (|R| * |S|)/max(n, m) $
+
+*Example*: Show the dependents of each employee
+
+- $n = "NDV"("SSN",E) = 2000; |E| = 2000$ employees
+- $m = "NDV"(E_("SSN"), P) = 3; |P| = 5$ dependents
+- $"js" = 1/max(2000,3) = 1/2000 = 0.0005$ or $0.05\%$ (probability of matching tuple)
+- $"jc" = 0.0005 dot.c 2000 dot.c 5 = 5$ matching tuples (as expected)
+
+
+== Join Cost Refinement
+
+*Strategy: Nested-Loop Join*
+
+D is the outer relation, i.e., $b_D < b_E$ with outer loops: $ceil(b_D/(n_B-2))$
+
+Expected Cost: $b_D + (ceil(b_D/(n_B-2)) dot.c b_E)$
+
+- Matching tuples: $"jc" = "js" dot.c |E| dot.c |D| = (1/max(n, m)) dot.c |E| dot.c |D|$
+- Number of result blocks: $k = ("js" dot.c |E| dot.c |D|) / f_"RS"$
+- Include $k$ result-block writes from memory to disk during the execution.
+
+Refined Cost: $b_D + (ceil(b_D/(n_B-2)) dot.c b_E + ("js" dot.c |E| dot.c (|D|) / f_"RS") dot.c b_R$
+
+*Strategy: Index-based Nested-Loop Join*
+
+Primary Index on MGR_SSN with $x_D$ levels
+
+For each employee e, use index to check if they are a manager.
+- Matching tuples: $"jc" = "js" dot.c |E| dot.c |D| = (1/max(n, m)) dot.c |E| dot.c |D|$
+- Number of result blocks: $k = ("js" dot.c |E| dot.c (|D|) / f_"RS")$
+
+Refined Expected Cost: $b_E + |E| dot.c (x_D + 1) + ("js" dot.c |E| dot.c (|D|) / f_"RS") dot.c b_R$
+
+*Strategy: Index-based Nested-Loop Join*
+
+Clustering Index on DNO with $x_E$ levels, selection cardinality $s_E$, blocking factor $f_E$
+
+Selection cardinality of DNO $s_E = (1/"NDV"("DNO")) dot.c |E|$
+
+Case: Clustering Index on ordering / non-key
+- Selection cardinality := employees per department: $s_E$
+- Blocks of employees per department: $ceil(s_E / f_E)$
+- Number of result blocks: $k = ("js" dot.c |E| dot.c (|D|) / f_"RS")$
+
+Refined Expected Cost: $b_D + |D| dot.c (x_E + ceil(s_E / f_E)) + ("js" dot.c |E| dot.c (|D|) / f_"RS")$
+
+*Strategy: Index-based Nested-Loop Join*
+
+B+ Tree on DNO with xE levels,
+selection cardinality sE, blocking factor fE
+
+Selection cardinality of DNO $s_E = (1/"NDV"("DNO")) dot.c |E|$. For each department d, use the index to load its employees.
+
+Case: B+ Tree Index on non-ordering / non-key
+
+- y blocks (blocks of pointers) + blocks of employees: sE
+  - each employee belongs to a different block (worst case)
+- Number of result blocks: $k = ("js" dot.c |E| dot.c (|D|) / f_"RS")$
+
+Refined Expected Cost: $b_D + |D| dot.c (x_E + y + s_E) + ("js" dot.c |E| dot.c (|D|) / f_"RS")$
+
+*Strategy: Sort-Merge*
+
+Both files are sorted on joining attributes A and B
+
+Refined Expected Cost: $b_R + b_S + ("js" dot.c |R| dot.c (|S|) / f_"RS")$
+
+*Strategy: Hash-Join*
+
+Both files are hashed w.r.t. same hash function h;
+
+Refined Expected Cost: $3 dot.c (b_R + b_S) + ("js" dot.c |R| dot.c (|S|) / f_"RS")$
+
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto,),
+  grid.cell(
+    image("assets/example-10-1.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/example-10-2.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/example-10-3.png", width: 100%)
+  )
+)
