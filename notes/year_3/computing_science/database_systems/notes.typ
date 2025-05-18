@@ -469,38 +469,151 @@ When you have many duplicate keys, you should use underground (UG) layer, this m
 
 = Query Processing #text(fill: gray, size: 10pt)[Week 8]
 
-*External Sorting*: Sorting for large relations stored on disk, that cannot fit into memory.
-Divide and Conquer. Split a file of b blocks into L smaller sub-files. Load each sub-file into memory and sort it.
-Merge the sorted sub-files into a new sorted file.
-Cost is $O(2b(1 + log_M(L)))$. M is degree of merging, L is the number of initial sorted sub-files.
+Almost all SQL queries involve sorting, but we cannot store the entire relation in memory for sorting.
+
+== External Sorting
+
+*Principle*
+
+- *Divide*: a file of b blocks into L smaller sub-files.
+- *Sort*: load each small sub-file into memory, sort (using quick-sort, bubble-sort, etc), write to disk.
+- *Merge*: merge two or more sorted sub-files loaded from disk in memory creating bigger sorted sub-files.
+
+The expected cost, in block accesses, is
+
+$ 2b(1 + log_M (L)) $
+
+b is the number of file blocks, M is degree of merging, L is the number of initial sorted sub-files.
 
 == Strategies for Select
 
-Linear search (b/2), binary search (log2 b), primary index (t+1) or hash function (1 + n/2) over a key,
-hash function over a non key (1 + n (overflow blocks)), primary index over a key in a range query (t + b), clustering index over ordering non-key (t + b/n),
-secondary index (B+ Tree) over a non-ordering key (t + 1), non-ordering key (t + m + b)
+*Linear search*:
+- expected cost: $b/2$
+
+*Binary search*:
+- unsorted: $log_2 b + 2b (1 + log_M L)$
+- sorted: $log_2 b$
+
+*Primary index* (label t) or *hash function* over a key:
+- unsorted: $t + 1$
+- hashed: $1 + n/2$ (overflow blocks)
+
+*hash function* over a non key:
+- expected cost: $1 + n $ (overflow blocks)
+
+*primary index* (level t) over a key in a range query:
+- expected cost: $t + O(b)$
+- estimated cost: $t + P(X > x) dot.c b = t + b dot.c (1 - x/r)$
+
+*clustering index* (level t) over ordering non-key:
+- expected cost (sorted file): $t + O(b/n)$
+- estimated cost: $t + b/n$ or $t + P(X = x) dot.c b$
+
+*secondary index* (B+ Tree) over a non-ordering key:
+- expected cost: $t + 1$
+
+*secondary index* (B+ Tree) over a non-ordering non key:
+- expected cost: $t + m + b$
+
+== Strategies for Disjunctive Select (OR)
+
+If an access path exists for all attributes:
+- use each to retrieve the result set,
+- union the result sets
+If none or some of the attributes have no access path:
+- linear search is unavoidable
 
 == Strategies for Conjunctive Select (AND)
 
-if an index exists, use the one that generates the smaller result set,
-then go through the result set and apply the remaining predicates.
+If an access path exists for an attribute use it to retrieve the result set.
+Then go through the result set and apply the remaining predicates.
+
+Ideally you select the attribute with the lowest selectivity.
+
+Optimisation here is predict the selectivity of the predicates.
 
 == Strategies for Join
 
-- Naive join (no index): Compoute the cartesian product, store the results and for each check the join condition
-- nested-loop join (no index): For each tuple in the outer relation, check the inner relation for matching tuples
-- index based nested loop join (index on the inner relation) For each tuple in the outer relation, use the index to find the matching tuples in the inner relation
-- merge-join (sorted relations) Load a pair of sorted blocks, check the join condition and output the result. Efficient if both relations
-  are already sorted on the join key.
-- hash-join (hashed relations) Hash the inner relation and then probe the hash table with the tuples of the outer relation.
+*Naive Join* (no access path)
 
-== Query Optimisation
+Compute the cartesian product, store the results and for each check the join condition
+
+*Nested-loop Join* (no access path)
+
+For each tuple in the outer relation, check the inner relation for matching tuples. Like a nested for loop.
+
+Which relation should be in the outer loop and which in the inner loop to minimize the join processing cost?
+
+*Algorithm*
+
+- Step 1:
+    - LOAD a set (chunk) of blocks from the outer relation R.
+    - LOAD one block from inner relation S
+    - Maintain an output buffer for the matching (resulting) tuples (r, s): r.A = s.B
+- Step 2:
+    - JOIN the S block with each R block from the chunk
+    - FOR each matching tuple $r in R$-block and $s in S$-block ADD (r, s) to Output Buffer
+    - IF Outer Buffer is full, PAUSE; WRITE the current join result to disk; CONTINUE
+- Step 3: LOAD next S-block and GOTO Step 2
+- Step 4: GOTO Step 1
+
+*Cost Analysis*
+- Total number of blocks read for outer relation E: $n_E$
+- Outer Loops: Number of chunks of (nB-2) blocks of outer relation: ceil(nE/(nB-2))
+- For each chunk of (nB-2) blocks read all the blocks of inner relation D:
+- Total number of block read in all outer loops: $n_D * ceil(n_E/(n_B - 2))$
+- Total Expected Cost: $n_E + n_D * ceil(n_E/(n_B - 2))$ block accesses
+
+*Index based nested loop join* (index; B+ Tree)
+
+For each tuple in the outer relation, use the index to find the matching tuples in the inner relation.
+
+*Cost Analysis*
+- Total number of blocks read for outer relation E: $n_E$
+- B+ Tree index: $t$
+- Number of tuples in the inner relation: $r_D$
+- Total Expected Cost: $n_E + r_D * (t + 1)$ block accesses
+
+*Sort-Merge join* (sorted relations)
+
+Use merge sort over two sorted relations (R and S), sorted on their joining keys (A and B).
+
+Idea:
+- Load a pair of sorted blocks
+- Both blocks are linearly scanned concurrently over the joining attributes (merge-sort in memory)
+- if matching tuples are found, add them to the result set
+
+*Gain*: blocks are only scanned once.
+
+Efficient if both relations are already sorted on the join key.
+
+*Cost Analysis*
+- Total number of blocks read for outer relation R: $n_R$
+- Total number of blocks read for inner relation S: $n_S$
+- Total Expected Cost: $n_R + n_S$ block accesses
+
+If both files are not sorted, then use external sorting.
+
+*Hash-join* (hashed relations)
+
+Pre-condition:
+- File R is partitioned into M buckets w.r.t. hash function h over joining attribute A.
+- File S is partitioned into M buckets w.r.t. the same hash function h over joining attribute B.
+Assumption: R is the smallest file and fits into main memory.
+
+The records of files R and S are partitioned into smaller files. The partitioning of each file is done using the same hashing function h on the join attribute A of R (for partitioning file R) and B of S (for partitioning file S). First, a single pass through the file with fewer records (say, R ) hashes its records to the various partitions of R; this is called the partitioning phase , since the records of R are partitioned into the hash buckets. In the simplest case, we assume that the smaller file can fit entirely in main memory after it is partitioned, so that the partitioned subfiles of R are all kept in main memory. The collection of records with the same value of h ( A ) are placed in the same partition, which is a hash bucket in a hash table in main memory. In the second phase, called the probing phase , a single pass through the other file ( S ) then hashes each of its records using the same hash function h ( B ) to probe the appropriate bucket, and that record is combined with all matching records from R in that bucket. This simplified description of partition-hash join assumes that the smaller of the two files fits entirely into memory buckets after the first phase. We will discuss the general case of partition-hash join below that does not require this assumption. In practice, techniques J1 to J4 are implemented by accessing whole disk blocks of a file, rather than individual records. Depending on the available number of buffers in memory, the number of blocks read in from the file can be adjusted.
+
+Hash the inner relation and then probe the hash table with the tuples of the outer relation.
+
+#pagebreak()
+
+= Query Optimisation #text(fill: gray, size: 10pt)[Week 9]
 
 *Cost-based Optimisation*: exploit statistical information to estimate the execution cost of a query.
 Important is information about each relation and attribute. NDV (Number of Distinct Values).
 
 *Selection Selectivity*: $0 <= "sl"(A) <= 1$
-*Selective Predictions*: Approximation of the selection selectivity. You oculd have no assumption about the data,
+*Selective Predictions*: Approximation of the selection selectivity. You could have no assumption about the data,
 could be uniformly distributed
 
 *Conjunctive Selectivity* (A = x and B = y): $"sl"(Q) = "sl"(A = x) * "sl"(B = y) in [0, 1]$
