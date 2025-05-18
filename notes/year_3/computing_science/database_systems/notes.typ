@@ -2,7 +2,7 @@
 #set page(margin: 20pt)
 #set text(size: 10pt)
 
-#outline()
+#outline(title: none)
 
 #pagebreak()
 
@@ -208,18 +208,21 @@ FROM FINANCE;
 Query: What is the second highest revenue for each department?
 
 ```sql
-SELECT DISTINCT DEPT, REV, TOP FROM(
+SELECT DISTINCT DEPT, REV, TOP
+FROM(
     SELECT DNO AS DEPT, MONTH, REVENUE AS REV,
     DENSE_RANK() OVER(PARTITION BY DNO ORDER BY REVENUE DESC) AS TOP
-    FROM FINANCE) AS RES
+    FROM FINANCE
+) AS RES
 WHERE TOP = 2
 ```
 
 Query: Which department has the highest number of employees?
 
 ```sql
-SELECT DEPT, RANKING FROM(
-SELECT INN.DEPT AS DEPT,
+SELECT DEPT, RANKING
+FROM(
+  SELECT INN.DEPT AS DEPT,
     RANK() OVER (ORDER BY INN.COUNTERS DESC) AS RANKING
     FROM(
         SELECT DNO AS DEPT, COUNT(*) AS COUNTERS
@@ -335,6 +338,10 @@ One index per distinct clustering value. Block pointer points at the first block
 Index field is:
   - non-ordered, key field, over an ordered or a non-ordered file.
   - non-ordered, non-key field, over an ordered or a non-ordered file.
+
+Because: the file is not ordered according to the indexing field, thus, we cannot use anchor records;
+
+#figure(image("assets/secondary-index.png", width: 50%))
 
 *Analysing an Index*
 
@@ -684,6 +691,20 @@ If A is not a key, then expected cost is $log_2(b) + ceil((r dot.c "sl"(A))/"bfr
 
 *Hash file structure*: cost: $t + m$ (m number of overflow blocks)
 
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto,),
+  grid.cell(
+    image("assets/selection-cost-clustering-index-non-key.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/selection-cost-b-plus-tree-non-ordering-non-key.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/selection-cost-b-plus-tree-non-ordering-key.png", width: 100%)
+  )
+)
+
 == Query Optimization Examples
 
 === Example 1: Complex Selection Query
@@ -808,6 +829,13 @@ Expected Cost: $b_D + (ceil(b_D/(n_B-2)) dot.c b_E)$
 
 Refined Cost: $b_D + (ceil(b_D/(n_B-2)) dot.c b_E + ("js" dot.c |E| dot.c (|D|) / f_"RS") dot.c b_R$
 
+
+
+
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto,),
+  rect(stroke: none)[
 *Strategy: Index-based Nested-Loop Join*
 
 Primary Index on MGR_SSN with $x_D$ levels
@@ -817,7 +845,16 @@ For each employee e, use index to check if they are a manager.
 - Number of result blocks: $k = ("js" dot.c |E| dot.c (|D|) / f_"RS")$
 
 Refined Expected Cost: $b_E + |E| dot.c (x_D + 1) + ("js" dot.c |E| dot.c (|D|) / f_"RS") dot.c b_R$
+  ],
+  grid.cell(
+    image("assets/join-cost-primary-index.png", width: 100%)
+  )
+)
 
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto,),
+  rect(stroke: none)[
 *Strategy: Index-based Nested-Loop Join*
 
 Clustering Index on DNO with $x_E$ levels, selection cardinality $s_E$, blocking factor $f_E$
@@ -830,21 +867,37 @@ Case: Clustering Index on ordering / non-key
 - Number of result blocks: $k = ("js" dot.c |E| dot.c (|D|) / f_"RS")$
 
 Refined Expected Cost: $b_D + |D| dot.c (x_E + ceil(s_E / f_E)) + ("js" dot.c |E| dot.c (|D|) / f_"RS")$
+  ],
+  grid.cell(
+    image("assets/join-cost-clustering-index.png", width: 100%)
+  )
+)
 
+
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto,),
+  rect(stroke: none)[
 *Strategy: Index-based Nested-Loop Join*
 
-B+ Tree on DNO with xE levels,
-selection cardinality sE, blocking factor fE
+B+ Tree on DNO with $x_E$ levels,
+selection cardinality $s_E$, blocking factor $f_E$
 
 Selection cardinality of DNO $s_E = (1/"NDV"("DNO")) dot.c |E|$. For each department d, use the index to load its employees.
 
 Case: B+ Tree Index on non-ordering / non-key
 
-- y blocks (blocks of pointers) + blocks of employees: sE
+- y blocks (blocks of pointers) + blocks of employees: $s_E$
   - each employee belongs to a different block (worst case)
 - Number of result blocks: $k = ("js" dot.c |E| dot.c (|D|) / f_"RS")$
 
 Refined Expected Cost: $b_D + |D| dot.c (x_E + y + s_E) + ("js" dot.c |E| dot.c (|D|) / f_"RS")$
+  ],
+  grid.cell(
+    image("assets/join-cost-b-plus-tree.png", width: 100%)
+  )
+)
+
 
 *Strategy: Sort-Merge*
 
@@ -870,4 +923,48 @@ Refined Expected Cost: $3 dot.c (b_R + b_S) + ("js" dot.c |R| dot.c (|S|) / f_"R
   grid.cell(
     image("assets/example-10-3.png", width: 100%)
   )
+)
+
+#pagebreak()
+
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto,),
+  grid.cell(
+    image("assets/3-way-join-optimisation-1.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/3-way-join-optimisation-2.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/3-way-join-optimisation-3.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/3-way-join-optimisation-4.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/3-way-join-optimisation-5.png", width: 100%)
+  ),
+)
+
+#pagebreak()
+
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto,),
+  grid.cell(
+    image("assets/holistic-optimisation-1.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/holistic-optimisation-2.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/holistic-optimisation-3.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/holistic-optimisation-4.png", width: 100%)
+  ),
+  grid.cell(
+    image("assets/holistic-optimisation-5.png", width: 100%)
+  ),
 )
