@@ -370,34 +370,109 @@ So, all levels must be updated.
 
 B-Tree node order p splits the searching space up to $p > 2$ subspaces
 
-*Node Definition*: $"Node" := {P_1, (K_1, Q_1), P_2, (K_2, Q_2), ..., P_(p-1), (K_(p-1), Q_(p-1)), P_p}$
+*Node Definition*: $"Node" := {P_1, (K_1, "Pr"_1), P_2, (K_2, "Pr"_2), ..., P_(p-1), (K_(p-1), "Pr"_(p-1)), P_p}$
 
 #figure(image("assets/b-tree.png", width: 60%))
 
-*B+ Tree: Index on non-ordering key*
+=== Example
 
-Internal nodes have no data pointers, only leaf nodes hold data pointers.
-Has higher fan out. Num pointers is blocking factor.
+Task 1: Create a 3-level B-Tree index of order p = 23 over a non-ordering, key field
+Context: Each B-Tree node is 69% full of information (pointers/keys).
+On average, each B-Tree node accommodates 0.69p = 16 tree pointers/ 15 key values.
+Average fan-out = 16 per tree node, i.e., split the tree space into 16 sub-trees.
+
+- Root: 1 node with 15 keys/data-pointers, 16 pointers to tree nodes;
+- Level-1: 16 nodes with 16*15=240 keys/data-pointers, 16*16 = 256 pointers to nodes;
+- Level-2: 256 nodes with 256*15=3840 keys/data-pointers, 256*16 = 4096 pointers to nodes;
+- Level-3: 4096 nodes with 4096*15 = 61440 keys/data-pointers, and no pointers (leaves);
+
+=== Maximize Fan-out & Minimize Storage
+
+B-Tree stores too much meta-data:
+- data-pointers to blocks (addresses, e.g., URI/L average size ~1KB!);
+- tree-pointers to tree nodes (structural meta-data);
+- search key values (data values);
+
+Objective 1: be more storage efficient...free up space from the nodes; how?
+
+Objective 2: be more search efficient...maximize the fan-out of a node; how?
+
+Recall: fan-out is the splitting factor of the search-space
+Thought: fan-out is the node order p, i.e., number of tree-pointers per node.
+Thus: maximize the number of tree-pointers per node to maximize fan-out!
+Thus: maximize the blocking factor by squeezing more tree-pointers
+Thus: remove the data-pointers from the tree nodes!
+
+#pagebreak()
+
+== B+ Tree: Index on non-ordering key
+
+*Internal Nodes*: guide the searching process (super-fast)
+*Leaf Nodes*: point to actual data blocks (access point)
+
+- Principle 1: Internal Nodes have no data-pointers to maximize fan-out.
+- Principle 2: only Leaf Nodes hold the actual data-pointers.
+- Principle 3: Leaf Nodes hold all the key values sorted and their corresponding data-pointers.
+- Principle 4: Some key values are replicated in the Internal Nodes to guide & expedite the search process (corresponding to medians of key values in sub-trees).
 
 *Internal Node Definition*: $p := {P_1, K_1, P_2, K_2, ..., P_(p-1), K_(p-1), P_p}$.
 Size of internal node is $p$ (pointer size) + $p-1$ (key size)
 
-*Leaf Node Definition*: $p_L := {(K_1, Q_1), (K_2, Q_2), ..., (K_(p_L), Q_(p_L)), P_"next"}$
+*Leaf Node Definition*: $p_L := {(K_1, "Pr"_1), (K_2, "Pr"_2), ..., (K_(p_L), "Pr"_(p_L)), P_"next"}$
 Size of leaf node is $p$ (pointer size) + $p$ (key size) + $p$ (sibling pointer size)
 
-#figure(image("assets/bplus-tree.png", width: 60%))
+#figure(image("assets/b-plus-tree.png", width: 50%))
 
-When you have many duplicate keys, you should use underground (UG) layer, this means the leaf nodes point to blocks of pointers,
-which point to the actual data.
+=== Example
+
+Context: Block B = 512 bytes, key V = 9 bytes, data-pointer Q = 7 bytes, tree-pointer P = 6 bytes.
+
+Calculate: maximum order p of B-Tree and B+ Tree fitting each node in one block.
+
+Recall: internal B+ Tree node has p tree pointers and p-1 keys
+Recall: B-Tree node has p tree pointers; p-1 keys; p-1 data-pointers.
+
+B+ TreeInternal Node:
+- Step 1: Size of a B+ Internal Node: $p*P + (p-1)*V$
+- Step 2: To fit into a block we have: $p*P + (p-1)*V ≤ B$ or $p ≤ (B + V) / (P + V)$
+- Step 3: The maximum p order is $p = 34$ (i.e., 34 tree pointers; 33 key values)
+
+B+ Tree Leaf Node:
+- Step 1: Size of a B+ Leaf Node:
+  - $p_L$ data-pointers,
+  - $p_L$ key values,
+  - one next-tree pointer.
+- Step 2: To fit into a block we have: $p_L * (Q + V) + P ≤ B$ or $p_L ≤ (B - P) / (Q + V)$
+- Step 3: Each leaf node can store up to $p_L = 31$ pairs of key/data-pointers.
+
+B Tree Node:
+- Step 1: Size of a B Tree Node:
+  - $p-1$ data-pointers,
+  - $p-1$ key values,
+  - $p$ tree-pointers.
+- Step 2: To fit into a block we have: $p*P + (p-1)*(V + Q) ≤ B$ or $p ≤ (B + V + Q) / (P + V + Q)$
+- Step 3: The maximum p order for B Tree is $p = 24 < 34$ (for B+ Tree).
+
+Conclusions: B+ Tree has higher fan-out, higher search speed-up, stores more entries; splits the subspace into 34 subspaces at every level instead of 24
+
+Expected cost for a given range ratio $a = (U-L)/n$
+- $t$ block accesses to reach the leaf-node with SSN = L.
+- $q$ block accesses for loading data-blocks and sum up Salary values.
+- Leaf nodes accessed: $(U-L)/q = a$ $(#"values-in-range" / #"values-in-leaf")$
+- Visit sibling leaf nodes: $s = a - 1$ block accesses
+- For each sibling leaf node, access $q$ data blocks and sum up Salaries
+Total: $C_a = t + q + (a n) / q - 1  + ((a n) / q - 1) q = a n (1 + 1/q) + t - 1$
+
+When you have many duplicate keys, you should use underground (UG) layer, this means the leaf nodes point to blocks of pointers, which point to the actual data.
+
+#pagebreak()
+
+= Query Processing #text(fill: gray, size: 10pt)[Week 8]
 
 *External Sorting*: Sorting for large relations stored on disk, that cannot fit into memory.
 Divide and Conquer. Split a file of b blocks into L smaller sub-files. Load each sub-file into memory and sort it.
 Merge the sorted sub-files into a new sorted file.
 Cost is $O(2b(1 + log_M(L)))$. M is degree of merging, L is the number of initial sorted sub-files.
-
-#pagebreak()
-
-= Query Processing #text(fill: gray, size: 10pt)[Week 8]
 
 == Strategies for Select
 
