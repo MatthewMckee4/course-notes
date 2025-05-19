@@ -1040,14 +1040,12 @@ L1 blocks = 4000 / 4 = 1000 blocks
 
 The blocking factor of all pointer blocks is 1024 / 128 = 8
 
-L2 will be $ceil(100/8)$
+L2 will be $ceil(100/8) = 13$
 
 - L1: 4000 entries, 1000 blocks
-- L2: $8 dot.c 4000 = 32000$ pointers, $4000$ blocks
-- L3: $8 dot.c 32000 = 256000$ pointers, $32000$ blocks
-- L4: $8 dot.c 256000 = 2048000$ pointers, $256000$ blocks
+- L2: $13 dot 4000 = 52000$ blocks, 416000 pointers
 
-Now that L4 has more than 400,000 pointers we have enough space to
+Now that L4 has more than 400,000 pointers we have enough space to store all pointers to data blocks.
 
 #pagebreak()
 
@@ -1063,14 +1061,14 @@ Each distinct `DepartureAirport` has 400,000 / 4000 = 100 tuples (50 blocks)
 
 We are looking over 110 - 100 = 10 `DepartureAirport` values
 
-We can binary search to the value of 100, then we must look in the next ceil(10/4) blocks to get the next L1 entries up to 110
+We can binary search to the value of 100, then we must look in the next $ceil(10/4) = 3$ blocks to get the next L1 entries up to 110
 
 The expected cost for SQL 1 for secondary index is:
 
-$ "Total Cost" &approx log_2 (1000) + ceil(10/4) + (110 - 100) dot ("L1" + "L2" + "L3") + 10 dot (400000 / (4000)) \
-&approx 10 + 3 + 10 dot (1 + 8 + 8 dot 8) + 10 dot 100 \
-&approx 13 + 730 + 1000 \
-&approx 1743 $
+$ "Total Cost" &approx log_2 (1000) + ceil(10/4) + (110 - 100) dot ("L1" + "L2") + 10 dot (400000 / (4000)) \
+&approx 10 + 3 + 10 dot (13) + 10 dot 100 \
+&approx 13 + 140 + 1000 \
+&approx 1143 $
 
 The expected cost for SQL 1 for sorted files is:
 
@@ -1085,7 +1083,7 @@ Then, since we have $(10 dot 100) / 2 = 1000$ records to loop over until the las
 $ "Total Cost" &approx log_2 (200000) + 500 \
 &approx 518 $
 
-Since $518 < 1743$, we have that the second option (using sequential file) is the better and faster option.
+Since $518 < 1153$, we have that the second option (using sequential file) is the better and faster option.
 
 === Query Processing & Optimization
 
@@ -1229,6 +1227,63 @@ HAVING COUNT(*) = (
     ) AS Counts
 );
 ```
+
+=== File Organization & Indexing
+
+Consider the relation EMPLOYEE(SSN, SURNAME, SALARY), where SSN is the social security number being the primary key. There are NDV(SALARY) = 2000 distinct salary values uniformly distributed across all the employees (NDV stands for Number of Distinct Values). The relation EMPLOYEE has r = 40,000 records, the size of each record is R = 512 bytes, the block size is B = 1024 bytes, and any pointer has size P = 100 bytes. The file of the relation EMPLOYEE is not sorted by any of the attributes.
+
+A data engineer has built a B+ Tree Secondary Index over SALARY, where the tree node can store p = 5 tree node pointers (4 salary values) and the leaf node can store pL = 10 salary values/pointers. Consider the SQL2 query:
+SQL2:
+
+```sql
+SELECT * FROM EMPLOYEE WHERE Salary = x
+```
+
+#emph[
+a) Create the B+ Tree Index over SALARY based on the above-mentioned context. You may mention the required levels of the tree and the structure of the leaf-node level.
+]
+
+blocking factor of B/R = 2
+
+Since we have 2,000 distinct salary values uniformly distributed, we must have 2,000/10 = 200 leaf nodes
+
+Each salary has 40,000/2,000 = 20 records => 10 blocks
+
+Each leaf node block pointer will point to a block of pointers, this block of pointers will hold 10 pointers
+
+We can fit 10 pointers as bfr for pointer blocks is floor(1024/100) = 10.
+
+Root: 1 node with 5 pointers, 4 salary values
+level 1: 5 nodes with 5*5 = 25 pointers, 5*4 = 20 salary values
+level 2: 25 nodes with 25*5 = 125 pointers, 25*4 = 100 salary values
+level 3: 125 nodes with 125*5 = 625 pointers, 125*4 = 500 salary values
+level 4 (leaf nodes): 625 leaf nodes with 625*10 = 6250 pointers, 6250 salary values and 625 sibling pointers
+
+UG layer: 6250 pointers to 6250 pointer blocks.
+
+
+Calculate the number of the block accesses for SQL2 given the B+ Tree Index from the
+Question 2.(a)
+
+#emph[
+b) Calculate the number of the block accesses for SQL2 given the B+ Tree Index from the Question 2.(a).
+]
+
+You will have to access root plus all 4 layers to get to the leaf nodes, then you will have to access the pointer block which then you will have to read all 10 blocks to get all of the data:
+
+1 + 4 + 1 + 10 = 16 blocks accesses.
+
+#emph[
+c) The data engineer considers replacing the B+ Tree Index of Question 2.(a) with a Hash File structure with M > 1 buckets. Assuming that the hash function can uniformly distribute the tuples in each bucket given the SALARY attribute as the hashing field, find which should be the minimum M value, such as using the hash file for SQL2 requires a smaller number of block accesses than using the B+ Tree Index from the Question 2.(a). Explain your answer briefly.
+]
+
+We must have less than 16 block accesses to be better than the B+ Tree.
+
+Since the hash function uniformly distributes the salaries we can have no more than 10 blocks per bucket (20 tuples per bucket).
+
+Since we have 2000 distinct salaries, we should have M = 2000 buckets.
+
+Resulting in 10 block accesses when using this hash function.
 
 #pagebreak()
 
@@ -1389,7 +1444,7 @@ For the first clustering index over AGE in the relation EMPLOYEE,
 we first do the AGE range, we binary search over the AGE to get to 45. Then we have that the range covers $0.5 dot 100 = 50$ ranges. This covers half of the blocks, so 25 blocks, then for each block we load 10 data blocks.
 
 
-$ "Total Cost" &= log_2 (50) + 25 + 50 dot 10 \
+$ "Total Cost" &= log_2 (50) + 24 + 50 dot 10 \
 &= 5.64 + 25 + 500 \
 &= 530.64 $
 
@@ -1397,8 +1452,8 @@ This range query results in 500 tuples (500 blocks). We can keep this in memory,
 
 So our total block accesses is:
 
-$ "Total Cost" &= 530.64 + 250 ("write") \
-&= 780.64 $
+$ "Total Cost" &= 530.64 + 250 + 250 ("write") \
+&= 1030.64 $
 
 
 For the second clustering index over the ESSN in the relation Dependent.
