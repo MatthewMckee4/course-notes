@@ -316,6 +316,11 @@ First search within the index to find the block pointer, then access the data bl
 
 == Index Types
 
+
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto,),
+  rect(stroke: none)[
 === Primary Index
 
 Index field is an ordered key field of a sequential file.
@@ -325,13 +330,33 @@ Fixed length index entries $(K_i, P_i)$ where $K_i$ is the key value and $P_i$ i
 Anchor records: Sparse index, one per block.
 
 When an anchor record is deleted / updated, you must fully update the index.
+  ],
+  grid.cell(
+    image("assets/primary-index.png", width: 100%)
+  )
+)
 
+
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto,),
+  rect(stroke: none)[
 === Clustering Index
 
 Index field is an ordered non-key field of a sequential file.
 
 One index per distinct clustering value. Block pointer points at the first block of the cluster. The other blocks of the same cluster are contiguous and accessed via chain pointers.
+  ],
+  grid.cell(
+    image("assets/clustering-index.png", width: 100%)
+  )
+)
 
+
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto,),
+  rect(stroke: none)[
 === Secondary Index
 
 Index field is:
@@ -340,9 +365,16 @@ Index field is:
 
 Because: the file is not ordered according to the indexing field, thus, we cannot use anchor records;
 
-#figure(image("assets/secondary-index.png", width: 50%))
+You can use chain pointers in L2, to link pointer blocks.
+  ],
+  grid.cell(
+    image("assets/secondary-index.png", width: 100%)
+  )
+)
 
-*Analysing an Index*
+#pagebreak()
+
+== Analysing an Index
 
 Find the following information:
 - Index entry values (key field)
@@ -352,7 +384,7 @@ Find the following information:
 
 Compare the number of blocks in the index file with the number of blocks in the data file.
 
-=== Multilevel Index
+== Multilevel Index
 
 Since all index files are ordered on the indexing field, the indexing field is unique and each index entry is of fixed size.
 
@@ -988,9 +1020,9 @@ a) Provide a SQL statement that shows the number of airplanes assigned to more t
 ```sql
 SELECT Count(*)
 FROM (
-    SELECT FID, Count(*)
+    SELECT ID
     FROM FLIGHT
-    GROUP BY FID
+    GROUP BY ID
     HAVING COUNT(*) > 10
 ) as SubQuery
 ```
@@ -1001,12 +1033,12 @@ b) For those airline companies with more than 10 airplanes (fleet), provide a SQ
 ```sql
 SELECT AL.Name
 FROM (
-    SELECT AC, Count(*)
+    SELECT AC
     FROM AIRPLANE
     GROUP BY AC
     HAVING COUNT(*) > 10
 ) as SubQuery, AIRLINE as AL
-WHERE AC = AL.AC AND EXISTS (
+WHERE SubQuery.AC = AL.AC AND EXISTS (
     SELECT *
     FROM AIRPLANE AS AP, FLIGHT AS F
     WHERE AL.AC = AP.AC AND F.ID = AP.ID AND F.DepartureAirport = 'LHR'
@@ -1017,7 +1049,7 @@ WHERE AC = AL.AC AND EXISTS (
 )
 ```
 
-=== File Organization & Indexing
+=== File Organization & Indexing  #text(fill: gray, size: 10pt)[Secondary Index with pointer blocks]
 
 Consider the relation `FLIGHT` from Question 1. There are NDV(DepartureAirport) = 4000 distinct (different) Departure Airports uniformly distributed across all the flights (NDV stands for Number of Distinct Values). The values of the DepartureAirport range from 1 to 4000 (integer values). The relation FLIGHT has $r_F$ = 400,000 records, the size of each record is $R_F$ = 512 bytes, the size of DepartureAirport is 128 bytes, the block size is $B$ = 1024 bytes, and any pointer has size $P$ = 128 bytes.
 
@@ -1047,7 +1079,6 @@ L2 will be $ceil(100/8) = 13$
 
 Now that L4 has more than 400,000 pointers we have enough space to store all pointers to data blocks.
 
-#pagebreak()
 
 #emph[
 b) The data scientist from Question 2 (a) investigates whether the Secondary Index over the DepartureAirport is more efficient w.r.t. expected cost (in block accesses) than storing the FLIGHT on a file sorted by DepartureAirport.
@@ -1061,11 +1092,11 @@ Each distinct `DepartureAirport` has 400,000 / 4000 = 100 tuples (50 blocks)
 
 We are looking over 110 - 100 = 10 `DepartureAirport` values
 
-We can binary search to the value of 100, then we must look in the next $ceil(10/4) = 3$ blocks to get the next L1 entries up to 110
+We can binary search to the value of 100, then we must look in the next $ceil(9/4) = 3$ blocks to get the next L1 entries up to 110
 
 The expected cost for SQL 1 for secondary index is:
 
-$ "Total Cost" &approx log_2 (1000) + ceil(10/4) + (110 - 100) dot ("L1" + "L2") + 10 dot (400000 / (4000)) \
+$ "Total Cost" &approx log_2 (1000) + ceil(9/4) + (110 - 100) dot ("L1" + "L2") + 10 dot (400000 / (4000)) \
 &approx 10 + 3 + 10 dot (13) + 10 dot 100 \
 &approx 13 + 140 + 1000 \
 &approx 1143 $
@@ -1085,7 +1116,7 @@ $ "Total Cost" &approx log_2 (200000) + 500 \
 
 Since $518 < 1153$, we have that the second option (using sequential file) is the better and faster option.
 
-=== Query Processing & Optimization
+=== Query Processing & Optimization   #text(fill: gray, size: 10pt)[Clustering Index, Primary Index]
 
 Consider the relations: `FLIGHT(FID, ID*, DepartureAirport, DepartureTime, ArrivalAirport)` and` AIRPLANE(ID, Type, AC*)` from Question 1 with $r_F = 400,000$ records in FLIGHT and $r_A = 2000$ records in AIRPLANE. The `ID*` in FLIGHT is a foreign key referencing the ID primary key in AIRPLANE.
 
@@ -1228,7 +1259,7 @@ HAVING COUNT(*) = (
 );
 ```
 
-=== File Organization & Indexing
+=== File Organization & Indexing  #text(fill: gray, size: 10pt)[B+ Tree]
 
 Consider the relation EMPLOYEE(SSN, SURNAME, SALARY), where SSN is the social security number being the primary key. There are NDV(SALARY) = 2000 distinct salary values uniformly distributed across all the employees (NDV stands for Number of Distinct Values). The relation EMPLOYEE has r = 40,000 records, the size of each record is R = 512 bytes, the block size is B = 1024 bytes, and any pointer has size P = 100 bytes. The file of the relation EMPLOYEE is not sorted by any of the attributes.
 
@@ -1285,6 +1316,40 @@ Since we have 2000 distinct salaries, we should have M = 2000 buckets.
 
 Resulting in 10 block accesses when using this hash function.
 
+=== Query Processing & Optimization  #text(fill: gray, size: 10pt)[Clustering Index, B+ Tree, Primary Index]
+
+Consider the relations: EMPLOYEE(SSN, SALARY, AGE) and DEPARTMENT(DNUMBER, DNAME, MGR) with rE = 10,000 records in Employee (primary key is the SSN) and rD = 200 records in Department (primary key is DNUMBER). The MGR is a foreign key related to the manager of a department, referencing the SSN. The size of an EMPLOYEE record is 128 bytes, the size of a DEPARTMENT record is 128 bytes, and the size of the block is B = 512 bytes. SALARY ranges from £10,000 to £60,000 and AGE ranges from 21 to 60. Both attributes are assumed to be uniformly distributed across all the employees. There are NDV(AGE) = 40 distinct age values, which are all integers from 21 (inclusive) to 60 (inclusive). SALARY and AGE are assumed to be statistically independent. The size of any pointer is P = 32 bytes. The allocated memory is 1500 blocks.
+
+Consider the following query:
+```sql
+SELECT *
+FROM EMPLOYEE AS E, DEPARTMENT AS D
+WHERE E.SSN = D.MGR AND E.AGE >= 41 AND E.SALARY >= 50000
+```
+
+and consider the following available access paths:
+- Clustering Index over AGE in relation EMPLOYEE. AGE has size 32 bytes. Note, this clustering index is not a multi-level clustering index.
+- B+ Tree Secondary Index over SSN in relation EPMLOYEE with xSSN = 2 levels.
+- Primary Index over MGR in relation DEPARTMENT with xMGR = 1 level.
+
+#emph[
+a) Estimate the number of the tuples/rows returned from the SQL3 query.
+]
+
+$"sl"(E) = 1/5 * 1/2 = 1/10$
+
+So we have $200 * 1/10 = 20$ tuples returned from SQL3.
+
+#emph[
+For each of the following processing methods (Method 1 and Method 2), briefly explain the steps you follow to calculate the expected number of block accesses and the required memory for processing the SQL3 query using the available access paths. Then, select the best method in terms of block accesses.
+
+b) Method 1: First process the join condition: E.SSN = D.MGR and then process the
+selection conditions: E.AGE >= 41 AND E.SALARY >= 50000
+
+c) Method 2: First process the selection conditions: E.AGE >= 41 AND E.SALARY >=
+50000 and then process the join condition: E.SSN = D.MGR
+]
+
 #pagebreak()
 
 == 2022
@@ -1336,7 +1401,7 @@ WHERE Price > 100000 AND MID IN (
 GROUP BY MID
 ```
 
-=== File Organization & Indexing
+=== File Organization & Indexing  #text(fill: gray, size: 10pt)[Multi-level Clustering Index]
 
 Consider the relation `EMPLOYEE(SSN, Surname, Salary, Age, DNO)`, where SSN is the social security number and DNO is the department number. Consider the following context:
 - The number of the distinct values of DNO is n = 100. The DNO values are the integers {1, 2, …, 100}. The DNO values are uniformly distributed across the employee tuples.
@@ -1407,7 +1472,7 @@ The clustering index results in $3 + 50$ for any x.
 
 So we need x = 1. Otherwise linear search requires at least 100 block accesses. which will always be greater than the clustering index.
 
-=== Query Processing and Optimization
+=== Query Processing and Optimization #text(fill: gray, size: 10pt)[Clustering Index]
 
 Consider the relations EMPLOYEE(SSN, SURNAME, AGE) and DEPENDENT(ESSN, NAME) with rE = 1,000 tuples in Employee and rD = 500 tuples in Dependent. Each attribute in the EMPLOYEE has size 50 bytes. Each attribute in the DEPENDENT has size 50 bytes with NDV(ESSN) = 50 distinct social security numbers (NDV stands for Number of Distinct Values) in DEPENDENT, and NDV(AGE) = 100 distinct age values in EMPLOYEE. The ESSN values are uniformly distributed across the DEPENDENT tuples. The AGE values are uniformly distributed across the EMPLOYEE tuples and range from 25 (inclusive) to 65 (inclusive). The size of the block is B = 256 bytes and any pointer has size V = 50 bytes. Consider the following query:
 ```sql
@@ -1471,3 +1536,119 @@ From that we get 500 tuples, which we then half (from the range query condition)
 
 $ "Total Cost" &= 5140 + 250 ("write") \
 &= 5690 $
+
+= Other Examples
+
+== SQL Questions
+
+=== Question 1
+
+Consider the following schema:
+```sql
+STUDENT(StudentID, Name, Age, DepartmentID)
+DEPARTMENT(DepartmentID, Name, Building)
+COURSE(CourseID, Title, Credits)
+ENROLLMENT(StudentID*, CourseID*, Grade)
+```
+
+Question: Write a SQL query to find the average grade for each course, but only include courses where the average grade is higher than the overall average grade across all courses.
+
+```sql
+SELECT C.CourseID, C.Title, AVG(E.Grade) as AvgGrade
+FROM COURSE C
+JOIN ENROLLMENT E ON C.CourseID = E.CourseID
+GROUP BY C.CourseID, C.Title
+HAVING AVG(E.Grade) > (
+    SELECT AVG(Grade)
+    FROM ENROLLMENT
+)
+```
+
+=== Question 2
+
+Using the same schema:
+Question: Find all departments that have at least 3 students enrolled in courses with grades above 80.
+
+```sql
+SELECT D.DepartmentID, D.Name
+FROM DEPARTMENT D
+JOIN STUDENT S ON D.DepartmentID = S.DepartmentID
+JOIN ENROLLMENT E ON S.StudentID = E.StudentID
+WHERE E.Grade > 80
+GROUP BY D.DepartmentID, D.Name
+HAVING COUNT(DISTINCT S.StudentID) >= 3
+```
+
+=== Question 3
+
+Consider this schema:
+```sql
+PRODUCT(ProductID, Name, Price, CategoryID)
+CATEGORY(CategoryID, Name)
+SALE(SaleID, ProductID*, Date, Quantity)
+```
+
+Question: For each category, find the product that has generated the highest total revenue ($"Price" * "Quantity"$) and show the category name, product name, and total revenue.
+
+```sql
+SELECT C.Name as CategoryName, P.Name as ProductName,
+       SUM(P.Price * S.Quantity) as TotalRevenue
+FROM CATEGORY C
+JOIN PRODUCT P ON C.CategoryID = P.CategoryID
+JOIN SALE S ON P.ProductID = S.ProductID
+GROUP BY C.CategoryID, C.Name, P.ProductID, P.Name
+HAVING SUM(P.Price * S.Quantity) = (
+    SELECT MAX(TotalRev)
+    FROM (
+        SELECT SUM(P2.Price * S2.Quantity) as TotalRev
+        FROM PRODUCT P2
+        JOIN SALE S2 ON P2.ProductID = S2.ProductID
+        WHERE P2.CategoryID = C.CategoryID
+        GROUP BY P2.ProductID
+    ) as SubQuery
+)
+```
+
+=== Question 4
+
+Using the same schema:
+Question: Find the categories where the average product price is higher than the overall average product price across all categories.
+
+```sql
+SELECT C.CategoryID, C.Name, AVG(P.Price) as AvgCategoryPrice
+FROM CATEGORY C
+JOIN PRODUCT P ON C.CategoryID = P.CategoryID
+GROUP BY C.CategoryID, C.Name
+HAVING AVG(P.Price) > (
+    SELECT AVG(Price)
+    FROM PRODUCT
+)
+```
+
+=== Question 5
+
+Consider this schema:
+```sql
+EMPLOYEE(EmployeeID, Name, DepartmentID, Salary)
+DEPARTMENT(DepartmentID, Name, Location)
+PROJECT(ProjectID, Name, Budget)
+ASSIGNMENT(EmployeeID*, ProjectID*, Hours)
+```
+
+Question: Find all departments where the average salary of employees working on projects with budgets over 100000 is higher than the department's overall average salary.
+
+```sql
+SELECT D.DepartmentID, D.Name
+FROM DEPARTMENT D
+JOIN EMPLOYEE E ON D.DepartmentID = E.DepartmentID
+JOIN ASSIGNMENT A ON E.EmployeeID = A.EmployeeID
+JOIN PROJECT P ON A.ProjectID = P.ProjectID
+WHERE P.Budget > 100000
+GROUP BY D.DepartmentID, D.Name
+HAVING AVG(E.Salary) > (
+    SELECT AVG(Salary)
+    FROM EMPLOYEE
+    WHERE DepartmentID = D.DepartmentID
+)
+```
+
