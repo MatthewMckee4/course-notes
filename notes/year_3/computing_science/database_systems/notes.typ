@@ -970,11 +970,11 @@ Refined Expected Cost: $3 dot.c (b_R + b_S) + ("js" dot.c |R| dot.c (|S|) / f_"R
 
 #pagebreak()
 
-= Example Answers
+= Past Papers
 
-== Relational Modelling & SQL
+== 2024
 
-=== Example 1
+=== Relational Modelling & SQL
 
 `AIRLINE(AC, Name)`
 
@@ -988,9 +988,9 @@ a) Provide a SQL statement that shows the number of airplanes assigned to more t
 ```sql
 SELECT Count(*)
 FROM (
-    SELECT ID, Count(*)
+    SELECT FID, Count(*)
     FROM FLIGHT
-    GROUP BY ID
+    GROUP BY FID
     HAVING COUNT(*) > 10
 ) as SubQuery
 ```
@@ -1009,17 +1009,15 @@ FROM (
 WHERE AC = AL.AC AND EXISTS (
     SELECT *
     FROM AIRPLANE AS AP, FLIGHT AS F
-    WHERE AL.AC = AP.AC AND F.ID = AP.ID AND F.DepartureAirport == "LHR"
+    WHERE AL.AC = AP.AC AND F.ID = AP.ID AND F.DepartureAirport = 'LHR'
 ) AND EXISTS (
     SELECT *
     FROM AIRPLANE AS AP, FLIGHT AS F
-    WHERE AL.AC = AP.AC AND F.ID = AP.ID AND F.DepartureAirport == "GLA"
+    WHERE AL.AC = AP.AC AND F.ID = AP.ID AND F.DepartureAirport = 'GLA'
 )
 ```
 
-== File Organization & Indexing
-
-=== Example 1
+=== File Organization & Indexing
 
 Consider the relation `FLIGHT` from Question 1. There are NDV(DepartureAirport) = 4000 distinct (different) Departure Airports uniformly distributed across all the flights (NDV stands for Number of Distinct Values). The values of the DepartureAirport range from 1 to 4000 (integer values). The relation FLIGHT has $r_F$ = 400,000 records, the size of each record is $R_F$ = 512 bytes, the size of DepartureAirport is 128 bytes, the block size is $B$ = 1024 bytes, and any pointer has size $P$ = 128 bytes.
 
@@ -1042,10 +1040,12 @@ L1 blocks = 4000 / 4 = 1000 blocks
 
 The blocking factor of all pointer blocks is 1024 / 128 = 8
 
+L2 will be $ceil(100/8)$
+
 - L1: 4000 entries, 1000 blocks
-- L2: $8 dot.c 1000 = 8000$ pointers, 1000 blocks
-- L3: $8 dot.c 8000 = 64000$ pointers, 8000 blocks
-- L4: $8 dot.c 64000 = 512000$ pointers, 64000 blocks
+- L2: $8 dot.c 4000 = 32000$ pointers, $4000$ blocks
+- L3: $8 dot.c 32000 = 256000$ pointers, $32000$ blocks
+- L4: $8 dot.c 256000 = 2048000$ pointers, $256000$ blocks
 
 Now that L4 has more than 400,000 pointers we have enough space to
 
@@ -1067,10 +1067,10 @@ We can binary search to the value of 100, then we must look in the next ceil(10/
 
 The expected cost for SQL 1 for secondary index is:
 
-$ "Total Cost" &approx log_2 (1000) + ceil(10/4) + (110 - 100) dot ("L1" + "L2" + "L3") + 10 dot (400000 / (4000 * 2)) \
-&approx 10 + 3 + 10 dot (1 + 8 + 8 dot 8) + 10 dot 50 \
-&approx 13 + 730 + 500 \
-&approx 1243 $
+$ "Total Cost" &approx log_2 (1000) + ceil(10/4) + (110 - 100) dot ("L1" + "L2" + "L3") + 10 dot (400000 / (4000)) \
+&approx 10 + 3 + 10 dot (1 + 8 + 8 dot 8) + 10 dot 100 \
+&approx 13 + 730 + 1000 \
+&approx 1743 $
 
 The expected cost for SQL 1 for sorted files is:
 
@@ -1085,11 +1085,9 @@ Then, since we have $(10 dot 100) / 2 = 1000$ records to loop over until the las
 $ "Total Cost" &approx log_2 (200000) + 500 \
 &approx 518 $
 
-Since $518 < 1243$, we have that the second option (using sequential file) is the better and faster option.
+Since $518 < 1743$, we have that the second option (using sequential file) is the better and faster option.
 
-== Query Processing & Optimization
-
-=== Example 1
+=== Query Processing & Optimization
 
 Consider the relations: `FLIGHT(FID, ID*, DepartureAirport, DepartureTime, ArrivalAirport)` and` AIRPLANE(ID, Type, AC*)` from Question 1 with $r_F = 400,000$ records in FLIGHT and $r_A = 2000$ records in AIRPLANE. The `ID*` in FLIGHT is a foreign key referencing the ID primary key in AIRPLANE.
 
@@ -1134,9 +1132,9 @@ In the clustering index, we have entries of size 32 + 32 = 64 bytes
 
 Therefore the blocking factor of the clustering index is 1024 / 64 = 16
 
-So we have 400,000 / 16 = 25,000 blocks in the clustering index
+So we have 2000 / 16 = 125 blocks in the clustering index
 
-For `FLIGHT` relation we have:
+For the `FLIGHT` relation we have:
 
 $"bfr"_F = 1024 / 512 = 2$
 
@@ -1144,7 +1142,7 @@ So we have $b_F = 400000 / 2 = 200000$ blocks
 
 $s_F = (|F|)/"NVD"("ID") = 400000 / 2000 = 200$
 
-For `AIRPLANE` relation we have:
+For the `AIRPLANE` relation we have:
 
 $"bfr"_A = 1024 / 256 = 4$
 
@@ -1154,10 +1152,13 @@ Using the Clustering index
 
 The join cost for a clustering index is
 
+#let clustering_index_block_accesses = 214500
+
 $ "Total Cost" &=b_A + |A| dot (x_F + ceil(s_F/f_F))  \
-&= 500 + 2000 dot (log_2 (2000 / 16) + 100) \
-&= 500 + 214000 \
-&= 214500 $
+&= 500 + 2000 dot (log_2 (2000 / 16) + ceil(200/2)) \
+&approx 500 + 2000 dot (7 + 100) \
+&approx 500 + 214000 \
+&approx #clustering_index_block_accesses $
 
 From the join condition we get a result of 400,000 tuples.
 
@@ -1170,6 +1171,135 @@ So the total cost is 214,500 + 50,000 = 264,500 block accesses.
 
 For the primary index
 
+#let primary_index_block_accesses = 1400000
+
 $ "Total Cost" &=b_F + |F| dot (x_A + 1)  \
 &= 200000 + 400000 dot 3 \
-&= 1400000 $
+&= #primary_index_block_accesses $
+
+Similarly for the clustering index, we can load the result of the join (100,000 blocks) in memory and execute the range condition resulting in 50,000 output blocks
+
+So Method 1 (using the clustering index) is faster since #clustering_index_block_accesses < #primary_index_block_accesses.
+
+#pagebreak()
+
+== 2023
+
+=== Relational Modelling and SQL
+
+`MANUFACTURER(ID, Name)`
+
+`VEHICLE(NumberPlate, Year, MID*)`
+
+`RETAILER(RID, Name)`
+
+`SALES(TID*, VID*, Price)`
+
+#emph[
+a) Provide a SQL statement that shows the number of the manufacturers who have produced more than 500 vehicles since 2020?
+]
+
+```sql
+SELECT COUNT(*)
+FROM (
+    SELECT V.MID
+    VEHICLE as V
+    WHERE V.YEAR >= 2020
+    GROUP BY V.MID
+    HAVING COUNT(*) > 500
+) AS SubQuery
+```
+
+#emph[
+b) Provide a SQL statement that shows the retailers' names and RIDs, who have sold
+the least vehicles.
+]
+
+```sql
+SELECT R.Name, R.RID
+FROM RETAILER R
+JOIN SALES S ON R.RID = S.TID
+GROUP BY R.RID, R.Name
+HAVING COUNT(*) = (
+    SELECT MIN(VehicleCount)
+    FROM (
+        SELECT COUNT(*) AS VehicleCount
+        FROM SALES
+        GROUP BY TID
+    ) AS Counts
+);
+```
+
+#pagebreak()
+
+== 2022
+
+=== Relational Modelling and SQL
+
+`MANUFACTURER(ID, Name)`
+
+`VEHICLE(NumberPlate, Price, Year, MID)`
+
+#emph[
+a) For each manufacturer, show the price of its most expensive car(s) using the GROUP BY clause in your SQL query. It is possible that more than one car has the same price.
+]
+
+```sql
+SELECT M.ID, M.Name, MAX(V.Price)
+FROM Manufacturer as M, Vehicle as V
+WHERE M.ID = V.MID
+GROUP BY M.ID
+```
+
+#emph[
+b) For each manufacturer, show the price of its most expensive car(s) without using the GROUP BY clause in your SQL query. It is possible that more than one car has the same price.
+]
+
+```sql
+SELECT M.ID, M.Name, V.Price
+FROM Manufacturer as M, Vehicle as V
+WHERE M.ID = V.MID AND V.Price = (
+    SELECT MAX(VSub.Price)
+    FROM Vehicle VSub
+    WHERE VSub.MID = M.ID
+)
+```
+
+#emph[
+c) From each manufacturer, which has produced more than 1000 cars, how many of these cars have a price greater than £100,000.
+]
+
+```sql
+SELECT MID, COUNT(*)
+FROM VEHICLE
+WHERE Price > 100000 AND MID IN (
+    SELECT V.MID
+    FROM VEHICLE AS V
+    GROUP BY V.MID
+    HAVING COUNT(*) > 1000
+)
+GROUP BY MID
+```
+
+=== File Organization & Indexing
+
+Consider the relation `EMPLOYEE(SSN, Surname, Salary, Age, DNO)`, where SSN is the social security number and DNO is the department number. Consider the following context:
+- The number of the distinct values of DNO is n = 100. The DNO values are the integers {1, 2, …, 100}. The DNO values are uniformly distributed across the employee tuples.
+- The relation EMPLOYEE has r = 10,000 tuples, the size of each record is R = 250 bytes (DNO = 50 bytes, Salary = 100 bytes, Age = 50 bytes, SSN = 50 bytes), the block size is B = 512 bytes, and any pointer has size V = 10 bytes.
+- The file of the relation EMPLOYEE is sorted by the non-key, ordering attribute DNO.
+- The SQL1 query below fetches those employees working in the departments 10, 11, …, 29.
+
+```sql
+SELECT * FROM EMPLOYEE WHERE DNO >= 10 AND DNO <= 29
+```
+
+#emph[
+a) Calculate the number of the block accesses for SQL1 using a linear search with exiting feature over the ordering, uniformly distributed, non-key DNO attribute.
+]
+
+$"sl" ("DNO" >= 10 "AND" "DNO" <= 29) = 0.3$
+
+$r = 10000$
+
+$r dot "sl" = 3000$
+
