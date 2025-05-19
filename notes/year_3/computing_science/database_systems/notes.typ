@@ -3,7 +3,6 @@
 #set text(size: 10pt)
 
 #outline(title: none)
-
 #pagebreak()
 
 = Database Fundamentals & Relational Model  #text(fill: gray, size: 10pt)[Week 1]
@@ -439,7 +438,7 @@ Calculate: maximum order p of B-Tree and B+ Tree fitting each node in one block.
 Recall: internal B+ Tree node has p tree pointers and p-1 keys
 Recall: B-Tree node has p tree pointers; p-1 keys; p-1 data-pointers.
 
-B+ TreeInternal Node:
+B+ Tree Internal Node:
 - Step 1: Size of a B+ Internal Node: $p*P + (p-1)*V$
 - Step 2: To fit into a block we have: $p*P + (p-1)*V ≤ B$ or $p ≤ (B + V) / (P + V)$
 - Step 3: The maximum p order is $p = 34$ (i.e., 34 tree pointers; 33 key values)
@@ -968,3 +967,209 @@ Refined Expected Cost: $3 dot.c (b_R + b_S) + ("js" dot.c |R| dot.c (|S|) / f_"R
     image("assets/holistic-optimisation-5.png", width: 100%)
   ),
 )
+
+#pagebreak()
+
+= Example Answers
+
+== Relational Modelling & SQL
+
+=== Example 1
+
+`AIRLINE(AC, Name)`
+
+`AIRPLANE(ID, Type, AC*)`
+
+`FLIGHT(FID, ID*, DepartureAirport, DepartureTime, ArrivalAirport)`
+#emph[
+a) Provide a SQL statement that shows the number of airplanes assigned to more than 10 flights.
+]
+
+```sql
+SELECT Count(*)
+FROM (
+    SELECT ID, Count(*)
+    FROM FLIGHT
+    GROUP BY ID
+    HAVING COUNT(*) > 10
+) as SubQuery
+```
+#emph[
+b) For those airline companies with more than 10 airplanes (fleet), provide a SQL statement that shows the companies' names that have scheduled flights from the departure airports: London Heathrow ("LHR") and Glasgow International ("GLA").
+]
+
+```sql
+SELECT AL.Name
+FROM (
+    SELECT AC, Count(*)
+    FROM AIRPLANE
+    GROUP BY AC
+    HAVING COUNT(*) > 10
+) as SubQuery, AIRLINE as AL
+WHERE AC = AL.AC AND EXISTS (
+    SELECT *
+    FROM AIRPLANE AS AP, FLIGHT AS F
+    WHERE AL.AC = AP.AC AND F.ID = AP.ID AND F.DepartureAirport == "LHR"
+) AND EXISTS (
+    SELECT *
+    FROM AIRPLANE AS AP, FLIGHT AS F
+    WHERE AL.AC = AP.AC AND F.ID = AP.ID AND F.DepartureAirport == "GLA"
+)
+```
+
+== File Organization & Indexing
+
+=== Example 1
+
+Consider the relation `FLIGHT` from Question 1. There are NDV(DepartureAirport) = 4000 distinct (different) Departure Airports uniformly distributed across all the flights (NDV stands for Number of Distinct Values). The values of the DepartureAirport range from 1 to 4000 (integer values). The relation FLIGHT has $r_F$ = 400,000 records, the size of each record is $R_F$ = 512 bytes, the size of DepartureAirport is 128 bytes, the block size is $B$ = 1024 bytes, and any pointer has size $P$ = 128 bytes.
+
+Consider also the SQL1 query:
+SQL1:
+
+```sql
+SELECT * FROM FLIGHT
+WHERE DepartureAirport >= 100 AND DepartureAirport < 110
+```
+#emph[
+a) A data scientist decides to create a Secondary Index over the DepartureAirport attribute (non-sorting, non-key attribute). Describe the structure of this index.
+]
+
+L1 index entry: 128 + 128 = 256 bytes
+
+L1 blocking factory = 1024 / 256 = 4
+
+L1 blocks = 4000 / 4 = 1000 blocks
+
+The blocking factor of all pointer blocks is 1024 / 128 = 8
+
+- L1: 4000 entries, 1000 blocks
+- L2: $8 dot.c 1000 = 8000$ pointers, 1000 blocks
+- L3: $8 dot.c 8000 = 64000$ pointers, 8000 blocks
+- L4: $8 dot.c 64000 = 512000$ pointers, 64000 blocks
+
+Now that L4 has more than 400,000 pointers we have enough space to
+
+#pagebreak()
+
+#emph[
+b) The data scientist from Question 2 (a) investigates whether the Secondary Index over the DepartureAirport is more efficient w.r.t. expected cost (in block accesses) than storing the FLIGHT on a file sorted by DepartureAirport.
+
+Calculate the expected cost for SQL1 using the Secondary Index from Question 2 (a) and calculate the expected cost for SQL1 using a sequential/sorted file of the relation FLIGHT sorted by DepartureAirport on average. Which is the best option for SQL1?
+
+Note: you do not need to calculate the cost for sorting the file w.r.t. DepartureAirport
+]
+
+Each distinct `DepartureAirport` has 400,000 / 4000 = 100 tuples (50 blocks)
+
+We are looking over 110 - 100 = 10 `DepartureAirport` values
+
+We can binary search to the value of 100, then we must look in the next ceil(10/4) blocks to get the next L1 entries up to 110
+
+The expected cost for SQL 1 for secondary index is:
+
+$ "Total Cost" &approx log_2 (1000) + ceil(10/4) + (110 - 100) dot ("L1" + "L2" + "L3") + 10 dot (400000 / (4000 * 2)) \
+&approx 10 + 3 + 10 dot (1 + 8 + 8 dot 8) + 10 dot 50 \
+&approx 13 + 730 + 500 \
+&approx 1243 $
+
+The expected cost for SQL 1 for sorted files is:
+
+The size of each `Flight` record is 512 bytes, so we have a blocking factor of bfr = 1024 / 512 = 2
+
+So we can store the 400,000 blocks in 400,000 / 2 = 200,000 blocks.
+
+Using binary search on the sorted file, we can assume we will reach the first record with `DepartureAirport` of 100 after $log_2 (200000) approx 18$ block accesses.
+
+Then, since we have $(10 dot 100) / 2 = 1000$ records to loop over until the last record with `DepartureAirport` of 110.
+
+$ "Total Cost" &approx log_2 (200000) + 500 \
+&approx 518 $
+
+Since $518 < 1243$, we have that the second option (using sequential file) is the better and faster option.
+
+== Query Processing & Optimization
+
+=== Example 1
+
+Consider the relations: `FLIGHT(FID, ID*, DepartureAirport, DepartureTime, ArrivalAirport)` and` AIRPLANE(ID, Type, AC*)` from Question 1 with $r_F = 400,000$ records in FLIGHT and $r_A = 2000$ records in AIRPLANE. The `ID*` in FLIGHT is a foreign key referencing the ID primary key in AIRPLANE.
+
+Moreover, NDV(DepartureAirport) = 4000, DepartureAirport ranges from 1 to 4000 and is uniformly distributed across all tuples in FLIGHT.
+`NDV(ID*)` = 2000 in relation FLIGHT and the ID values in FLIGHT are uniformly distributed.
+
+The size of a FLIGHT and AIRPLANE record is $R_F = 512$ bytes and $R_A = 256$ bytes, respectively. The block size is B = 1024 bytes, and any pointer has size P = 32 bytes. The Type (in AIRLANE) and FID (in FLIGHT) have size 64 bytes each. The size of DepartureAirport is 128 bytes. The allocated memory is 150,000 blocks.
+
+Consider the SQL2 query:
+```sql
+SELECT F.FID, A.Type, F.DepartureAirport
+FROM FLIGHT AS F, AIRPLANE AS A
+WHERE A.ID = F.ID AND F.DepartureAirport >= 2001
+```
+
+and the following available access paths:
+- Clustering Index over ID in relation FLIGHT. ID has size 32 bytes. Note, this clustering index is not a multi-level clustering index.
+- Primary Index over ID in relation AIRPLANE with $x_("ID") = 2$ levels. ID has size 32 bytes
+
+#emph[
+a) Estimate the number of the rows returned from the SQL2 query.
+]
+
+$"sl" (A) = 2000 / 4000 = 0.5$
+
+So we have $400000 dot 0.5 = 200000$ tuples returned from SQL2.
+
+#emph[
+b)A data scientist proposes only the following strategy for executing the SQL2 query:
+
+First execute the join condition A.ID = F.ID using the index-based nested loop join method
+and then, execute the range condition F.DepartureAirport >= 2001.
+
+Since there are two indexes, the scientist examines both methods: one using the Clustering Index
+and the other one using the Primary Index in their strategy. Which of these two methods is the
+best for the proposed strategy with respect to the expected cost in the number of block accesses?
+
+For convenience, use $log_2 (125) approx 7$.
+]
+
+In the clustering index, we have entries of size 32 + 32 = 64 bytes
+
+Therefore the blocking factor of the clustering index is 1024 / 64 = 16
+
+So we have 400,000 / 16 = 25,000 blocks in the clustering index
+
+For `FLIGHT` relation we have:
+
+$"bfr"_F = 1024 / 512 = 2$
+
+So we have $b_F = 400000 / 2 = 200000$ blocks
+
+$s_F = (|F|)/"NVD"("ID") = 400000 / 2000 = 200$
+
+For `AIRPLANE` relation we have:
+
+$"bfr"_A = 1024 / 256 = 4$
+
+So we have $b_A = 2000 / 4 = 500$ blocks
+
+Using the Clustering index
+
+The join cost for a clustering index is
+
+$ "Total Cost" &=b_A + |A| dot (x_F + ceil(s_F/f_F))  \
+&= 500 + 2000 dot (log_2 (2000 / 16) + 100) \
+&= 500 + 214000 \
+&= 214500 $
+
+From the join condition we get a result of 400,000 tuples.
+
+We can then store the tuples (64 + 64 + 128) = 256
+
+This gives 100,000 blocks which we can store in memory, and apply the range condition, to get 50,000 blocks of output
+
+So the total cost is 214,500 + 50,000 = 264,500 block accesses.
+
+
+For the primary index
+
+$ "Total Cost" &=b_F + |F| dot (x_A + 1)  \
+&= 200000 + 400000 dot 3 \
+&= 1400000 $
