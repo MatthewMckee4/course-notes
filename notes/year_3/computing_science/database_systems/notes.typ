@@ -1297,9 +1297,122 @@ SELECT * FROM EMPLOYEE WHERE DNO >= 10 AND DNO <= 29
 a) Calculate the number of the block accesses for SQL1 using a linear search with exiting feature over the ordering, uniformly distributed, non-key DNO attribute.
 ]
 
-$"sl" ("DNO" >= 10 "AND" "DNO" <= 29) = 0.3$
+We have these following properties based on the `Employee` table.
 
-$r = 10000$
+$"bfr"_E = floor(512 / 250) = 2$
 
-$r dot "sl" = 3000$
+Because we are doing a linear search, so we will look through all records until we reach the end of DNO = 29. This results in 3,000 tuples which is 2900 / 2 = 1,450 blocks.
+And writing the data which is 2,000 tuples so 1000 blocks.
 
+Thus, the total block accesses for executing and writing the query is:
+
+$ "Total Cost" &= 1450 + 1000 \
+&= 2450 $
+
+#emph[
+b) Create a multi-level Clustering Index over the DNO attribute and calculate the number of the
+block accesses for SQL1.
+]
+
+Since we have $"DNV" ("DNO") = 100$, and a blocking factor of $"bfr" = floor(512 / (10 + 50)) = 8$
+
+- L1: 1 block, 8 pointers
+- L2: 8 blocks, $8 dot 8 = 64$ pointers
+- L3: 64 blocks, $ 8 dot 64 = 512$ pointers
+
+This is acting like a B+ Tree, where L3 is the leaf nodes, these 512 pointers point to the data blocks with chain pointers to the next data block for that specific DNO.
+
+Leaf node can have 8 key value pairs, and a sibling pointer (480 + 10) = 490 bytes.
+
+After locating the leaf node containing DNO = 10, we must access (via sibling pointers) a further $ceil(20 / 8) = 3$ leaf nodes (blocks)
+
+Each leaf node pointer will point to 10,000 / 100 = 100 records so 50 data blocks with chain pointers
+
+That means the cost is:
+
+$ "Total Cost" &= 3 + 3 + 20 dot 50 \
+&= 1006 $
+
+#emph[
+c) Consider the following SQL2 query for a specific DNO value x:
+SQL2:
+
+```sql
+SELECT * FROM EMPLOYEE WHERE DNO = x
+```
+
+Find the maximum DNO value x such that searching using the linear search with exiting feature
+requires a smaller number of block accesses than using the Clustering index in Q2(b). Explain
+your answer.
+]
+
+Linear search using with exiting feature results in $x dot 50$ block accesses.
+
+The clustering index results in $3 + 50$ for any x.
+
+So we need x = 1. Otherwise linear search requires at least 100 block accesses. which will always be greater than the clustering index.
+
+=== Query Processing and Optimization
+
+Consider the relations EMPLOYEE(SSN, SURNAME, AGE) and DEPENDENT(ESSN, NAME) with rE = 1,000 tuples in Employee and rD = 500 tuples in Dependent. Each attribute in the EMPLOYEE has size 50 bytes. Each attribute in the DEPENDENT has size 50 bytes with NDV(ESSN) = 50 distinct social security numbers (NDV stands for Number of Distinct Values) in DEPENDENT, and NDV(AGE) = 100 distinct age values in EMPLOYEE. The ESSN values are uniformly distributed across the DEPENDENT tuples. The AGE values are uniformly distributed across the EMPLOYEE tuples and range from 25 (inclusive) to 65 (inclusive). The size of the block is B = 256 bytes and any pointer has size V = 50 bytes. Consider the following query:
+```sql
+SELECT *
+FROM EMPLOYEE AS E, DEPENDENT AS D
+WHERE E.SSN = D.ESSN AND E.AGE >= 45
+```
+and consider the following available access paths:
+- Clustering Index over the AGE in the relation EMPLOYEE.
+- Clustering Index over the ESSN in the relation DEPENDENT.
+
+#emph[
+a) Calculate the number of entries and number of blocks of the two Clustering Indexes.
+]
+
+For the first clustering index, we have that the entry size is (50 + 50) = 100 bytes, so our bfr is $floor(256/100) = 2$.
+
+We have $100 / 2 = 50$ blocks in the clustering index, with 100 entries.
+
+For the second clustering index, we have that then entry size is (50 + 50) = 100 bytes, so our bfr is $floor(256/100) = 2$.
+
+We have $50 / 2 = 25$ blocks in the clustering index, with 50 entries.
+
+#emph[
+b) Provide two processing methods using the Clustering Indexes from Question 3(a) and select the best one in terms of block accesses.
+]
+
+The blocking factor for the Employee table is $floor(256/150) = 1$
+
+we have that the selection selectivity is $(65 - 45)/(65 - 25) = 20/40 = 0.5$
+
+For the first clustering index over AGE in the relation EMPLOYEE,
+
+we first do the AGE range, we binary search over the AGE to get to 45. Then we have that the range covers $0.5 dot 100 = 50$ ranges. This covers half of the blocks, so 25 blocks, then for each block we load 10 data blocks.
+
+
+$ "Total Cost" &= log_2 (50) + 25 + 50 dot 10 \
+&= 5.64 + 25 + 500 \
+&= 530.64 $
+
+This range query results in 500 tuples (500 blocks). We can keep this in memory, and load the Dependent table into memory too, then do the join in memory, resulting 250 tuples. Which we can store in 250 blocks.
+
+So our total block accesses is:
+
+$ "Total Cost" &= 530.64 + 250 ("write") \
+&= 780.64 $
+
+
+For the second clustering index over the ESSN in the relation Dependent.
+
+We first do the join. With the outer loop as Employee.
+
+For each employee SSN, we have to binary search to see if that ESSN exists in the clustering index, This will only happen for 50 employees as $"NVD" ("ESSN") = 50$.
+For those 50 employees, we get the associated 10 blocks for that SSN (ESSN).
+
+$ "Total Cost" &= 1000 dot log_2 (25) + 50 dot 10 \
+&= 4640 + 500 \
+&= 5140 $
+
+From that we get 500 tuples, which we then half (from the range query condition) to get 250 tuples as the output.
+
+$ "Total Cost" &= 5140 + 250 ("write") \
+&= 5690 $
