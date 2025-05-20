@@ -1245,10 +1245,10 @@ the least vehicles.
 ]
 
 ```sql
-SELECT R.Name, R.RID
+SELECT R.RID, R.Name
 FROM RETAILER R
 JOIN SALES S ON R.RID = S.TID
-GROUP BY R.RID, R.Name
+GROUP BY R.RID
 HAVING COUNT(*) = (
     SELECT MIN(VehicleCount)
     FROM (
@@ -1284,14 +1284,13 @@ Each leaf node block pointer will point to a block of pointers, this block of po
 
 We can fit 10 pointers as bfr for pointer blocks is floor(1024/100) = 10.
 
-Root: 1 node with 5 pointers, 4 salary values
-level 1: 5 nodes with 5*5 = 25 pointers, 5*4 = 20 salary values
-level 2: 25 nodes with 25*5 = 125 pointers, 25*4 = 100 salary values
-level 3: 125 nodes with 125*5 = 625 pointers, 125*4 = 500 salary values
-level 4 (leaf nodes): 625 leaf nodes with 625*10 = 6250 pointers, 6250 salary values and 625 sibling pointers
+- Root: 1 node with 5 pointers, 4 salary values
+- level 1: 5 nodes with 5*5 = 25 pointers, 5*4 = 20 salary values
+- level 2: 25 nodes with 25*5 = 125 pointers, 25*4 = 100 salary values
+- level 3: 125 nodes with 125*5 = 625 pointers, 125*4 = 500 salary values
+- level 4 (leaf nodes): 625 leaf nodes with 625*10 = 6250 pointers, 6250 salary values and 625 sibling pointers
 
 UG layer: 6250 pointers to 6250 pointer blocks.
-
 
 Calculate the number of the block accesses for SQL2 given the B+ Tree Index from the
 Question 2.(a)
@@ -1302,7 +1301,7 @@ b) Calculate the number of the block accesses for SQL2 given the B+ Tree Index f
 
 You will have to access root plus all 4 layers to get to the leaf nodes, then you will have to access the pointer block which then you will have to read all 10 blocks to get all of the data:
 
-1 + 4 + 1 + 10 = 16 blocks accesses.
+1 + 4 + 2 + 20 = 27 blocks accesses.
 
 #emph[
 c) The data engineer considers replacing the B+ Tree Index of Question 2.(a) with a Hash File structure with M > 1 buckets. Assuming that the hash function can uniformly distribute the tuples in each bucket given the SALARY attribute as the hashing field, find which should be the minimum M value, such as using the hash file for SQL2 requires a smaller number of block accesses than using the B+ Tree Index from the Question 2.(a). Explain your answer briefly.
@@ -1312,7 +1311,7 @@ We must have less than 16 block accesses to be better than the B+ Tree.
 
 Since the hash function uniformly distributes the salaries we can have no more than 10 blocks per bucket (20 tuples per bucket).
 
-Since we have 2000 distinct salaries, we should have M = 2000 buckets.
+Since we have 2000 distinct salaries, we should have M = 1000 buckets.
 
 Resulting in 10 block accesses when using this hash function.
 
