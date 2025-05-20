@@ -24,15 +24,33 @@ make compile
 
 This will compile all `.typ` files in the repository and create a corresponding `.pdf` file in the same directory.
 
-## Downloadable Notes
-
-If you see any issues in the notes, please create an [issue](https://github.com/MatthewMckee4/exam_notes/issues).
+## Current Notes
 
 > [!NOTE]
 > These notes are not guaranteed to be 100% correct, content is taken from their respective lecture notes.
+
+If you see any issues in the notes, please create an [issue](https://github.com/MatthewMckee4/exam_notes/issues).
+
+After I have finished each exam, the notes will be moved to the [Archived Notes](#archived-notes) section.
 
 ### Year 3 (2024-2025)
 
 #### Computing Science
 
 - [Systems Programming](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/systems_programming_notes.pdf)
+
+## Archived Notes
+
+> [!WARNING]
+> These are notes for the specified year that the exam was taken in. Don't expect these to be up to date.
+
+These are notes for exams that I have already taken.
+
+### Year 3 (2024-2025)
+
+#### Computing Science
+
+- [Database Systems](https://github.com/MatthewMckee4/exam_notes/releases/download/pdf-8931f5516ea6f3231ed1fcf61385c034fc290d26/database_systems_notes.pdf)
+- [Professional Software Development](https://github.com/MatthewMckee4/exam_notes/releases/download/pdf-db74c6392790609303666ee115e7f7a65ccbb105/professional_software_development_notes.pdf)
+- [Data Fundamentals](https://github.com/MatthewMckee4/exam_notes/releases/download/pdf-11a1abf7a9c70236a548afb2eb6860a96a973661/data_fundamentals-notes.pdf)
+- [Networked Systems](https://github.com/MatthewMckee4/exam_notes/releases/download/pdf-11a1abf7a9c70236a548afb2eb6860a96a973661/networked_systems-notes.pdf)
