@@ -29,7 +29,7 @@ This will compile all `.typ` files in the repository and create a corresponding 
 If you see any issues in the notes, please create an [issue](https://github.com/MatthewMckee4/exam_notes/issues).
 
 > [!NOTE]
-> These notes are not guaranteed to be 100% correct, but all content is taken from their respective lecture notes.
+> These notes are not guaranteed to be 100% correct, content is taken from their respective lecture notes.
 
 ### Year 3 (2024-2025)
 

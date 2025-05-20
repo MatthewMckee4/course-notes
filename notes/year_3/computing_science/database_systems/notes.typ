@@ -496,8 +496,8 @@ Conclusions: B+ Tree has higher fan-out, higher search speed-up, stores more ent
 Expected cost for a given range ratio $a = (U-L)/n$
 - $t$ block accesses to reach the leaf-node with SSN = L.
 - $q$ block accesses for loading data-blocks and sum up Salary values.
-- Leaf nodes accessed: $(U-L)/q = a$ $(#"values-in-range" / #"values-in-leaf")$
-- Visit sibling leaf nodes: $s = a - 1$ block accesses
+- Leaf nodes accessed: $(U-L)/q = (a n) / q (#"values-in-range" / #"values-in-leaf")$
+- Visit sibling leaf nodes: $s = (a n)/q - 1$ block accesses
 - For each sibling leaf node, access $q$ data blocks and sum up Salaries
 Total: $C_a = t + q + (a n) / q - 1  + ((a n) / q - 1) q = a n (1 + 1/q) + t - 1$
 
@@ -1508,10 +1508,9 @@ For the first clustering index over AGE in the relation EMPLOYEE,
 
 we first do the AGE range, we binary search over the AGE to get to 45. Then we have that the range covers $0.5 dot 100 = 50$ ranges. This covers half of the blocks, so 25 blocks, then for each block we load 10 data blocks.
 
-
 $ "Total Cost" &= log_2 (50) + 24 + 50 dot 10 \
-&= 5.64 + 25 + 500 \
-&= 530.64 $
+&= 5.64 + 24 + 500 \
+&= 529.64 $
 
 This range query results in 500 tuples (500 blocks). We can keep this in memory, and load the Dependent table into memory too, then do the join in memory, resulting 250 tuples. Which we can store in 250 blocks.
 
