@@ -1,35 +1,146 @@
 #set document(title: "Systems Programming")
 #set page(margin: 20pt)
 
-= Compiling
+#outline(title: none)
 
-The preprocessor expands macros and includes files (`-E`).
-In the compiling stage, the source code is parsed and turned into an intermediate representation (`-emit-llvm -S`).
-Machine-specific assembly code is generated (`-S`).
-Machine code is generated in an object file (`-c`).
-The linker combines object files and libraries to create an executable,
-checks all functions have machine code available, complains if not.
+#pagebreak()
+
+= Introduction to Systems Programming
+
+== Compiling
+
+To execute a C program we must first *compile* it into machine executable code.
+
+The *compiler* translates the source code in multiple steps into machine executable code.
+- The preprocessor expands macros and includes files (`-E`).
+- In the compiling stage, the source code is a) parsed and turned into an intermediate representation, b) machine-specific assembly code is generated, and, finally, c) machine code is generated in an object file.
+- The linker combines multiple object files into an executable
+- Machine-specific assembly code is generated (`-S`).
+- Machine code is generated in an object file (`-c`).
+
 `clang -o hello hello.c`.
 `-Werror` makes all warnings errors.
 `-Wall` enables all warnings.
 
-= Fundamental of C
+= The Basics of C
 
 == Basic Program Structure and I/O
-`int main (int argc, char* argv[])`. %d is a decimal integer. %s is a string. %c is a character. %f is a floating point number.
-%.f is a double-precision floating point number.
 
-== Data Types and Strings
-char 1 byte, int 4 bytes, float 4 bytes, double 8 bytes.
-Strings have a null terminator, one extra byte: `\0`
+*Main function*
+`int main (int argc, char* argv[])`.
+
+*Basic I/O*
+`printf` is part of the C standard library. It can be imported with `#include <stdio.h>`.
+
+*Format specifiers*
+- %d is a decimal integer.
+- %s is a string.
+- %c is a character.
+- %f is a floating point number.
+- %.f is a double-precision floating point number.
+
+== Data Types
+
+A bit-pattern by itself has no inherit meaning.
+
+Data types offer meaning to bits, telling the program what the bits mean in memory represent.
+
+Data types provide context to operations:
+- The compiler ensures that the meaning of a data type is preserved.
+- The compiler enforces that computations preserve the meaningful representation of our data.
+- Bit patterns are modified according to the data type.
+
+Every variable in C is stored at a fixed location in memory, the memory location does not change over the lifetime of the variable.
+
+#table(
+  columns: (auto, auto, auto),
+  inset: 10pt,
+  align: horizon,
+  table.header(
+    [*Type name*], [*Size in bytes*], [*Value range*],
+  ),
+  [char / unsigned char], [1 byte], [[-127, +127] / [0, 255]],
+  [short / unsigned short], [2 bytes], [[-32767, +32767] / [0, 65535]],
+  [int / unsigned int], [4 bytes], [[-2147483647, +2147483647] / [0, 4294967295]],
+  [long / unsigned long], [4 or 8 bytes], [at least the range of int],
+  [long long / unsigned long long], [8 bytes], [[−2^63 − 1, +2^63 − 1] / [0, 2^64 − 1]],
+  [float (IEEE-754)], [4 bytes], [$±1.2 dot 10^-38$ to $±3.4 dot 10^38$],
+  [double (IEEE-754)], [8 bytes], [$±2.3 dot 10^-308$ to $±1.7 dot 10^308$],
+)
+
+Strings have a null terminator, one extra byte: "`\0`"
 Use strcmp to compare strings.
 include <stdbool.h> for bools.
 
 == Scopes and Lifetimes
-a pair of curly braces is a block, and introduces a lexical scope.
-variables declared inside a block are local to that block.
-Lifetimes, automatic: ends at the end of the block,
-static: ends at the end of the program.
+A pair of curly braces is a block, and introduces a lexical scope.
+Variables declared inside a block are local to that block.
+
+If multiple variables have the same name, the inner one *shadows* the outer one.
+
+Lifetimes, automatic: ends at the end of the block, static: ends at the end of the program.
+
+== Stack-based Memory Management
+
+Automatically-managed variables are considered *stack objects*. When the lifetime of an automatically-managed variable ends, its memory is automatically deallocated, and can be reused.
+
+The stack is Last In First Out (LIFO). When a block enters, its variables are allocated on the stack, when it exits, its variables are deallocated.
+
+== Arrays
+
+Arrays are a sequence of elements of the same type.
+Elements are stored in contiguous memory locations.
+Arrays stored on the stack must have a fixed size, so their memory can be automatically managed.
+
+== Structs
+
+Members are stored in contiguous memory locations, in the same order they are declared.
+
+```c
+struct point {
+  int x;
+  int y;
+};
+int main() {
+  struct point p = {1, 2};
+  printf("x = %d\ny = %d\n", p.x, p.y);
+}
+```
+We can often use this:
+```c
+typedef struct {
+  int x;
+  int y;
+} point;
+int main() { point p = {1, 2}; /* ... */ }
+```
+
+== Strings
+
+Strings are arrays of characters, terminated by a null character.
+
+```c
+char greeting[] = "Hello World";
+```
+
+This is the same as:
+```c
+char greeting[] = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '\0'};
+```
+
+We use double quotes " to write a (ASCII) string literal and single quotes ' to write a character literal.
+
+== Functions
+
+Function definition: fully specifies the behaviour of the function.
+Function declaration: only specifies the interface -- how a function can be used.
+
+== Call by Value and Call by Reference
+
+All function arguments are passed by value.
+
+Arrays are treated slightly differently: the address of the first element is passed by value.
+Because of this, changes to the array elements are now visible to the caller (mutability).
 
 == Stack and Heap Allocation
 allocated on the stack, or heap, at runtime, using dynamic memory allocation (malloc).

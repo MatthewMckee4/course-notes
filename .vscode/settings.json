@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "malloc",
+        "pagebreak",
         "stdbool",
         "strcmp",
         "Werror"
