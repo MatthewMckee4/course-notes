@@ -1,19 +1,8 @@
 {
     "cSpell.words": [
-        "AIRLANE",
-        "AIRPLANE",
-        "airplanes",
-        "BCNF",
-        "CMMI",
-        "DNUMBER",
-        "emph",
-        "ESSN",
-        "forall",
-        "L'Hôpital's",
-        "Maclaurin",
-        "millis",
-        "pagebreak",
-        "requirer",
-        "ruggedised"
+        "malloc",
+        "stdbool",
+        "strcmp",
+        "Werror"
     ]
 }

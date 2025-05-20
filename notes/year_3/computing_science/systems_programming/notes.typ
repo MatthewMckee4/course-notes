@@ -1,9 +1,7 @@
 #set document(title: "Systems Programming")
 #set page(margin: 20pt)
 
-= Systems Programming
-
-== Compiling
+= Compiling
 
 The preprocessor expands macros and includes files (`-E`).
 In the compiling stage, the source code is parsed and turned into an intermediate representation (`-emit-llvm -S`).
@@ -15,27 +13,27 @@ checks all functions have machine code available, complains if not.
 `-Werror` makes all warnings errors.
 `-Wall` enables all warnings.
 
-== Fundamental of C
+= Fundamental of C
 
-=== Basic Program Structure and I/O
+== Basic Program Structure and I/O
 `int main (int argc, char* argv[])`. %d is a decimal integer. %s is a string. %c is a character. %f is a floating point number.
 %.f is a double-precision floating point number.
 
-=== Data Types and Strings
+== Data Types and Strings
 char 1 byte, int 4 bytes, float 4 bytes, double 8 bytes.
 Strings have a null terminator, one extra byte: `\0`
 Use strcmp to compare strings.
 include <stdbool.h> for bools.
 
-=== Scopes and Lifetimes
+== Scopes and Lifetimes
 a pair of curly braces is a block, and introduces a lexical scope.
 variables declared inside a block are local to that block.
 Lifetimes, automatic: ends at the end of the block,
 static: ends at the end of the program.
 
-=== Stack and Heap Allocation
+== Stack and Heap Allocation
 allocated on the stack, or heap, at runtime, using dynamic memory allocation (malloc).
-Returining pointers to local variables is dangerous, as the local variable will go out of
+Returning pointers to local variables is dangerous, as the local variable will go out of
 scope when the function returns and the pointer will point to invalid memory.
 Stack is last in first out. When a block enters, its variables are allocated on the stack,
 When it exits, its variables are deallocated.
@@ -45,11 +43,11 @@ Dynamic arrays are allocated on the heap, using malloc for allocation and free f
 Struct is sequence of members, passed by value.
 Array, passed by reference.
 
-=== Manual Memory Management Challenges
+== Manual Memory Management Challenges
 Challenges with manual memory management: double free errors, dangling pointers, memory leaks.
 64-bit architecture: addresses are 64-bit. In practice, 48 bits are used.
 
-=== Pointers and Their Usage
+== Pointers and Their Usage
 Dereferencing a pointer: Access the value stored at the memory address.
 Dereferencing a void pointer: Forbidden as the type of the pointer is unknown, the user must cast the pointer
 to the correct type before dereferencing it.
@@ -67,10 +65,10 @@ It is safe to call free (NULL).
 If we don't call free, we leak memory.
 Returning a pointer to a local variable is dangerous.
 
-=== Function Pointers
+== Function Pointers
 Function pointers `(return type (*func) (arg_types))`.
 
-== Errors
+= Errors
 
 Segmentation faults: accessing memory that is not allocated, or accessing memory that is protected.
 Causes for segmentation faults: Dangling pointers, dereferencing NULL, writing to read-only memory,
@@ -78,52 +76,52 @@ buffer overflow, stack/heap overflow.
 Memory Sanitizer, Address Sanitizer, Leak Sanitizer.
 To check where an error occurs, use GDB, use -g flag when compiling.
 
-== Memory Management and Ownership
+= Memory Management and Ownership
 
 RAII: Resource Acquisition Is Initialisation.
 Use constructor to allocate memory, destructor to free it.
 For storing a value, use unique_ptr for unique ownership, shared_ptr for shared ownership.
 Ownership is the concept of managing the lifecycle of resources, particularly memory.
 
-== Concurrency
+= Concurrency
 
-=== Concurrency vs. Parallelism
+== Concurrency vs. Parallelism
 Concurrency is about dealing with lots of things at once.
 Concurrency is a programming paradigm.
 Parallelism is about doing lots of things at once.
 Parallelism is about making programs faster.
 
-=== Threads and Processes
+== Threads and Processes
 Processes are instances of a program.
 Threads are instances of a process.
 Multiple threads can be executed simultaneously.
 Threads share the same address space.
 Processes have their own address space, the OS ensures this.
 
-=== Mutual Exclusion and Critical Regions
+== Mutual Exclusion and Critical Regions
 Mutual exclusion is the mechanism that ensures that only one thread can access a resource at a time.
 Mutual exclusion is used to protect critical sections of code.
 Example showing the need for mutual exclusion: removal of elements from a linked list.
 Critical region is the part of the code that updates some shared state.
 
-=== Locks and Deadlocks
+== Locks and Deadlocks
 Locks: before entering a critical region, acquire a lock.
 After leaving a critical region, release the lock.
 Deadlock: two threads are waiting for each other to release a lock.
 Bust Waiting: one thread is waiting for another thread to release a lock, wastes CPU cycles.
 
-=== Condition Variables and Coordination
+== Condition Variables and Coordination
 use condition variables to wake up threads that are waiting for a condition to be true.
 Important thread coordination aspects:
 partitioning: what parts of the computation should be separatel evaluated,
 data sharing: what data to share between threads,
 synchronisation: ensuring threads can cooperate without interference.
 
-=== Semaphores
+== Semaphores
 Semaphores: a semaphore is a variable that is used to control access to a shared resource.
 A semaphore holds an integer counter and provides two atomic operations: wait and signal.
 
-=== Auto Keyword and Lambda Functions
+== Auto Keyword and Lambda Functions
 Auto keyword: auto keyword is used to let the compiler deduce the type of a variable from the initializer.
 Lambda functions: `([capture] (parameters) -> return type { body })`.
 Pass by pointer: `([l_ptr = &l])`.
@@ -132,7 +130,7 @@ Capture all variables by reference: `([&] (parameters) -> return type { body })`
 Capture a specific variable by value: `([x] (parameters) -> return type { body })`.
 Capture a specific variable by reference: `([&x] (parameters) -> return type { body })`.
 
-=== Asynchronous Programming (std::async, std::future, std::promise, std::packaged_task)
+== Asynchronous Programming (std::async, std::future, std::promise, std::packaged_task)
 Std::async: `std::async(std::launch::async, function, args...)`
 Async tasks are executed in a separate thread.
 
