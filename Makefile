@@ -5,7 +5,7 @@ compile:
 	fd -e typ -x typst compile
 
 rename:
-	fd -e pdf -x sh -c ' \
+	fd -e pdf --no-ignore -x sh -c ' \
 		dir=$$(dirname "{}"); \
 		base=$$(basename "{}"); \
 		if [ "$$dir" != "." ]; then \
