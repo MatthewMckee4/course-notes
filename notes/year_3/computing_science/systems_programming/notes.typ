@@ -360,7 +360,7 @@ int main() {
 }
 ```
 
-== Stack Overflow
+=== Stack Overflow
 
 Trying to write more data than your allocated memory.
 Often triggered by a recursion without a base case.
@@ -375,7 +375,7 @@ int main() {
 }
 ```
 
-== Heap Overflow
+=== Heap Overflow
 
 ```c
 void recurse(int n) { // Let's smash the heap
@@ -427,7 +427,7 @@ To use these tools, compile with the appropriate flags
 
 When we allocate memory ourselves with `malloc`, we are responsible for calling `free`.
 We must call `free` exactly once for each address we obtained from `malloc`.
-It is good practice to assign the null value to pointers that have been freed but this does not prevent all double free errors.
+It is good practice to assign the null value to pointers that have been freed but this does not prevent all *double free* errors.
 
 == Ownership
 
@@ -1237,70 +1237,162 @@ int dequeue(ThreadSafeQueue* q) {
 ```
 ]
 
-== Thread Safe Stack in C++
+== Thread Safe Stack in C
+
+#text(size: 9pt)[
+```c
+#include <pthread.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+#define STACK_CAPACITY 32
+
+typedef struct {
+    int data[STACK_CAPACITY];
+    int top;
+    pthread_mutex_t mutex;
+} ThreadSafeStack;
+
+void stack_init(ThreadSafeStack* s) {
+    s->top = -1;
+    pthread_mutex_init(&s->mutex, NULL);
+}
+
+void stack_destroy(ThreadSafeStack* s) {
+    pthread_mutex_destroy(&s->mutex);
+}
+
+bool stack_push(ThreadSafeStack* s, int value) {
+    pthread_mutex_lock(&s->mutex);
+    if (s->top == STACK_CAPACITY - 1) {
+        pthread_mutex_unlock(&s->mutex);
+        return false; // Stack full
+    }
+    s->data[++s->top] = value;
+    pthread_mutex_unlock(&s->mutex);
+    return true;
+}
+
+bool stack_pop(ThreadSafeStack* s, int* value) {
+    pthread_mutex_lock(&s->mutex);
+    if (s->top == -1) {
+        pthread_mutex_unlock(&s->mutex);
+        return false; // Stack empty
+    }
+    *value = s->data[s->top--];
+    pthread_mutex_unlock(&s->mutex);
+    return true;
+}
+```
+]
+
+== Thread Safe Binary Search Tree in C
+
+#text(size: 9pt)[
+```c
+#include <pthread.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+typedef struct BSTNode {
+    int value;
+    struct BSTNode *left, *right;
+} BSTNode;
+
+typedef struct {
+    BSTNode* root;
+    pthread_mutex_t mutex;
+} ThreadSafeBST;
+
+void bst_init(ThreadSafeBST* bst) {
+    bst->root = NULL;
+    pthread_mutex_init(&bst->mutex, NULL);
+}
+
+void bst_destroy_nodes(BSTNode* node) {
+    if (!node) return;
+    bst_destroy_nodes(node->left);
+    bst_destroy_nodes(node->right);
+    free(node);
+}
+
+void bst_destroy(ThreadSafeBST* bst) {
+    pthread_mutex_lock(&bst->mutex);
+    bst_destroy_nodes(bst->root);
+    pthread_mutex_unlock(&bst->mutex);
+    pthread_mutex_destroy(&bst->mutex);
+}
+
+void bst_insert(ThreadSafeBST* bst, int value) {
+    pthread_mutex_lock(&bst->mutex);
+    BSTNode **cur = &bst->root;
+    while (*cur) {
+        if (value < (*cur)->value) cur = &(*cur)->left;
+        else if (value > (*cur)->value) cur = &(*cur)->right;
+        else { pthread_mutex_unlock(&bst->mutex); return; }
+    }
+    *cur = malloc(sizeof(BSTNode));
+    (*cur)->value = value;
+    (*cur)->left = (*cur)->right = NULL;
+    pthread_mutex_unlock(&bst->mutex);
+}
+
+bool bst_search(ThreadSafeBST* bst, int value) {
+    pthread_mutex_lock(&bst->mutex);
+    BSTNode* cur = bst->root;
+    while (cur) {
+        if (value == cur->value) { pthread_mutex_unlock(&bst->mutex); return true; }
+        cur = (value < cur->value) ? cur->left : cur->right;
+    }
+    pthread_mutex_unlock(&bst->mutex);
+    return false;
+}
+```
+]
+
+== Thread Safe Binary Search Tree in C++
 
 #text(size: 9pt)[
 ```cpp
-#include <stack>
+#include <memory>
 #include <mutex>
 #include <optional>
 
-template<typename T>
-class ThreadSafeStack {
-    std::stack<T> stack;
+class ThreadSafeBST {
+    struct Node {
+        int value;
+        std::unique_ptr<Node> left, right;
+        Node(int v) : value(v) {}
+    };
+    std::unique_ptr<Node> root;
     mutable std::mutex m;
 public:
-    ThreadSafeStack() = default;
-    void push(T value) {
+    void insert(int value) {
         std::lock_guard<std::mutex> lock(m);
-        stack.push(std::move(value));
+        Node** cur = &root.get();
+        while (*cur) {
+            if (value < (*cur)->value) cur = &(*cur)->left.get();
+            else if (value > (*cur)->value) cur = &(*cur)->right.get();
+            else return;
+        }
+        if (cur == &root.get()) root = std::make_unique<Node>(value);
+        else *cur = new Node(value);
     }
-    std::optional<T> pop() {
+    bool search(int value) const {
         std::lock_guard<std::mutex> lock(m);
-        if (stack.empty()) return std::nullopt;
-        T value = std::move(stack.top());
-        stack.pop();
-        return value;
-    }
-    bool empty() const {
-        std::lock_guard<std::mutex> lock(m);
-        return stack.empty();
+        Node* cur = root.get();
+        while (cur) {
+            if (value == cur->value) return true;
+            cur = (value < cur->value) ? cur->left.get() : cur->right.get();
+        }
+        return false;
     }
 };
 ```
 ]
 
-== Thread Safe Map in C++
 
-#text(size: 9pt)[
-```cpp
-#include <unordered_map>
-#include <mutex>
-#include <optional>
-#include <string>
-
-template<typename K, typename V>
-class ThreadSafeMap {
-    std::unordered_map<K, V> map;
-    mutable std::mutex m;
-public:
-    void set(const K& key, const V& value) {
-        std::lock_guard<std::mutex> lock(m);
-        map[key] = value;
-    }
-    std::optional<V> get(const K& key) const {
-        std::lock_guard<std::mutex> lock(m);
-        auto it = map.find(key);
-        if (it != map.end()) return it->second;
-        return std::nullopt;
-    }
-    void erase(const K& key) {
-        std::lock_guard<std::mutex> lock(m);
-        map.erase(key);
-    }
-};
-```
-]
 
 #pagebreak()
 
@@ -1511,3 +1603,332 @@ It ensure that two threads do not access a critical section at the same time, th
 d) PThreads provide low-level coordination in the form of locks & condition variables. Name some higher-level coordination construct, and briefly outline how to implement that construct using locks & condition variables.
 
 Synchronisation ensure threads can cooperate without interference. We can implement this by protecting a critical section in the following way: first, acquire the lock, then enter a while(condition) loop, inside that call pthread_cond_wait to wait on a condition variable to indicate you can proceed.
+
+== 2022/2023
+
+1 a)
+
+i) int
+
+ii)
+
+double, floats only support up to 7 decimal places.
+
+```c
+double pi = 3.14159
+```
+
+1 b) How many bytes of memory does the string literal "Systems" require in a C program? Show your working.
+
+8 bytes, all characters in the string plus the null terminator byte.
+
+1 c) Consider the following struct definition use.
+
+```c
+struct actor {
+    char* name;
+    int age;
+    char* famous_for;
+}
+
+struct actor guy = {"Guy Pearce", 55, "Memento"};
+struct actor brad = {"Brad Pitt", 58, "Seven"};
+```
+
+How many bytes of memory in total will the data stored in each of the guy and brad variables occupy?
+Explain how you calculated your answers.
+
+guy: 24 bytes
+brad: 24 bytes
+
+8 + 4 + 8 = 20 bytes, plus padding to make it 24 bytes.
+
+1 d) The following program takes two command-line arguments: a character and a filename, respectively. The program should print all the lines in the given file that contain the given character at least once.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#define BUF 256
+
+int main(int argc, char *argv[]) {
+    FILE *fp;
+    char ch;
+    char line[BUF];
+
+    if (argc != 3) {
+        printf("Usage: %s character filename\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+    ch = argv[1][0];
+    if ((fp = fopen(argv[2], "r")) == NULL) {
+        printf("Error: Cannot open %s\n", argv[2]);
+        exit(EXIT_FAILURE);
+    }
+    while (fgets(line, BUF, fp) != NULL) {
+        if (has_ch(ch, line)) {
+            fputs(line, stdout);
+        }
+    }
+    fclose(fp);
+    return 0;
+}
+```
+
+```c
+int has_ch(char ch, char line[BUF]) {
+    for (int i = 0; line[i] != '\0'; i++) {
+        if (ch == line[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
+```
+
+2 a) Consider the following allocation: `foo * x = malloc(sizeof(foo));`
+Where is x stored?
+Where is the value it points to stored?
+
+x is stored on the stack,
+the value x points to is on the heap.
+
+2 b) Consider the following declaration:
+`int matrix[40][20];`
+Express the address of the first element in the 20th row in two different ways.
+
+&matrix[19][0]
+&matrix[0][0] + 380
+
+2 c) Declare a function called sub_str that returns a pointer to a string, and takes as arguments a string and an
+integer. There is no need to define the logic of the function.
+
+```c
+char* sub_str(char* str, int i) {...}
+```
+
+2 d) Consider the following code that traverses a block of memory pointed to by buf.
+```c
+int traverse(char buf[], int n){
+    int ok = 1;
+    int i;
+    for (i = 0; i<=n-1; i++) {
+        if (buf[i]!=buf[n-1-i])
+            ok = 0;
+        }
+    return ok;
+}
+```
+Explain in your own words the aim of this code.
+
+Explain how this aim is achieved.
+
+Give one example of an input buf that would mean the function returns the value 1.
+
+This function checks if the given buf is a palindrome.
+
+It uses a sort of two pointer approach where we start from 0, n-1, then move up the first value and move back the last value. This will then check if every value is equal to is respective "mirrored" value.
+
+buf = "a"
+
+2 e) The program fragments below contain some error(s). For each fragment, name the type of error(s) and give a brief technical explanation of how it arises.
+
+i)
+```c
+node * some_node = create_node(...);
+node * other_node = create_node(..., some_node, ...);
+free(some_node);
+```
+
+This will leave you with a dangling pointer to some_node inside other_node
+We have a use-after-free error.
+
+ii)
+```c
+int s = 3;
+void *p = malloc(sizeof(int)*s);
+void *q = p;
+free(p);
+free(q);
+```
+
+This results in a double free error, which causes undefined behaviour, usually a program crash or memory corruption.
+
+3
+```c
+1. pthread_mutex_t m;
+2. bool delivered = false;
+3. void *homeOwner(void* arg)
+4.      {
+5.      printf("HomeOwner: Awaiting delivery ...\n");
+6.      pthread_mutex_lock(&m);
+7.      while (!delivered) {
+8.          pthread_mutex_unlock(&m);
+9.          printf("HomeOwner: Still waiting\n");
+10.         pthread_mutex_lock(&m);
+11.     }
+12.     pthread_mutex_unlock(&m);
+13.     printf("HomeOwner: Enjoying my new item.\n");
+14.     return NULL;
+15.     }
+16. void *deliveryDriver(void* arg)
+17. {
+18.     printf("Delivery Driver: out making deliveries ...\n");
+19.     usleep(randomSleepTime());
+20.     printf("Delivery Driver: arrived at address\n");
+21.     pthread_mutex_lock(&m);
+22.     delivered = true;
+23.     pthread_mutex_unlock(&m);
+24.     printf("Delivery Driver: package delivered\n");
+25.     return NULL;
+26. }
+27. int main()
+28. {
+29.     /* Perform some initialisation */
+30.     pthread_t t1;
+31.     pthread_t t2;
+32.     pthread_mutex_init(&m, NULL);
+33.     pthread_create(&t1, NULL, homeOwner, NULL);
+34.     pthread_create(&t2, NULL, deliveryDriver, NULL);
+35.     pthread_join(t1, NULL);
+36.     pthread_join(t2, NULL);
+37.     pthread_mutex_destroy(&m);
+38. }
+```
+
+a) Is the program parallel or concurrent, as defined in the course?
+
+This is concurrent
+
+b) Identify the state shared by the two threads.
+
+The `delivered` variable.
+
+c) Use the program line numbers to identify any critical section(s) in the program fragment.
+
+lines 7, 22.
+
+d) Is the program fragment thread safe? If not, carefully explain how an inconsistent state may arise. If so, carefully explain how this is achieved.
+
+This is thread safe, because in homeOwner, we release the lock after checking the condition, this allows the deliveryDriver function to acquire the lock and set delivered to true then releasing the lock, allowing the homeOwner thread acquire the lock and recheck the while condition, and progress.
+
+e)
+i) Briefly outline any other concurrency issues you identify with the program fragment.
+
+The homeOwner function uses busy waiting — repeatedly locking and unlocking the mutex to check if the delivery has occurred. This wastes CPU cycles because the thread is actively polling instead of sleeping when the condition is false.
+
+ii) Explain the implications of the concurrency issue(s) you identify.
+
+Busy waiting leads to inefficient CPU usage. The thread continuously acquires and releases the mutex and uses CPU time even though it can't make progress until the delivery is complete. On systems with many threads or limited CPU cores, this reduces overall performance and responsiveness.
+
+iii) Explain how the program can be adapted to avoid the concurrency issue(s) you have identified, and explain how this addresses the implications you have identified.
+
+The program can be adapted using condition variables (pthread_cond_t). Instead of repeatedly polling, the homeOwner thread can wait on the condition variable when delivered is false. When the deliveryDriver thread sets delivered = true, it then signals the condition variable to wake the waiting thread. This avoids wasting CPU time and allows the homeOwner to sleep until notified.
+
+iv) Adapt the program fragment to avoid the concurrency issue(s) you have identified. Write out the complete program fragment, and provide comments explaining the purpose of each line you add.
+
+#text(size: 9pt)[
+```c
+#include <stdio.h>
+#include <stdbool.h>
+#include <pthread.h>
+#include <unistd.h>
+
+// Shared resources
+pthread_mutex_t m;
+pthread_cond_t deliveredCond;
+bool delivered = false;
+
+// Simulates a random delivery delay
+int randomSleepTime() {
+    return 500000 + rand() % 1000000; // 0.5 to 1.5 seconds
+}
+
+void *homeOwner(void* arg) {
+    printf("HomeOwner: Awaiting delivery ...\n");
+
+    pthread_mutex_lock(&m);
+    while (!delivered) {
+        // Wait on the condition variable — this releases the mutex and sleeps
+        pthread_cond_wait(&deliveredCond, &m);
+    }
+    pthread_mutex_unlock(&m);
+
+    printf("HomeOwner: Enjoying my new item.\n");
+    return NULL;
+}
+
+void *deliveryDriver(void* arg) {
+    printf("Delivery Driver: out making deliveries ...\n");
+    usleep(randomSleepTime()); // Simulate delivery delay
+    printf("Delivery Driver: arrived at address\n");
+
+    pthread_mutex_lock(&m);
+    delivered = true;
+    // Notify the waiting thread that delivery is complete
+    pthread_cond_signal(&deliveredCond);
+    pthread_mutex_unlock(&m);
+
+    printf("Delivery Driver: package delivered\n");
+    return NULL;
+}
+
+int main() {
+    pthread_t t1, t2;
+
+    // Initialize mutex and condition variable
+    pthread_mutex_init(&m, NULL);
+    pthread_cond_init(&deliveredCond, NULL);
+
+    // Create threads
+    pthread_create(&t1, NULL, homeOwner, NULL);
+    pthread_create(&t2, NULL, deliveryDriver, NULL);
+
+    // Wait for threads to finish
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    // Clean up
+    pthread_mutex_destroy(&m);
+    pthread_cond_destroy(&deliveredCond);
+
+    return 0;
+}
+```
+]
+
+#pagebreak()
+
+== 2020/2021
+
+```c
+auto size = 1 * 1024 * 1024;
+auto vec = std::vector<int>(size);
+
+int sumChunk(int lower, int upper) {
+  int sum = 0;
+  for (int i = lower; i < upper; i++)
+    sum += vec[i];
+  return sum;
+}
+
+int main2() {
+  std::vector<std::thread> threads;
+  for (int i = 0; i < 9; i++) {
+    threads.emplace_back(sumChunk, i * size / 10, (i + 1) * size / 10);
+  }
+
+  int sum = sumChunk(9 * size / 10, size);
+  for (auto &thread : threads) {
+    thread.join();
+  }
+  return sum;
+}
+
+int main() {
+  std::generate(vec.begin(), vec.end(), randInt);
+  std::thread thread(sumChunk, 0, size / 2);
+  int sum = sumChunk(size / 2, size);
+  thread.join();
+  return sum;
+}
+```
