@@ -1,14 +1,17 @@
+TYP_FILES := $(shell find . -name "*.typ")
+
 clean:
-	git clean -f
-	find . -name '*.pdf' -exec rm -rf {} +
-
-
+	git clean -fdx
 
 compile:
-	find . -name '*.typ' -execdir typst compile {} \;
+	@set -e; \
+	for file in $(TYP_FILES); do \
+		echo "Compiling $$file"; \
+		typst compile "$$file"; \
+	done
 
 rename:
-	find . -name "*.pdf" -type f -exec sh -c ' \
+	find . -name "*.pdf" -exec sh -c ' \
 		dir=$$(dirname "{}"); \
 		base=$$(basename "{}"); \
 		if [ "$$dir" != "." ]; then \
