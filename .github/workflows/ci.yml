@@ -13,11 +13,6 @@ jobs:
 
     - uses: typst-community/setup-typst@v4
 
-    - name: Install fd
-      run: |
-        sudo apt-get update
-        sudo apt-get install fd-find
-
     - name: Build Typst Files
       run: make compile
 

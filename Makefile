@@ -2,10 +2,10 @@ clean:
 	git clean -fdx
 
 compile:
-	fd -e typ -x typst compile
+	find . -name "*.typ" -exec typst compile {} \;
 
 rename:
-	fd -e pdf --no-ignore -x sh -c ' \
+	find . -name "*.pdf" -exec sh -c ' \
 		dir=$$(dirname "{}"); \
 		base=$$(basename "{}"); \
 		if [ "$$dir" != "." ]; then \
