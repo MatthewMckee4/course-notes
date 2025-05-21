@@ -199,7 +199,7 @@ vector = another_vector; // error: array type 'int [6]' is not assignable
 
 We can use *pointer arithmetic* to modify the value of a pointer.
 - Add/subtract a number to/from a pointer to get a new pointer.
-- Subtract two pointers from each other
+- Subtract two pointers from each other to get a signed integer.
 - Compare pointers
 
 Pointers cannot be added or multiplied
@@ -209,8 +209,7 @@ Pointers cannot be added or multiplied
 *Linked list* example
 
 ```c
-struct node { int value; struct node *next;
-};
+struct node { int value; struct node *next; };
 ```
 
 `ptr->m` is the *member access operation* to access a member `m` of a struct pointer `ptr`.
@@ -367,7 +366,7 @@ Trying to write more data than your allocated memory.
 Often triggered by a recursion without a base case.
 
 ```c
-void recurse(int n) { //Let’s smash the stack
+void recurse(int n) { //Let's smash the stack
     char ptr[1024];
     recurse(n+1);
 }
@@ -379,7 +378,7 @@ int main() {
 == Heap Overflow
 
 ```c
-void recurse(int n) { // Let’s smash the heap
+void recurse(int n) { // Let's smash the heap
     char *ptr = (char *)malloc(n);
     recurse(n+1);
 }
@@ -671,7 +670,6 @@ while (!teaIsReady) {
 
 Since Busy waiting wastes CPU cycles and energy, it would be better to block the thread seeking to acquire a lock, and wake it when it has a chance to proceed. We can achieve this with condition variables.
 
-Example:
 
 ```c
 pthread_mutex_lock(&m);
@@ -689,6 +687,11 @@ pthread_mutex_unlock(&m);
 In the function, the mutex is unlocked and the thread is blocked on the condition variable.
 When the condition variable is signalled, the thread is awakened and the mutex is locked again.
 
+== Coordination
+
+A concurrent poses all of the challenges of sequential *Computation*: i.e. what to compute. A correct and efficient Algorithm, using appropriate data structures must be constructed.
+
+A concurrent program must also specify a correct and effective strategy for *Coordination*: i.e. how threads should cooperate.
 
 Important thread coordination aspects:
 - *Partitioning*: determining what parts of the computation should be separately evaluated, e.g. a thread to serve each request, to render each frame of a film.
@@ -714,7 +717,7 @@ sem_post(&sem); // increment the counter
 ```
 
 We must avoid problems of:
-- *Deadlock*: a thread holds a lock and waits for another lock that is held by another thread that is waiting for the first thread to release its lock
+- *Deadlock*: a thread holds a lock and waits for another lock that is held by another thread
 - *Livelock*: a thread repeatedly attempts to acquire a lock that is always held by another thread
 - *Starvation*: a thread is perpetually denied access to a resource
 
@@ -1006,7 +1009,7 @@ public:
     void addItem(int item) {
         std::unique_lock<std::mutex> lock(m);
 
-        // Wait until there’s at least one free slot
+        // Wait until there's at least one free slot
         add_cv.wait(lock, [this] { return count < capacity; });
 
         buffer[end] = item;
@@ -1021,7 +1024,7 @@ public:
     int removeItem() {
         std::unique_lock<std::mutex> lock(m);
 
-        // Wait until there’s at least one item
+        // Wait until there's at least one item
         remove_cv.wait(lock, [this] { return count > 0; });
 
         int item = buffer[start];
@@ -1176,3 +1179,335 @@ int parallelSum(std::vector<int>::iterator begin, std::vector<int>::iterator
 ```
 ]
 
+#pagebreak()
+
+== Thread Safe Queue in C
+
+#text(size: 9pt)[
+```c
+#include <pthread.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+
+#define QUEUE_CAPACITY 16
+
+typedef struct {
+    int data[QUEUE_CAPACITY];
+    int front, rear, count;
+    pthread_mutex_t mutex;
+    pthread_cond_t not_empty, not_full;
+} ThreadSafeQueue;
+
+void queue_init(ThreadSafeQueue* q) {
+    q->front = q->rear = q->count = 0;
+    pthread_mutex_init(&q->mutex, NULL);
+    pthread_cond_init(&q->not_empty, NULL);
+    pthread_cond_init(&q->not_full, NULL);
+}
+
+void queue_destroy(ThreadSafeQueue* q) {
+    pthread_mutex_destroy(&q->mutex);
+    pthread_cond_destroy(&q->not_empty);
+    pthread_cond_destroy(&q->not_full);
+}
+
+void enqueue(ThreadSafeQueue* q, int value) {
+    pthread_mutex_lock(&q->mutex);
+    while (q->count == QUEUE_CAPACITY)
+        pthread_cond_wait(&q->not_full, &q->mutex);
+    q->data[q->rear] = value;
+    q->rear = (q->rear + 1) % QUEUE_CAPACITY;
+    q->count++;
+    pthread_cond_signal(&q->not_empty);
+    pthread_mutex_unlock(&q->mutex);
+}
+
+int dequeue(ThreadSafeQueue* q) {
+    pthread_mutex_lock(&q->mutex);
+    while (q->count == 0)
+        pthread_cond_wait(&q->not_empty, &q->mutex);
+    int value = q->data[q->front];
+    q->front = (q->front + 1) % QUEUE_CAPACITY;
+    q->count--;
+    pthread_cond_signal(&q->not_full);
+    pthread_mutex_unlock(&q->mutex);
+    return value;
+}
+```
+]
+
+== Thread Safe Stack in C++
+
+#text(size: 9pt)[
+```cpp
+#include <stack>
+#include <mutex>
+#include <optional>
+
+template<typename T>
+class ThreadSafeStack {
+    std::stack<T> stack;
+    mutable std::mutex m;
+public:
+    ThreadSafeStack() = default;
+    void push(T value) {
+        std::lock_guard<std::mutex> lock(m);
+        stack.push(std::move(value));
+    }
+    std::optional<T> pop() {
+        std::lock_guard<std::mutex> lock(m);
+        if (stack.empty()) return std::nullopt;
+        T value = std::move(stack.top());
+        stack.pop();
+        return value;
+    }
+    bool empty() const {
+        std::lock_guard<std::mutex> lock(m);
+        return stack.empty();
+    }
+};
+```
+]
+
+== Thread Safe Map in C++
+
+#text(size: 9pt)[
+```cpp
+#include <unordered_map>
+#include <mutex>
+#include <optional>
+#include <string>
+
+template<typename K, typename V>
+class ThreadSafeMap {
+    std::unordered_map<K, V> map;
+    mutable std::mutex m;
+public:
+    void set(const K& key, const V& value) {
+        std::lock_guard<std::mutex> lock(m);
+        map[key] = value;
+    }
+    std::optional<V> get(const K& key) const {
+        std::lock_guard<std::mutex> lock(m);
+        auto it = map.find(key);
+        if (it != map.end()) return it->second;
+        return std::nullopt;
+    }
+    void erase(const K& key) {
+        std::lock_guard<std::mutex> lock(m);
+        map.erase(key);
+    }
+};
+```
+]
+
+#pagebreak()
+
+= Past Papers
+
+== 2023/2024
+
+1 a) The following variables are all pointers to the same data type: start, end, middle.
+They point to different locations in an array whose elements are stored in contiguous memory locations.
+`start` and `end` point to the first and last elements in an array, respectively. middle holds the address of
+the element at the middle position in the array. Assume that the array has an odd number of elements.
+
+i) Now consider the statement: `middle = (start + end) / 2;`
+Explain why such pointer arithmetic statement is invalid in 10 words or fewer.
+
+We cannot add pointers to each other.
+
+ii) Write an alternative single statement of code that achieves the same objective of pointing to the
+element in the middle of the array. You are not allowed to use `sizeof()`.
+Also, explain why this would work, i.e. how the new code avoids the problem of the previous code.
+
+`middle = (end - start) / 2 + start`
+
+`end - start` returns returns a signed integer, we can then divide this by 2 to get the number of elements to the half way point, then add this to the pointer `start` as it is a number.
+
+1 b) Consider the following declaration:
+
+```c
+struct node {
+  char val;
+  int min, max;
+};
+
+struct {
+  struct node n;
+  int count;
+} v, *w = &v;
+
+```
+
+i) The following statement is invalid. Explain why.
+`printf("%d", w->n->min);`
+
+struct node in the second struct is not a pointer, so you cannot do n->min.
+
+ii) Re-write the previous statement correctly.
+
+`n.min`
+
+iii)The following statement is also invalid. Explain why.
+`w->max = 999;`
+
+w is a pointer to v, but v does not have a member max.
+
+iv) Re-write the previous statement correctly.
+
+`w.n->max = 999;`
+
+1 c) The following code segment has a bug.
+
+```c
+int* initaliseInteger(int val) {
+  int x = val;
+  int* ptr = &x;
+  return ptr;
+}
+```
+
+i) Name the memory management issue and describe why it occurs (in 30 words or fewer).
+
+Dangling pointer. We create a pointer to a local variable `x`, so the local variable gets freed when the program is out of the function scope, so the returned pointer points to invalid memory.
+
+ii) Will this bug be discovered at compile time (without any special compile flags) or at run time?
+Explain why (in 30 words or fewer).
+
+This will be discovered at run time when the program tries to dereference the returned pointer, this will result in undefined behaviour.
+
+2 a) Using the following allocation: `foo *p = malloc(sizeof(foo))`; , In terms of memory spaces: Where is p stored? Where is the value it points to stored? 1-2 words per question would be sufficient.
+
+p is stored on the stack, p points to a value stored on the heap.
+
+b) Declare a function called str_seek that takes as arguments a string pointer and an integer. It returns a string pointer. There is no need to define the logic of the function.
+
+```c
+char * str_seek (char* str, int num) {...}
+```
+
+c) The following code segment attempts to implement a dynamic array using malloc(). A dynamic array is one that can be resized as needed during runtime. Although the code compiles without any errors, it does not achieve what is intended.
+
+```c
+#include <stdlib.h>
+
+int* allocateArray(int arr[], int len) {
+  if (arr) {
+    free(arr);
+    arr = NULL;
+  }
+  arr = (int *)malloc(len * sizeof(int));
+  return arr;
+}
+
+int main() {
+  int size = 8;
+  int *array = allocateArray(NULL, size);
+
+  // store some values in the array
+  for (int i = 0; i < size; i++) {
+    array[i] = i*i;
+  }
+
+  // attempt to change the array size
+  size = 10;
+  array = allocateArray(array, size);
+
+  free(array);
+  array = NULL;
+}
+```
+
+i) If executed, this code will exhibit undefined behaviour. Identify the cause of this, the line number that is responsible, and explain why it happens (in 20 words or fewer).
+
+Dangling pointer, line 18, accessing invalid memory.
+
+ii) If the above runtime error is fixed, would the array keep the values stored in it before resizing (see lines 16-19)? Explain (in 30 words or fewer).
+
+No it would not, because malloc allocates new space on the heap, it will create an empty array if integers.
+
+iii) Again, ignoring the runtime error discussed in (i), suggest how you would modify the code in order to keep the original values stored in the array even after resizing. Please write code and indicate using line numbers where it would be placed and/or if it would replace any existing lines.
+
+From line 8, replace with the following:
+```c
+int *array = (int *)malloc(len * sizeof(int));
+int length = sizeof(arr) / sizeof(int);
+for (int i = 0; i < length, i++) {
+  array[i] = arr[i];
+}
+return array;
+```
+
+3 a) Writing concurrent code entails specifying both computation and coordination
+
+i) Briefly define computation and concurrent coordination.
+
+computation is what the program computes.
+concurrent coordination is how threads cooperate
+
+ii) Identify three aspects of coordination, and for each aspect state how it is controlled in either C with PThreads, or C++ with threads.
+
+Partitioning: this is controlled by pthread_create where you separate functions into different threads.
+
+Data Sharing: this is managed by shared variables or shared memory regions.
+
+Synchronisation: this is controlled by locks that only allow one thread in a critical section. And condition variables.
+
+3 b) Consider the following C with PThreads function awaitEvent() that is executed by a thread. It uses the
+following shared variables to wait until some desirable event has occurred.
+```c
+bool teaIsReady = false \\ Indicates an event has occurred:
+                        \\ tea is available
+pthread_mutex_t m       \\ A lock or mutex that protects teaIsReady
+```
+For ease of reference the code has been annotated with line numbers.
+```c
+1 void *awaitEvent(void* arg) {
+2   (void)arg;
+3   printf("Me: Waiting for my tea ...\n");
+
+4   pthread_mutex_lock(&m);
+5   while (!teaIsReady) {
+6     pthread_mutex_unlock(&m);
+7     printf("Me: (Unamused) // do nothing\n");
+8     pthread_mutex_lock(&m);}
+9   pthread_mutex_unlock(&m);
+
+10  printf("Me: (Happy) ... finished waiting.\n");
+11  return NULL;
+}
+```
+
+i) State the number of lines that specify coordination, and give the line numbers of that code.
+
+4 lines of code:
+4, 6, 8, 9
+
+ii) State the number of lines that specify computation, and give the line numbers of that code.
+
+1 line:
+7
+
+iii) The teaIsReady variable is shared by multiple threads. Briefly explain how shared variables are used to communicate between threads.
+
+Shared variables can be used to signal that a thread needs to wait.
+They can also be used to tell a thread to proceed with some task.
+
+iv) The mutex m is also shared by multiple threads. Briefly explain how it is used to synchronise interaction between the threads.
+
+It ensure that two threads do not access a critical section at the same time, this ensure no race conditions and less random results.
+
+3 c) Concurrent programming is considered more difficult than sequential programming. Give the correct technical name for 6 challenges facing developers of concurrent code that are not encountered by developers of sequential code. Briefly describe, and give an example of, each of the 6 challenges.
+
+- Deadlock: a thread holds a lock and waits for another lock that is held by another thread. Two threads waiting on each other.
+- Livelock: a thread repeatedly attempts to acquire a lock that is always help by another thread.
+- Starvation: a thread is perpetually denied access to a resource.
+- Busy waiting: while a thread waits for a resource it continues to use CPU power.
+- Race conditions: when the result of a program execution depends on the order in which threads are executed.
+- Memory consistency: one threads writes are not seen by another thread.
+
+d) PThreads provide low-level coordination in the form of locks & condition variables. Name some higher-level coordination construct, and briefly outline how to implement that construct using locks & condition variables.
+
+Synchronisation ensure threads can cooperate without interference. We can implement this by protecting a critical section in the following way: first, acquire the lock, then enter a while(condition) loop, inside that call pthread_cond_wait to wait on a condition variable to indicate you can proceed.
