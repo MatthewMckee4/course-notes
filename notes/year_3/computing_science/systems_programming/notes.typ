@@ -420,25 +420,89 @@ The clang project provides several sanitizers:
 Later in the course, we will use:
 - *ThreadSanitizer*: detects data races in concurrent programs
 
-To use these tools, compile with the appropriate flags:
+To use these tools, compile with the appropriate flags
 
+#pagebreak()
 
-= Errors
+= Memory Management and Ownership #text(fill: gray, size: 10pt)[Week 5]
 
-Segmentation faults: accessing memory that is not allocated, or accessing memory that is protected.
-Causes for segmentation faults: Dangling pointers, dereferencing NULL, writing to read-only memory,
-buffer overflow, stack/heap overflow.
-Memory Sanitizer, Address Sanitizer, Leak Sanitizer.
-To check where an error occurs, use GDB, use -g flag when compiling.
+== Challenges
 
-= Memory Management and Ownership
+When we allocate memory ourselves with `malloc`, we are responsible for calling `free`.
+We must call `free` exactly once for each address we obtained from `malloc`.
+It is good practice to assign the null value to pointers that have been freed but this does not prevent all double free errors.
 
-RAII: Resource Acquisition Is Initialisation.
-Use constructor to allocate memory, destructor to free it.
-For storing a value, use unique_ptr for unique ownership, shared_ptr for shared ownership.
+== Ownership
+
+To organise memory management we adopt the concept of *ownership*.
+Ownership means tht we identify a single entity that is responsible for managing a location in memory.
+
+== Differences between C and C++
+
+C++ is a superset of C with almost double the keywords. The main difference is its focus on Object-Oriented Programming (OOP), where the focus is on objects rather than functions. Objects act as cookie cutters, with instances being the cookies. OOP principles include:
+- Inheritance
+- Encapsulation
+- Abstraction
+- Polymorphism
+
+There are some library differences, for example using `<iostream.h>` instead of `<stdio.h>`. However, C libraries can still be imported using the `c` prefix, e.g. `<cstdio>`.
+
+To compile C++ code, use `clang++` with the `-std` flag to specify the language standard:
+
+== Ownership in C++
+
+In C++, we can express the ownership of a heap memory location explicitly in the code.
+
+*RAII*: Resource Acquisition Is Initialisation.
+
+- We tie the management of a resource to the lifetime of a variable on the stack.
+- The allocation of the resource is done when we create the variable, in the constructor.
+- The deallocation of the resource is done when the variable goes out of scope, in the destructor.
+
+```cpp
+struct int_list_on_the_heap { // This is C++ code and not legal C!
+    int * ptr; // dynamic array of ints
+    // constructor
+    int_list_on_the_heap(int size) {
+        ptr = (int*)malloc(sizeof(int) * size);
+    }
+    // destructor
+    ~int_list_on_the_heap() { free(ptr); }
+};
+typedef struct int_list_on_the_heap int_list_on_the_heap;
+```
+
+For storing a single value on the heap we should use one of two "smart" pointers:
+- `unique_ptr` for unique ownership
+- `shared_ptr` for shared ownership
+
 Ownership is the concept of managing the lifecycle of resources, particularly memory.
 
-= Concurrency
+*Binary Tree example*
+
+```cpp
+#include <memory>
+struct node {
+    const void * value_ptr;
+    // The parent owns both children uniquely
+    std::unique_ptr<struct node> left_child;
+    std::unique_ptr<struct node> right_child;
+    // Each child knows their parent, but doesn't own it
+    struct node* parent;
+    node(const void * value_ptr_) {
+        value_ptr = value_ptr_;
+        left_child = NULL; right_child = NULL; parent = NULL }
+    // destructors of left/right_child are auto-called to free their heap memory
+    ~node() { }
+    void add_left_child(const void* value_ptr) {
+        // make_unique allocates heap memory for 1 node and calls the node-constructor
+        left_child = std::make_unique<struct node>(value_ptr); }
+    void add_right_child(const void* value_ptr) {
+        right_child = std::make_unique<struct node>(value_ptr); }
+};
+```
+
+= Concurrent Systems Programming #text(fill: gray, size: 10pt)[Week 6]
 
 == Concurrency vs. Parallelism
 Concurrency is about dealing with lots of things at once.

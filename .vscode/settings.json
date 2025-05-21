@@ -2,6 +2,7 @@
     "cSpell.words": [
         "malloc",
         "pagebreak",
+        "RAII",
         "stdbool",
         "strcmp",
         "Werror"
