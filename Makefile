@@ -1,8 +1,14 @@
+TYP_FILES := $(shell find . -name "*.typ")
+
 clean:
 	git clean -fdx
 
 compile:
-	find . -name "*.typ" -exec typst compile {} \;
+	@set -e; \
+	for file in $(TYP_FILES); do \
+		echo "Compiling $$file"; \
+		typst compile "$$file"; \
+	done
 
 rename:
 	find . -name "*.pdf" -exec sh -c ' \
