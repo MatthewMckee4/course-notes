@@ -13,7 +13,7 @@ jobs:
 
     - uses: typst-community/setup-typst@v4
 
-    - name: Build Typst
+    - name: Build Typst Files
       run: make compile
 
     - name: Rename PDFs with folder names

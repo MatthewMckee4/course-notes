@@ -1,12 +1,11 @@
 clean:
-	git clean -f
-	find . -name '*.pdf' -exec rm -rf {} +
+	git clean -fdx
 
 compile:
-	find . -name '*.typ' -execdir typst compile {} \;
+	fd -e typ -x typst compile
 
 rename:
-	find . -name "*.pdf" -type f -exec sh -c ' \
+	fd -e pdf -x sh -c ' \
 		dir=$$(dirname "{}"); \
 		base=$$(basename "{}"); \
 		if [ "$$dir" != "." ]; then \
