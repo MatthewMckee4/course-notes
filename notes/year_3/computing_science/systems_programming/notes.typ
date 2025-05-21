@@ -162,23 +162,23 @@ Every pointers has the same size, which is the size of the address of the machin
 
 A pointer has its space in memory.
 
-=== Pointers and NULL
+*Pointers and NULL*
 
 A pointer is supposed to stoer the address of a variable, but sometimes it doesn't point to anything.
 When the pointers doesn't have a valid address, we set it to `NULL` or `0`.
 
 Dereferencing a NULL pointer will crash your program.
 
-=== Pointers and const
+*Pointers and const*
 
 In C, every variable can be annotated with the type qualifier `const`. This indicates that the content of the variable cannot be changed. This is enforced by the compiler.
 
-*Pointers can be const*
+Pointers can be const
 - `float * const ptr`: ptr is a constant pointer to a float.
 - `const float * ptr`: ptr is a pointer to a constant float.
 - `const float * const ptr`: ptr is a constant pointer to a constant float.
 
-=== Pointers and Arrays
+*Pointers and Arrays*
 
 The name of an array is a pointer to the first element of the array.
 
@@ -195,7 +195,7 @@ printf("%ld\n", sizeof(ptr)); // prints '8' (size of a pointer)
 vector = another_vector; // error: array type 'int [6]' is not assignable
 ```
 
-=== Pointer Arithmetic
+*Pointer Arithmetic*
 
 We can use *pointer arithmetic* to modify the value of a pointer.
 - Add/subtract a number to/from a pointer to get a new pointer.
@@ -204,7 +204,7 @@ We can use *pointer arithmetic* to modify the value of a pointer.
 
 Pointers cannot be added or multiplied
 
-=== Pointers and Structs
+*Pointers and Structs*
 
 *Linked list* example
 
@@ -403,8 +403,6 @@ Static analysis tools are used to analyse the code without running it.
 They are useful to find potential bugs and errors.
 
 `clang --analyze --analyzer-output html program.c`
-
-== Dynamic Analysis Tools
 
 == Dynamic Analysis Tools
 
@@ -720,41 +718,135 @@ We must avoid problems of:
 - *Livelock*: a thread repeatedly attempts to acquire a lock that is always held by another thread
 - *Starvation*: a thread is perpetually denied access to a resource
 
+= C++ Thread Management #text(fill: gray, size: 10pt)[Week 7]
 
 == Auto Keyword and Lambda Functions
 Auto keyword: auto keyword is used to let the compiler deduce the type of a variable from the initializer.
+
 Lambda functions: `([capture] (parameters) -> return type { body })`.
-Pass by pointer: `([l_ptr = &l])`.
-Capture all variables by value: `([=] (parameters) -> return type { body })`.
-Capture all variables by reference: `([&] (parameters) -> return type { body })`.
-Capture a specific variable by value: `([x] (parameters) -> return type { body })`.
-Capture a specific variable by reference: `([&x] (parameters) -> return type { body })`.
+- Pass by pointer: `([l_ptr = &l])`.
+- Capture all variables by value: `([=] (parameters) -> return type { body })`.
+- Capture all variables by reference: `([&] (parameters) -> return type { body })`.
+- Capture a specific variable by value: `([x] (parameters) -> return type { body })`.
+- Capture a specific variable by reference: `([&x] (parameters) -> return type { body })`.
 
-== Asynchronous Programming (std::async, std::future, std::promise, std::packaged_task)
-Std::async: `std::async(std::launch::async, function, args...)`
+== Mutual Exclusion in C++
+
+C++ avoids the issue of forgetting to unlock a resource by
+viewing locking mutex as owning a resource and applying
+the RAII (Resource Acquisition Is Initialization) technique:
+We create a local variable on the stack that locks the mutex
+
+At the end of the lifetime the variable releases the lock automatically
+
+```cpp
+std::mutex m; // mutex variable; shared across threads
+void foo() {
+  std::unique_lock<std::mutex> lock(m); // acquire the mutex
+// ... do some work
+} // releases the mutex by calling m.unlock();
+```
+
+== Condition Variables in C++
+
+Condition variables are a synchronisation mechanism to wait for conditions without busy waiting.
+
+In C++ we directly provide the condition we are waiting for to the wait call.
+```cpp
+std::condition_variable cv;
+std::mutex m;
+void wait_for_event() {
+  std::unique_lock<std::mutex> lock(m);
+  cv.wait(lock, [] { return event_happened; });
+}
+```
+
+This idiom checks the condition after the thread is woken up, guaranteeing that cond is true after the statement is executed.
+
+== Asynchronous Programming
+
 Async tasks are executed in a separate thread.
+Std::async: `std::async(function, args...)`
 
-Std::future: `std::future<T> f = std::async(std::launch::async, function, args...)`
 Future is a promise to return a value later, a value that is not yet computed.
+Std::future: `std::future<T> f = std::async(function, args...)`
 
 future.get(): blocks until the future is ready.
 
 Std::promise: `std::promise<T> p`
 Promise is a container for a future value.
 
+```cpp
+void sum(
+    std::vector<int>::iterator begin,
+    std::vector<int>::iterator end,
+    std::promise<int> sum_promise
+  ) {
+  int sum = std::accumulate(begin, end, 0);
+  sum_promise.set_value(sum); // 4. write result
+}
+int main() {
+  auto numbers = std::vector<int>{ 1, 2, 3, 4, 5, 6 };
+  std::promise<int> sum_promise; // 1. create promise for an int
+  std::future<int> sum_future = sum_promise.get_future(); // 2. get future from promise
+  // 3. create thread that takes ownership of the promise (ownership transfer with std::move)
+  auto t = std::thread(sum, numbers.begin(), numbers.end(), std::move(sum_promise) );
+  printf("result = %d\n", sum_future.get() ); // 4. wait and then read result
+  t.join();
+}
+```
+
 A promise allows you to provide a value once it has been computed.
 
 Without future and promise the value would have to be explicitly protected by a
 mutex and a condition variable that could be used to wait for the value to be computed.
 
+Usually we communicate data over a channel, e.g. the results of a computation
+Sometimes we only want to synchronise tasks e.g. wait until all worker threads are ready before sending work We can achieve this with
+- an std::promise<void>, a promise to produce nothing (but say when you're done)
+- the std::future<T>::wait() method
+
+```cpp
+void do_work(std::promise<void> barrier) {
+  std::this_thread::sleep_for(std::chrono::seconds(1)); // do something (like
+  sleeping)
+  barrier.set_value(); // 4. send signal to other thread
+}
+int main() {
+  std::promise<void> barrier; // 1. create promise
+  std::future<void> barrier_future = barrier.get_future(); // 2. get future from it
+  auto t = std::thread(do_work, std::move(barrier) ); // 3. launch thread
+}
+```
+
 Std::packaged_task: `std::packaged_task<T> pt(function)`
 Packaged task is a task that can be executed later.
 
+We can
+- wrap up a task for future execution using std::packaged_task
+- extract the value with task.get_future(
+
+```cpp
+int main() {
+  auto task = std::packaged_task<int(int,int)>([](int a, int b) { return pow(a,
+  b); }) ;
+  std::future<int> result = task.get_future() ;
+  // The task can now be stored, or passed as a parameter.
+  // When we are ready to use it either
+  // launch task in the same thread via:
+  // task(2, 10);
+  // or start a new thread:
+  auto t = std::thread(std::move(task) , 2, 10);
+  t.join();
+  printf("task result: %d\n", result.get() );
+}
+
+```
 #pagebreak()
 
 = Code Examples
 
-== Thread Safe Bounded Buffer
+== Thread Safe Bounded Buffer in C
 
 #text(size: 9pt)[
 #grid(
@@ -868,3 +960,219 @@ int main() {
   ],
 )
 ]
+
+
+#pagebreak()
+
+== Thread Safe Bounded Buffer in C++
+
+#text(size: 7pt)[
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto),
+  stroke: none,
+  rect(stroke: none)[
+```cpp
+#include <iostream>
+#include <thread>
+#include <vector>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
+#include <random>
+
+class BoundedBuffer {
+private:
+    std::size_t start   = 0;          // index of next item to remove
+    std::size_t end     = 0;          // index of next slot to fill
+    std::size_t count   = 0;          // current number of items
+    const std::size_t capacity;       // max items allowed
+
+    std::vector<int> buffer;          // underlying storage
+
+    std::mutex m;
+    std::condition_variable add_cv;    // signalled when space becomes available
+    std::condition_variable remove_cv; // signalled when an item is available
+
+public:
+    explicit BoundedBuffer(std::size_t max_size)
+        : capacity(max_size), buffer(max_size) {}
+
+    // disable copying — the mutex/condvars cannot be copied safely
+    BoundedBuffer(const BoundedBuffer&)            = delete;
+    BoundedBuffer& operator=(const BoundedBuffer&) = delete;
+
+    // Producer interface
+    void addItem(int item) {
+        std::unique_lock<std::mutex> lock(m);
+
+        // Wait until there’s at least one free slot
+        add_cv.wait(lock, [this] { return count < capacity; });
+
+        buffer[end] = item;
+        end = (end + 1) % capacity;
+        ++count;
+
+        // Wake up *one* waiting consumer
+        remove_cv.notify_one();
+    }
+
+    // Consumer interface
+    int removeItem() {
+        std::unique_lock<std::mutex> lock(m);
+
+        // Wait until there’s at least one item
+        remove_cv.wait(lock, [this] { return count > 0; });
+
+        int item = buffer[start];
+        start = (start + 1) % capacity;
+        --count;
+
+        // Wake up *one* waiting producer
+        add_cv.notify_one();
+        return item;
+    }
+};
+
+
+```
+  ],
+  rect(stroke: none)[
+```c
+void producer(BoundedBuffer& buf, int id, int total) {
+    std::mt19937 rng(id * 1234);
+    std::uniform_int_distribution<int> dist(10, 100);
+
+    for (int i = 1; i <= total; ++i) {
+        int value = id * 1000 + i;          // create something identifiable
+        buf.addItem(value);
+        std::cout << "Producer " << id << " pushed " << value << '\n';
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(dist(rng)));
+    }
+}
+
+void consumer(BoundedBuffer& buf, int id, int total) {
+    std::mt19937 rng(id * 5678);
+    std::uniform_int_distribution<int> dist(20, 150);
+
+    for (int i = 0; i < total; ++i) {
+        int value = buf.removeItem();
+        std::cout << "  Consumer " << id << " popped " << value << '\n';
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(dist(rng)));
+    }
+}
+
+int main() {
+    constexpr std::size_t capacity     = 5;   // size of the ring buffer
+    constexpr int items_per_producer   = 10;
+    constexpr int num_producers        = 2;
+    constexpr int num_consumers        = 2;
+
+    BoundedBuffer buf(capacity);
+
+    std::vector<std::thread> threads;
+
+    // launch producers
+    for (int p = 0; p < num_producers; ++p) {
+        threads.emplace_back(producer, std::ref(buf), p + 1, items_per_producer);
+    }
+    // launch consumers (each will consume the same total number of items)
+    for (int c = 0; c < num_consumers; ++c) {
+        threads.emplace_back(consumer, std::ref(buf), c + 1,
+                             (num_producers * items_per_producer) / num_consumers);
+    }
+
+    for (auto& t : threads) t.join();
+    std::cout << "\nAll work done — buffer is empty, threads exited cleanly.\n";
+    return 0;
+}
+
+```
+  ],
+)
+]
+
+#pagebreak()
+
+== Thread Safe Linked List in C++
+
+#text(size: 9pt)[
+```cpp
+#include <list>
+#include <thread>
+#include <optional>
+#include <mutex>
+
+struct list {
+  private:
+    std::list<int> list; std::mutex mutex; // mutex to protect critical section
+  public:
+  void append_to_list(int value) {
+    std::unique_lock<std::mutex> lock(mutex); // lock mutex: enter critical section
+    list.push_back(value);
+  } // mutex will be automatically unlocked here
+  std::optional<int> remove_from_list(int position) {
+    std::unique_lock<std::mutex> lock(mutex); // lock mutex: enter critical section
+    auto iter = list.begin();
+    while (position > 0 && iter != list.end()) { iter++; position--; }
+    if (position != 0 || iter == list.end()) { return {}; /* nothing to return */ }
+    int value = *iter;
+    list.erase(iter);
+    return value;
+  } // mutex will be automatically unlocked here
+};
+
+int main() {
+  auto l = list{}; l.append_to_list('a'); l.append_to_list('b'); l.append_to_list('c');
+  auto t1 = std::thread([l_ptr = &l](){ l_ptr->remove_from_list(1); });
+  auto t2 = std::thread([l_ptr = &l](){ l_ptr->remove_from_list(1); });
+  t1.join(); t2.join();
+}
+```
+]
+
+
+== Parallel Sum in C++
+
+#text(size: 9pt)[
+```cpp
+int parallelSum(std::vector<int>::iterator begin, std::vector<int>::iterator end) {
+  auto len = end - begin;
+  // compute sequentially for small arrays
+  if (len < 1000) { return std::accumulate(begin, end, 0); }
+  auto mid = begin + len/2;
+  // launch asynchronous task for the left half of the
+  array
+  auto left_side = std::async([=] { return parallelSum(begin, mid); });
+  // compute right half of array recursively
+  int right_side = parallelSum(mid, end);
+  // block to wait for left side to finish
+  return left_side.get() + right_side;
+}
+int main() {
+  std::vector<int> vec = createLargeVector();
+  auto sum = parallelSum(vec.begin(), vec.end());
+  printf("sum: %d\n", sum);
+}
+```
+]
+
+Better parallel sum:
+
+#text(size: 9pt)[
+```cpp
+int parallelSum(std::vector<int>::iterator begin, std::vector<int>::iterator
+  end, int depth = 0 ) {
+  auto len = end - begin;
+  if (len < 1000 || depth > 3 ) { return std::accumulate(begin, end, 0); }
+  auto mid = begin + len/2;
+  auto left_side = std::async([=] { return parallelSum(begin, mid, depth +
+  1 ); });
+  int right_side = parallelSum(mid, end, depth + 1 );
+  return left_side.get() + right_side;
+}
+```
+]
+
