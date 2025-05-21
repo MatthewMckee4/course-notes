@@ -1,7 +1,9 @@
 {
     "cSpell.words": [
+        "Livelock",
         "malloc",
         "pagebreak",
+        "pthread",
         "RAII",
         "stdbool",
         "strcmp",
