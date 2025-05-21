@@ -5,7 +5,7 @@
 
 #pagebreak()
 
-= Introduction to Systems Programming
+= Introduction to Systems Programming #text(fill: gray, size: 10pt)[Week 1]
 
 == Compiling
 
@@ -22,7 +22,7 @@ The *compiler* translates the source code in multiple steps into machine executa
 `-Werror` makes all warnings errors.
 `-Wall` enables all warnings.
 
-= The Basics of C
+= The Basics of C #text(fill: gray, size: 10pt)[Week 2]
 
 == Basic Program Structure and I/O
 
@@ -142,42 +142,286 @@ All function arguments are passed by value.
 Arrays are treated slightly differently: the address of the first element is passed by value.
 Because of this, changes to the array elements are now visible to the caller (mutability).
 
-== Stack and Heap Allocation
-allocated on the stack, or heap, at runtime, using dynamic memory allocation (malloc).
-Returning pointers to local variables is dangerous, as the local variable will go out of
-scope when the function returns and the pointer will point to invalid memory.
-Stack is last in first out. When a block enters, its variables are allocated on the stack,
-When it exits, its variables are deallocated.
-The stack is automatically managed by the compiler, the size of every variable is fixed at compile time.
-Fixed size arrays are allocated on the stack.
-Dynamic arrays are allocated on the heap, using malloc for allocation and free for deallocation.
-Struct is sequence of members, passed by value.
-Array, passed by reference.
+#pagebreak()
 
-== Manual Memory Management Challenges
-Challenges with manual memory management: double free errors, dangling pointers, memory leaks.
-64-bit architecture: addresses are 64-bit. In practice, 48 bits are used.
+= Memory & Pointers #text(fill: gray, size: 10pt)[Week 3]
 
-== Pointers and Their Usage
+Each byte in memory has its own unique address.
+
+On a 64-bit machine, addresses are 64-bit, in practice 48 bits are used.
+
+We can get the address of a variable using the address-of operator `&`.
+
+== Pointers
+
+A pointer is a variable that stores the address of a memory location.
+
 Dereferencing a pointer: Access the value stored at the memory address.
-Dereferencing a void pointer: Forbidden as the type of the pointer is unknown, the user must cast the pointer
-to the correct type before dereferencing it.
-Make a pointer `(int* p = &x)`.
-`int param[]` and int `*param` are the same.
-float `* const ptr`: ptr is a constant pointer to a float.
-const float `* ptr`: ptr is a pointer to a constant float.
-const float `* const ptr`: ptr is a constant pointer to a constant float.
-ptr[i] and `* (ptr + i)` are the same.
-`ptr->member` is the same as (`*ptr`).member.
-Dereferencing a pointer is unsafe.
-Dereferencing a void pointer is forbidden.
-Heap is part of memory reserved for dynamic allocation.
-It is safe to call free (NULL).
-If we don't call free, we leak memory.
-Returning a pointer to a local variable is dangerous.
+
+Every pointers has the same size, which is the size of the address of the machine.
+
+A pointer has its space in memory.
+
+=== Pointers and NULL
+
+A pointer is supposed to stoer the address of a variable, but sometimes it doesn't point to anything.
+When the pointers doesn't have a valid address, we set it to `NULL` or `0`.
+
+Dereferencing a NULL pointer will crash your program.
+
+=== Pointers and const
+
+In C, every variable can be annotated with the type qualifier `const`. This indicates that the content of the variable cannot be changed. This is enforced by the compiler.
+
+*Pointers can be const*
+- `float * const ptr`: ptr is a constant pointer to a float.
+- `const float * ptr`: ptr is a pointer to a constant float.
+- `const float * const ptr`: ptr is a constant pointer to a constant float.
+
+=== Pointers and Arrays
+
+The name of an array is a pointer to the first element of the array.
+
+`ptr[i]` is the same as `*(ptr + i)`.
+
+Two important differences:
+- sizeof returns different values (size of array vs. size of pointer)
+```c
+printf("%ld\n", sizeof(vector)); // prints '24' (== 6 * 4 bytes)
+printf("%ld\n", sizeof(ptr)); // prints '8' (size of a pointer)
+```
+- We can not change a static array, only its elements
+```c
+vector = another_vector; // error: array type 'int [6]' is not assignable
+```
+
+=== Pointer Arithmetic
+
+We can use *pointer arithmetic* to modify the value of a pointer.
+- Add/subtract a number to/from a pointer to get a new pointer.
+- Subtract two pointers from each other
+- Compare pointers
+
+Pointers cannot be added or multiplied
+
+=== Pointers and Structs
+
+*Linked list* example
+
+```c
+struct node { int value; struct node *next;
+};
+```
+
+`ptr->m` is the *member access operation* to access a member `m` of a struct pointer `ptr`.
+
+```c
+struct node * ptr = &a;
+while (ptr) {
+    printf("%d\n", (*ptr).value);
+    ptr = (*ptr).next;
+}
+```
+
+*Binary Search Tree* example
+
+```c
+struct bst_node {
+    int value;
+    struct bst_node *left;
+    struct bst_node *right;
+};
+```
+
+We can search efficiently for a value in the tree using a pointer to the root of the tree.
+
+```c
+struct node * find(struct node *root, int value) {
+    if (root == NULL || root->value == value) {
+        return root;
+    }
+    if (value < root->value && root->left != NULL) {
+        return find(root->left, value);
+    }
+    if (value > root->value && root->right != NULL) {
+        return find(root->right, value);
+    }
+    return NULL;
+}
+```
+
+== Writing Generic Code with `void *`
+
+Sometimes we want to write code that can work with any type of data.
+
+The special pointer of type `void *` is a generic pointer. Every pointer is automatically convertible to it.
+
+We cannot access the value we are pointing to as we don't know what those bits mean. Hence, dereferencing a `void *` is forbidden.
+
+== Stack and Heap Memory Regions
+
+*Automatic variables are stored on the stack*.
+The size of every variable on the stack has to be known statically.
+
+*Allocated variables*: we manage the memory manually by dynamically requesting and releasing memory from *the heap*.
+
+*The heap* is a part of memory reserved for dynamic memory allocation, it is managed by the programmer.
+
+The stack and the heap share the same address space and grow with use towards each other.
+
+== Dynamic memory management
+
+*`malloc`* is used to request memory from the heap.
+*`free`* is used to release memory back to the heap.
+
+=== Allocating memory
+
+We request a new chunk of memory from the heap using `malloc`.
+
+```c
+int *ptr = (int *)malloc(sizeof(int));
+```
+
+If `malloc` succeeds, it returns a void pointer to the first bytes of the un-initialized memory.
+
+If `malloc` fails, it returns `NULL`, we should check for this.
+
+=== Freeing memory
+
+We release memory back to the heap using `free`.
+
+```c
+free(ptr);
+```
+
+It is a good practice to set the pointer to `NULL` after freeing it.
+
+```c
+ptr = NULL;
+```
+
+=== Memory Leaks
+
+The heap has a finite amount of memory, if we continuously allocate memory without freeing it, we will run out of memory.
+
+If *`free`* is not called, we *leak* the allocated memory.
+
+Returning a pointer to a local variable is dangerous, as the local variable will go out of scope when the function returns and the pointer will point to invalid memory.
+
+= Debugging and Development Tools #text(fill: gray, size: 10pt)[Week 4]
 
 == Function Pointers
-Function pointers `(return type (*func) (arg_types))`.
+Function pointers `return_type (*func) (arg_types)`. A pointer to a function. Used in function arguments.
+
+== Segmentation Faults
+
+A *segmentation fault* is raised by the hardware notifying the operating system that your program has attempted to access a restricted area of memory.
+
+The operating system will then immediately terminate your program. It is possible to catch the segmentation fault signal and handle it.
+
+=== Dangling Pointers
+
+A *dangling pointer* is a pointer that points to a memory location which has been de-allocated then allocated to another variable.
+If you `NULL` after freeing, it is easier to check if this pointer is "active" or not.
+
+```c
+int main() {
+    int* ptr = (int*)malloc(sizeof(int));
+    *ptr = 10;
+    free(ptr);
+    // ptr = NULL; we should do this
+    printf(“%d\n”, *ptr); // ptr is now a dangling pointer
+    return 0;
+}
+```
+
+=== Dereferencing a NULL pointer
+
+`NULL` is an invalid memory location.
+
+```c
+int main() {
+    int* ptr = NULL;
+    *ptr = 10; // dereferencing ptr will cause a segmentation fault
+    return 0;
+}
+```
+
+=== Buffer overflow
+
+Accessing memory outside of allocated bounds, typically with arrays.
+You can read the values in these extra locations, but this data would be corrupted.
+
+```c
+int main() {
+    int arr[5] = {1, 2, 3, 4, 5};
+    int* ptr = arr;
+    printf("%d\n", ptr[5]); // accessing memory outside of allocated bounds
+    return 0;
+}
+```
+
+== Stack Overflow
+
+Trying to write more data than your allocated memory.
+Often triggered by a recursion without a base case.
+
+```c
+void recurse(int n) { //Let’s smash the stack
+    char ptr[1024];
+    recurse(n+1);
+}
+int main() {
+    recurse(1);
+}
+```
+
+== Heap Overflow
+
+```c
+void recurse(int n) { // Let’s smash the heap
+    char *ptr = (char *)malloc(n);
+    recurse(n+1);
+}
+int main() {
+    recurse(1);
+}
+```
+
+== The Debugger
+
+The two popular debuggers are `gdb` and `lldb`.
+
+We need to compile the program with the `-g` flag to include debugging information.
+
+Inside the debugger, common commands are `run`, `b`, `n`, `s`, `bt`, `list`.
+
+
+== Static Analysis
+
+Static analysis tools are used to analyse the code without running it.
+They are useful to find potential bugs and errors.
+
+`clang --analyze --analyzer-output html program.c`
+
+== Dynamic Analysis Tools
+
+== Dynamic Analysis Tools
+
+Dynamic analysis tools are used to analyse the code while it is running.
+They can only detect bugs which are encountered during the execution of a particular test input.
+
+The clang project provides several sanitizers:
+- *AddressSanitizer*: detects memory errors like buffer overflows and use-after-free
+- *MemorySanitizer*: detects uninitialized memory reads
+- *LeakSanitizer*: detects memory leaks
+- *UndefinedBehaviorSanitizer*: detects undefined behaviour
+
+Later in the course, we will use:
+- *ThreadSanitizer*: detects data races in concurrent programs
+
+To use these tools, compile with the appropriate flags:
+
 
 = Errors
 
