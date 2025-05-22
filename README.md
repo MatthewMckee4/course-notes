@@ -33,7 +33,7 @@ If you see any issues in the notes, please create an [issue](https://github.com/
 
 After I have finished each exam, the notes will be moved to the [Archived Notes](#archived-notes) section.
 
-### Year 4 (2025-2025)
+### Year 4 (2025-2026)
 
 #### Computing Science
 
