@@ -329,7 +329,7 @@ int main() {
     *ptr = 10;
     free(ptr);
     // ptr = NULL; we should do this
-    printf(“%d\n”, *ptr); // ptr is now a dangling pointer
+    printf("%d\n", *ptr); // ptr is now a dangling pointer
     return 0;
 }
 ```
@@ -1412,7 +1412,6 @@ We cannot add pointers to each other.
 
 ii) Write an alternative single statement of code that achieves the same objective of pointing to the
 element in the middle of the array. You are not allowed to use `sizeof()`.
-Also, explain why this would work, i.e. how the new code avoids the problem of the previous code.
 
 `middle = (end - start) / 2 + start`
 
@@ -1593,7 +1592,7 @@ It ensure that two threads do not access a critical section at the same time, th
 
 3 c) Concurrent programming is considered more difficult than sequential programming. Give the correct technical name for 6 challenges facing developers of concurrent code that are not encountered by developers of sequential code. Briefly describe, and give an example of, each of the 6 challenges.
 
-- Deadlock: a thread holds a lock and waits for another lock that is held by another thread. Two threads waiting on each other.
+- Deadlock: a thread holds a lock and waits for another lock that is held by another thread.
 - Livelock: a thread repeatedly attempts to acquire a lock that is always help by another thread.
 - Starvation: a thread is perpetually denied access to a resource.
 - Busy waiting: while a thread waits for a resource it continues to use CPU power.
@@ -1898,6 +1897,112 @@ int main() {
 
 #pagebreak()
 
+== 2021/2022
+
+1 a)
+
+| Data Type | Size in Memory |
+|-----------|----------------|
+| char      | 1 byte         |
+| int       | 4 bytes        |
+| float     | 4 bytes        |
+| double    | 8 bytes        |
+| pointer   | 8 bytes        |
+
+
+i) Which data type will you use to store the value 10.1 and how many bytes will it require in memory? Give an example variable declaration.
+
+float, 4 bytes, `float num = 10.1;`
+
+ii) Which data type will you use to store the value `1 `and how many bytes will it require in memory? Give an example variable declaration.
+
+char, 1 byte1, `char num = '1';`
+
+iii) Which data type will you use to store the value 255.2 and how many bytes will it require in memory? Give an example variable declaration and an explanation for your choice.
+
+float, 4 bytes, `float num = 255.2;`
+
+We should use this since its a decimal value with less than 8 decimal points.
+
+iv) Consider the following struct definition and use. How many bytes in memory will the newPersonID variable occupy? Explain how you calculated your answer.
+
+```c
+struct personID {
+    const char * name;
+    int date;
+};
+struct personID newPersonID = {“Happy Coding”,2022};
+```
+
+char pointer (8 bytes) + int (4 bytes) + padding (4 bytes) = 16 bytes.
+
+1 b) Consider the following C program fragment where `___` denotes a gap you will need to fill. Consider
+the Programming Question Advice as you answer this question.
+
+```c
+1. struct A { int val; struct A * next; };
+2. struct A * newL(int v) {
+3.     struct A * l;
+4.     l = (struct A *)malloc(sizeof(struct A));
+5.     l->val = v;
+6.     l->next = NULL;
+7.     return l; }
+8. addL(struct A * l, int v) {
+9.     struct A * li;
+10.    struct node * l1;
+11.    li= newL(v);
+12.    if(___)
+13.    ___
+14.    while(l1->next!=NULL) l1 = l1->next;
+15.    l1->next = li;
+16.    return ___;
+17. }
+18. int main (){
+19.    struct A *lex;
+20.    ___
+21.    addL(lex,1);
+22.    addL(lex,2);
+23.    addL(lex,3);
+24.    printf("%d %d %d\n",lex->val,lex->next->val,lex->next->next->val);
+25.    ___
+26. }
+```
+i) This fragment has memory management issues relating to pointers. Identify two issues and add a single line code at each of the lines 20 and 25 to correct them; you can implement a helper function.
+
+We do not create the A at lex. To fix this we should add on line 20 `lex = newL(0);`
+
+We do not free the memory of lex. To Fix this we should free it on line 25: `freeL(lex);` with the function:
+
+```c
+void freeL(struct A *l) {
+    struct A *tmp;
+    while (l != NULL) {
+        tmp = l;
+        l = l->next;
+        free(tmp);
+    }
+}
+```
+
+ii) In lines 12, 13, and 16 of the fragment, the handling of return values is missing. Identify what checks should be performed and how these should be handled to ensure correct operation. Add the appropriate code to lines 12 and 13.
+
+```c
+void addL(struct A * l, int v) {
+    struct A * li;
+    struct node * l1;
+    li= newL(v);
+    if(li = NULL)
+        return -1;
+    while(l1->next!=NULL) l1 = l1->next;
+    l1->next = li;
+    return 0;
+}
+```
+
+iii) Explain what happens on lines 18-26 of the fragment, referring to lines 2-7 and 8-17 as appropriate. Illustrate your answer with an appropriate diagram to show how lex changes. You may draw the diagram using any convenient tool, e.g. a drawing tool, or insert a picture taken of a hand-drawn diagram.
+
+#pagebreak()
+
 == 2020/2021
 
 ```c
@@ -1932,3 +2037,316 @@ int main() {
   return sum;
 }
 ```
+
+
+#pagebreak()
+
+== Example 1
+
+1. Memory Management and Data Types (20 marks)
+
+a) Consider the following C program fragment:
+
+```c
+struct Person {
+    char name[50];
+    int age;
+    char* occupation;
+};
+
+void processPerson() {
+    struct Person p = {"John Doe", 30, "Engineer"};
+    struct Person* ptr = &p;
+    // ... more code ...
+}
+```
+
+i) How many bytes of memory will the `p` variable occupy? Show your working. (3 marks)
+
+50 (name array) + 4 (age) + 8 (occupation pointer) = 62 bytes, but due to memory alignment it will be 64 bytes.
+
+ii) Where is `p` stored in memory? Where is the value it points to stored? (2 marks)
+
+`p` is stored on the stack, `ptr` is stored on the stack.
+
+b) The following code attempts to create a dynamic array of integers:
+
+```c
+int* createDynamicArray(int size) {
+    int arr[size];
+    return arr;
+}
+
+int main() {
+    int* numbers = createDynamicArray(10);
+    numbers[0] = 42;
+    printf("%d\n", numbers[0]);
+    return 0;
+}
+```
+
+i) Identify the memory management issue in this code. (2 marks)
+
+This creates a dangling pointer. The array `arr` is created on the stack and will be deallocated when the function returns, but we're returning a pointer to it.
+
+ii) Explain why this issue occurs and what could happen when the program runs. (3 marks)
+
+The issue occurs because we're returning a pointer to a local variable that goes out of scope. When the program runs, it will attempt to access memory that has been deallocated, leading to undefined behaviour - it might crash, print garbage values, or appear to work sometimes.
+
+iii) Rewrite the code to properly create a dynamic array. (3 marks)
+
+```c
+int* createDynamicArray(int size) {
+    int* arr = (int*)malloc(size * sizeof(int));
+    return arr;
+}
+
+int main() {
+    int* numbers = createDynamicArray(10);
+    numbers[0] = 42;
+    printf("%d\n", numbers[0]);
+    free(numbers);
+    return 0;
+}
+```
+
+c) Consider the following pointer arithmetic:
+
+```c
+int arr[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+int* p1 = &arr[2];
+int* p2 = &arr[7];
+```
+
+i) What is the value of `p2 - p1`? Explain your answer. (2 marks)
+
+The value is 5. When subtracting pointers, we get the number of elements between them, not the number of bytes.
+
+ii) Is the expression `p1 + p2` valid? Explain why or why not. (2 marks)
+
+No, it is not valid. You cannot add two pointers together in C. You can only add a pointer and an integer, or subtract two pointers.
+
+iii) Write a valid expression that would give us the address of the middle element between `p1` and `p2`. (3 marks)
+
+```c
+int* middle = p1 + (p2 - p1) / 2;
+```
+
+2. Concurrent Programming (20 marks)
+
+a) Consider the following thread-safe queue implementation:
+
+```c
+typedef struct {
+    int* data;
+    int front;
+    int rear;
+    int size;
+    pthread_mutex_t mutex;
+    pthread_cond_t not_empty;
+    pthread_cond_t not_full;
+} ThreadSafeQueue;
+
+void enqueue(ThreadSafeQueue* q, int value) {
+    pthread_mutex_lock(&q->mutex);
+    while ((q->rear + 1) % q->size == q->front) {
+        pthread_cond_wait(&q->not_full, &q->mutex);
+    }
+    q->data[q->rear] = value;
+    q->rear = (q->rear + 1) % q->size;
+    pthread_cond_signal(&q->not_empty);
+    pthread_mutex_unlock(&q->mutex);
+}
+```
+
+i) Explain why the `while` loop is used instead of an `if` statement. (3 marks)
+
+The `while` loop is used to handle spurious wakeups. Even if a thread is woken up by a signal, it should recheck the condition because another thread might have consumed the resource in the meantime. This is known as the "Mesa" style of condition variables.
+
+ii) What would happen if we removed the `pthread_cond_signal(&q->not_empty)` line? (2 marks)
+
+If we removed this line, consumer threads waiting for data would never be notified when new data is available, potentially causing deadlock or starvation.
+
+b) The following code attempts to implement a thread-safe counter:
+
+```c
+int counter = 0;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void increment() {
+    pthread_mutex_lock(&mutex);
+    counter++;
+    pthread_mutex_unlock(&mutex);
+}
+
+void decrement() {
+    pthread_mutex_lock(&mutex);
+    counter--;
+    pthread_mutex_unlock(&mutex);
+}
+```
+
+i) Is this implementation thread-safe? Explain why or why not. (3 marks)
+
+Yes, this implementation is thread-safe. The mutex ensures that only one thread can access the counter at a time, preventing race conditions. The critical sections (increment and decrement operations) are properly protected.
+
+ii) What would happen if we forgot to unlock the mutex in the `increment` function? (2 marks)
+
+This would cause a deadlock. Once a thread acquires the lock and fails to release it, all other threads trying to acquire the lock will be blocked indefinitely.
+
+c) Consider the following producer-consumer scenario:
+
+```c
+#define BUFFER_SIZE 10
+int buffer[BUFFER_SIZE];
+int in = 0, out = 0;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t not_full = PTHREAD_COND_INITIALIZER;
+pthread_cond_t not_empty = PTHREAD_COND_INITIALIZER;
+
+void producer() {
+    while (1) {
+        pthread_mutex_lock(&mutex);
+        while ((in + 1) % BUFFER_SIZE == out) {
+            pthread_cond_wait(&not_full, &mutex);
+        }
+        buffer[in] = rand();
+        in = (in + 1) % BUFFER_SIZE;
+        pthread_cond_signal(&not_empty);
+        pthread_mutex_unlock(&mutex);
+    }
+}
+
+void consumer() {
+    while (1) {
+        pthread_mutex_lock(&mutex);
+        while (in == out) {
+            pthread_cond_wait(&not_empty, &mutex);
+        }
+        int item = buffer[out];
+        out = (out + 1) % BUFFER_SIZE;
+        pthread_cond_signal(&not_full);
+        pthread_mutex_unlock(&mutex);
+        printf("Consumed: %d\n", item);
+    }
+}
+```
+
+i) Explain why this implementation might not be efficient for multiple producers and consumers. (3 marks)
+
+This implementation might not be efficient because it uses a single mutex for the entire buffer, creating a bottleneck. When multiple producers or consumers try to access the buffer simultaneously, they must wait for each other even if they could operate on different parts of the buffer.
+
+ii) Suggest a modification to make it more efficient for multiple producers and consumers. (2 marks)
+
+We could use multiple mutexes to protect different sections of the buffer, or implement a more sophisticated locking mechanism like a read-write lock. This would allow multiple consumers to read from different parts of the buffer simultaneously.
+
+3. C++ Thread Management (20 marks)
+
+a) Consider the following C++ code:
+
+```cpp
+#include <thread>
+#include <vector>
+#include <mutex>
+
+std::mutex m;
+int shared_value = 0;
+
+void increment() {
+    std::lock_guard<std::mutex> lock(m);
+    shared_value++;
+}
+
+int main() {
+    std::vector<std::thread> threads;
+    for (int i = 0; i < 10; i++) {
+        threads.emplace_back(increment);
+    }
+    for (auto& t : threads) {
+        t.join();
+    }
+    std::cout << shared_value << std::endl;
+    return 0;
+}
+```
+
+i) What is the output of this program? Explain why. (3 marks)
+
+The output will be 10. The `std::lock_guard` ensures that the mutex is automatically locked when the guard is created and unlocked when it goes out of scope. This prevents race conditions, ensuring that each increment operation is atomic.
+
+ii) What would happen if we removed the `std::lock_guard`? (2 marks)
+
+Without the lock guard, we would have a race condition. Multiple threads could read and write to `shared_value` simultaneously, leading to lost updates and an unpredictable final value.
+
+b) The following code uses `std::async`:
+
+```cpp
+#include <future>
+#include <vector>
+
+int sum_chunk(std::vector<int>::iterator begin, std::vector<int>::iterator end) {
+    int sum = 0;
+    for (auto it = begin; it != end; ++it) {
+        sum += *it;
+    }
+    return sum;
+}
+
+int main() {
+    std::vector<int> numbers(1000, 1);
+    auto future1 = std::async(sum_chunk, numbers.begin(), numbers.begin() + 500);
+    auto future2 = std::async(sum_chunk, numbers.begin() + 500, numbers.end());
+
+    int total = future1.get() + future2.get();
+    std::cout << total << std::endl;
+    return 0;
+}
+```
+
+i) Explain what this code does and how it achieves parallelism. (3 marks)
+
+This code splits a vector of 1000 numbers into two chunks and calculates their sums in parallel using `std::async`. Each chunk is processed by a separate asynchronous task, and the results are combined at the end. The `get()` calls wait for the results to be ready.
+
+ii) What would happen if we removed the `get()` calls? (2 marks)
+
+If we removed the `get()` calls, the program would exit immediately without waiting for the asynchronous tasks to complete. The results would be lost, and we might not see the correct sum.
+
+c) Consider the following code that uses condition variables:
+
+```cpp
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
+std::mutex m;
+std::condition_variable cv;
+bool ready = false;
+
+void wait_for_ready() {
+    std::unique_lock<std::mutex> lock(m);
+    cv.wait(lock, []{ return ready; });
+}
+
+void set_ready() {
+    std::unique_lock<std::mutex> lock(m);
+    ready = true;
+    cv.notify_one();
+}
+
+int main() {
+    std::thread t1(wait_for_ready);
+    std::thread t2(set_ready);
+    t1.join();
+    t2.join();
+    return 0;
+}
+```
+
+i) Explain how the condition variable is used in this code. (3 marks)
+
+The condition variable `cv` is used to synchronize the two threads. The first thread waits for the `ready` flag to become true using `cv.wait()`, which automatically releases the mutex while waiting. The second thread sets the flag and notifies the waiting thread using `cv.notify_one()`.
+
+ii) What would happen if we used `notify_all()` instead of `notify_one()`? (2 marks)
+
+In this specific case, it would make no difference because there's only one waiting thread. However, if there were multiple threads waiting, `notify_all()` would wake up all of them, while `notify_one()` would only wake up one thread.
+
