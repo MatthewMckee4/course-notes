@@ -1,6 +1,6 @@
-Systems Programming:
+Programming Languages:
 - changed-files:
-  - any-glob-to-any-file: notes/year_3/computing_science/systems_programming/**
+  - any-glob-to-any-file: notes/year_4/computing_science/programming_languages/**
 
 Github Actions:
 - changed-files:
