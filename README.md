@@ -38,6 +38,7 @@ After I have finished each exam, the notes will be moved to the [Archived Notes]
 #### Computing Science
 
 - [Programming Languages](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/programming_languages_notes.pdf)
+- [Advanced Systems Programming](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/advanced_systems_programming_notes.pdf)
 
 ## Archived Notes
 
