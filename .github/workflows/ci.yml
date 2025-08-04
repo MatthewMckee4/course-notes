@@ -13,11 +13,13 @@ jobs:
 
     - uses: typst-community/setup-typst@v4
 
+    - uses: extractions/setup-just@v3
+
     - name: Build Typst Files
-      run: make compile
+      run: just compile
 
     - name: Rename PDFs with folder names
-      run: make rename
+      run: just rename
 
     - name: List PDFs
       run: tree
