@@ -19,7 +19,7 @@ Head over to [Typst's installation guide](https://github.com/typst/typst/?tab=re
 Once you have Typst installed, you can compile the notes by running the following command in the root directory of this repository:
 
 ```bash
-make compile
+just compile
 ```
 
 This will compile all `.typ` files in the repository and create a corresponding `.pdf` file in the same directory.
@@ -39,6 +39,8 @@ After I have finished each exam, the notes will be moved to the [Archived Notes]
 
 - [Programming Languages](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/programming_languages_notes.pdf)
 - [Advanced Systems Programming](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/advanced_systems_programming_notes.pdf)
+- [Functional Programming](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/functional_programming_notes.pdf)
+- [Software Product Release Engineering](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/software_product_release_engineering_notes.pdf)
 
 ## Archived Notes
 
@@ -56,4 +58,3 @@ These are notes for exams that I have already taken.
 - [Data Fundamentals](https://github.com/MatthewMckee4/exam_notes/releases/download/pdf-11a1abf7a9c70236a548afb2eb6860a96a973661/data_fundamentals-notes.pdf)
 - [Networked Systems](https://github.com/MatthewMckee4/exam_notes/releases/download/pdf-11a1abf7a9c70236a548afb2eb6860a96a973661/networked_systems-notes.pdf)
 - [Systems Programming](https://github.com/MatthewMckee4/exam_notes/releases/download/pdf-a74c6fc270bda2e4df1038e3c3856c2447120776/systems_programming_notes.pdf)
-#
