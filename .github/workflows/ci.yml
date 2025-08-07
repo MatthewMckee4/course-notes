@@ -3,32 +3,37 @@ name: CI
 on:
   pull_request:
     paths:
-    - '**/*.typ'
+      - "**/*.typ"
 
 jobs:
   compile:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - uses: typst-community/setup-typst@v4
+      - uses: typst-community/setup-typst@v4
 
-    - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v3
 
-    - name: Build Typst Files
-      run: just compile
+      - name: Build Typst Files
+        run: just compile
 
-    - name: Rename PDFs with folder names
-      run: just rename
+      - name: Rename PDFs with folder names
+        run: just rename
 
-    - name: List PDFs
-      run: tree
+      - name: List PDFs
+        run: tree
 
+      - name: Upload PDFs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-notes
+          path: ./notes/**/**/*_notes.pdf
+          retention-days: 5
 
-    - name: Upload PDFs as artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: pdf-notes
-        path: ./notes/**/**/*_notes.pdf
-        retention-days: 5
-
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - uses: pre-commit/action@v3.0.1

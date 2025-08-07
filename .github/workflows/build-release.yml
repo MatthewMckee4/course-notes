@@ -3,38 +3,38 @@ name: Build and Release PDFs
 on:
   push:
     branches:
-    - main
+      - main
     paths:
-    - .github/workflows/build-release.yml
-    - '**/*.typ'
-    - Justfile
+      - .github/workflows/build-release.yml
+      - "**/*.typ"
+      - Justfile
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - uses: typst-community/setup-typst@v4
+      - uses: typst-community/setup-typst@v4
 
-    - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v3
 
-    - name: Build Typst
-      run: just compile
+      - name: Build Typst
+        run: just compile
 
-    - name: Rename PDFs with folder names
-      run: just rename
+      - name: Rename PDFs with folder names
+        run: just rename
 
-    - name: List PDFs
-      run: tree
+      - name: List PDFs
+        run: tree
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      if: github.ref == 'refs/heads/main'
-      with:
-        files: |
-          ./notes/**/**/*_notes.pdf
-        tag_name: pdf-${{ github.sha }}
-        name: PDF Build ${{ github.event.head_commit.timestamp }}
-        draft: false
-        prerelease: false
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: github.ref == 'refs/heads/main'
+        with:
+          files: |
+            ./notes/**/**/*_notes.pdf
+          tag_name: pdf-${{ github.sha }}
+          name: PDF Build ${{ github.event.head_commit.timestamp }}
+          draft: false
+          prerelease: false
