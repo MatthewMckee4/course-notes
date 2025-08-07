@@ -33,7 +33,7 @@ Systems programs are responsible for managing shared mutable state. Like state s
 Systems programs are often the bottleneck for performance. All higher-level applications depend on them.
 That's why systems programing languages offer low-level control over memory and I/O.
 
-// Readings: 
+// Readings:
 // - https://dl.acm.org/doi/10.1145/1215995.1216004
 
 // 2b.
@@ -114,7 +114,7 @@ C has manual memory management through `malloc` and `free`. Arrays dont store le
 
 Manual memory management leads to:
 - Use-after-free bugs
-- Memory leaks  
+- Memory leaks
 - Buffer overflows
 - Iterator invalidation
 
