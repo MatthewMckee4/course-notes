@@ -226,3 +226,47 @@ Why is C weakly typed?
 
 - The designers of C were not type theorists
 - The original machines on which C was developed didn't have the resources to perform complex type checks
+
+#pagebreak()
+
+== Introducing Rust
+
+Access environment variables
+
+```rust
+use std::env;
+
+fn main() {
+    for arg in env::args() {
+        println!("{:?}", arg);
+    }
+}
+```
+
+```rust
+let v: Vec<u8> = vec![1, 2, 3];
+let v: Vec<u8> = Vec::new();
+let v = Vec::<u8>::new();
+```
+
+*Type Conversion Table*
+
+#table(
+  columns: 2,
+  [*C*], [*Rust*],
+  [unsigned], [usize],
+  [uint8_t, unsigned char], [u8],
+  [uint16_t], [u16],
+  [uint32_t], [u32],
+  [uint64_t], [u64],
+  [],[],
+  [int], [isize],
+  [int8_t, signed char], [i8],
+  [int16_t], [i16],
+  [int32_t], [i32],
+  [int64_t], [i64],
+  [float], [f32],
+  [double], [f64],
+  [int], [bool],
+  [char], [char],
+)
