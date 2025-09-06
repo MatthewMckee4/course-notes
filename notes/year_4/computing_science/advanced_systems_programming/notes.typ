@@ -156,7 +156,73 @@ Modern languages like Rust can detect iterator invalidation and use-after-free a
 
 Systems programs have reached complexity limits that humans can't manage. C gives precise control but exercising that control is too difficult. Strongly-typed languages provide same control with added safety, using type systems to eliminate bug classes and model problem spaces effectively.
 
+= Types and Systems Programming
 
+// 3a.
 
+== Strongly Typed Languages
 
+A *type* describes what an item of data represents
 
+*What is a Type System?*
+
+A type system is a set of rules constraining how types can be used.
+- What operations can be performed on and with a type
+- How does a type compose with other types of data
+
+A type system proves the absence of certain program behaviours
+- It doesn't guarantee the program is correct
+- It does guarantee that some incorrect behaviours do not occur
+
+We want a language where the type system is sophisticated enough to catch real problems, not just syntactic errors.
+
+There are weak and strong, static and dynamic type systems. Weak type systems allow implicit conversions between types, while strong type systems enforce strict type checking. Static type systems check types at compile time, while dynamic type systems check types at runtime.
+
+*Static and Dynamic Types*
+
+In a language with static types, the type of a variable is fixed:
+- Some required types to be explicitly declared, others can infer types from context
+- Just because the language can infer the type does not mean the type is dynamic
+
+In a language with dynamic types, the type of a variable can change.
+
+Dynamically typed languages tend to be lower performance, but offer more flexibility
+- They have to store the type as well as its value, which takes additional memory and processing time
+- They can make fewer optimisations based on the type of a variable.
+
+Systems languages generally have static types, and be compiled ahead of time, since they tend to be more performance sensitive.
+
+*Strong and Weak Types*
+
+In a language with *strong* types, every operation must conform to the type system,
+Operations that cannot be proved to conform to the typing rules are not permitted.
+
+Weakly types languages provide ways of circumventing the type checker. This might be automatic safe conversions between types:
+
+```c
+float x = 6.0;
+double y = 5.0;
+double z = x + y;
+```
+
+A *safe* language, whether static or dynamic, knows the types of all variables and only allows legal operations on those values.
+
+An *unsafe* language allows the types to be circumvented to perform operations the programmer believes to be correct, but the type system can't prove to be so.
+
+Why is Strong Typing Desirable?
+
+Results of a program using only strong types are well-defined (a safe language), the program will only ever perform operations on a type that are legal.
+
+*Segmentation faults*
+
+Segmentation faults should never happen:
+- Compiler and runtime should strongly enforce type rules
+- If a program violates them, it should be terminated cleanly
+- Security vulnerabilities come from undefined behaviour after type violations
+
+The C programming language is very bad for undefined behaviour, it has 193 kinds of undefined behaviour.
+
+Why is C weakly typed?
+
+- The designers of C were not type theorists
+- The original machines on which C was developed didn't have the resources to perform complex type checks
