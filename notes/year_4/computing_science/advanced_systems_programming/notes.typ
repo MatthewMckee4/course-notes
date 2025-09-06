@@ -229,6 +229,8 @@ Why is C weakly typed?
 
 #pagebreak()
 
+// 3b.
+
 == Introducing Rust
 
 Access environment variables
@@ -251,22 +253,77 @@ let v = Vec::<u8>::new();
 
 *Type Conversion Table*
 
-#table(
-  columns: 2,
-  [*C*], [*Rust*],
-  [unsigned], [usize],
-  [uint8_t, unsigned char], [u8],
-  [uint16_t], [u16],
-  [uint32_t], [u32],
-  [uint64_t], [u64],
-  [],[],
-  [int], [isize],
-  [int8_t, signed char], [i8],
-  [int16_t], [i16],
-  [int32_t], [i32],
-  [int64_t], [i64],
-  [float], [f32],
-  [double], [f64],
-  [int], [bool],
-  [char], [char],
+#grid(
+  columns: (1fr, 1fr, 2fr),
+  rows: (auto),
+  grid.cell(table(
+    columns: 2,
+    [*C*], [*Rust*],
+    [unsigned], [usize],
+    [uint8_t, unsigned char], [u8],
+    [uint16_t], [u16],
+    [uint32_t], [u32],
+    [uint64_t], [u64],
+  )),
+  grid.cell(table(
+    columns: 2,
+    [*C*], [*Rust*],
+    [int], [isize],
+    [int8_t, signed char], [i8],
+    [int16_t], [i16],
+    [int32_t], [i32],
+    [int64_t], [i64],
+    [float], [f32],
+    [double], [f64],
+    [int], [bool],
+    [char], [char],
+  ))
 )
+
+*Traits*
+
+Traits describe functionality that types can implement.
+Traits are an important tool for abstraction, similar role to sub-types in many languages.
+
+```rust
+trait Summary {
+    fn summarise(self) -> String;
+}
+
+fn notify<T: Summary>(item: T) {
+    println!("Breaking news! {}", item.summarise());
+}
+```
+
+You can derive common traits using the `#[derive]` attribute, like `#[derive(Debug)]`.
+
+Traits can also specify associated types, types that must be specified when a trait is implemented.
+
+```rust
+trait Iterator {
+    type Item;
+
+    fn next(&mut self) -> Option<Self::Item>;
+}
+```
+
+*Enums*
+
+There are several different kinds of enums in Rust:
+
+- *Unit Enums*: Enums without any associated data.
+- *Tuple Enums*: Enums with a fixed number of fields.
+- *Struct Enums*: Enums with a struct-like syntax.
+
+```rust
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+```
+
+In Rust when looking up an item from a db for example, you can return Option, in C you can return a pointer to the item or NULL if not found.
+
+This is dangerous in C because it can lead to null pointer dereferences and undefined behavior. In Rust, Option provides a safe way to handle the absence of a value, preventing such issues.
