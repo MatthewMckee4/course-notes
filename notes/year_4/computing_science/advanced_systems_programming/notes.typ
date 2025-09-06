@@ -327,3 +327,67 @@ enum Message {
 In Rust when looking up an item from a db for example, you can return Option, in C you can return a pointer to the item or NULL if not found.
 
 This is dangerous in C because it can lead to null pointer dereferences and undefined behavior. In Rust, Option provides a safe way to handle the absence of a value, preventing such issues.
+
+// 3d.
+
+== References in Rust vs C
+
+References are explicit – like pointers in C
+
+*Rust vs C Reference Comparison*
+
+#grid(
+  columns: (1.5fr, 2fr, 2fr),
+  rows: (auto, auto, auto, auto, auto),
+  gutter: 5pt,
+  [*Operation*], [*Rust*], [*C*],
+  [Create variable binding], [`let x = 10;`], [`int x = 10;`],
+  [Take reference (pointer)], [`let r = &x;`], [`int *r = &x;`],
+  [Dereference to access value], [`let s = *r;`], [`s = *r;`],
+  [Function parameter by reference], [`fn calculate_length(b: &Buffer) -> usize`], [`int calculate_length(Buffer *b)`]
+)
+
+In Rust, references can never be null.
+
+We can have multiple immutable references to the same data, but only one mutable reference, and not at the same time.
+
+*Memory Allocation and Boxes*
+
+A `Box<T>` is a smart pointer that refers to memory allocated on the heap. It provides automatic memory management and ensures that the memory is deallocated when the `Box` goes out of scope.
+
+#grid(
+  columns: (1fr, 2fr),
+  rows: (auto, auto),
+  gutter: 5pt,
+  [*Rust*], [*C*],
+  [`let b = Box::new(10);`], [`int *b = malloc(sizeof(int)); *b = 5;`],
+)
+
+Rust makes guarantees about memory allocation:
+- The value returned by Box::new() is guaranteed to be initialised
+- The allocated memory is guaranteed to match the size of the type it is to store
+- Rust guarantees that the memory will be automatically deallocated when the box goes out of scope
+
+Boxes do not implement the standard Copy trait; can pass boxes around, but only one copy of each box can exist – again, to avoid data races between threads
+- A Box<T> is a pointer to the heap allocated memory; if it were possible to copy the box, we could get multiple mutable references to that memory
+
+*Strings*
+
+Strings are Unicode text encoded in UTF-8 format
+- A str is an immutable string slice, always accessed via an &str reference
+- The &str type is built-in to the language
+- A String is a mutable string buffer type, implemented in the standard library
+- The string type implements the `Deref<Target=str>` trait, so taking a reference to a String results actually returns an &str
+
+*Why is Rust interesting?*
+
+- No concept of undefined behaviour
+- No buffer overflows
+- No dangling pointers
+- No null pointer dereferences
+- Zero cost abstractions to model problem space
+- Deterministic automatic memory management
+  - Prevents iterator invalidation
+  - Prevents use-after-free bugs
+  - Prevents most memory leaks
+- Rules around references and ownership prevent data races in concurrent code
