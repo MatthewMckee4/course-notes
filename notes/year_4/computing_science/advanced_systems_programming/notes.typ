@@ -330,7 +330,7 @@ This is dangerous in C because it can lead to null pointer dereferences and unde
 
 // 3d.
 
-== References in Rust vs C
+*References in Rust vs C*
 
 References are explicit – like pointers in C
 
@@ -391,3 +391,84 @@ Strings are Unicode text encoded in UTF-8 format
   - Prevents use-after-free bugs
   - Prevents most memory leaks
 - Rules around references and ownership prevent data races in concurrent code
+
+#pagebreak()
+
+= Type-based Modelling and Design
+
+// 4a.
+
+== Type-based Development
+
+In a type driven development approach, rather than structuring code around control flow, you structure it first around the types.
+
+First, define the types, think of the types you need to represent the problem domain.
+- Data exchanged
+- Data describing endpoints, interactors
+- States
+
+Make the behaviour obvious from the types, so the types constrain behaviour.
+- Use `Username` rather than `String` for user names
+- Encode states as types and state transitions as functions
+
+Types and functions provide a model of the system.
+- Interactive design using the compiler to check consistency
+
+// 4b.
+
+== Design Patterns
+
+Represent units in the type system if numbers have extra context involved.
+
+We can think of an example where we are working with degrees in celcius and fahrenheit.
+We can naively just represent these with float values. This can easily result in incorrect calculations.
+We should instead create new types that wrap float values.
+
+```rust
+struct Celsius(f32);
+struct Fahrenheit(f32);
+
+// impl add for each
+```
+
+Wrapping values inside struct adds zero runtime overhead in Rust.
+- No information is added to the struct, it's just a wrapper around the float value
+- Optimiser will recognise that the code collapses down to operations on primitive types, and generate code to do so
+- All the additinos are a compile-time model of the way the data is used, they dont affect the compiled code
+- Equivalent C++ code has the same properties
+
+*Typing Anti-Patterns*
+
+Method parameters that are strings rather than some more appropriate type.
+Use `enum` to represent values that can be one of several alternatives.
+
+Use of boolean flags. enums should be used instead of boolean flags.
+
+Use the type system to describe features of the system design, so the compiler cancheck for correctness
+There is an up-front cost: you must define the types
+- The benefit is that fixing compilation errors is easier than fixing silent data corruption
+  - For small systems, the cost may outweigh the benefit
+  - For large systems, compiler enforced consistency checks due to use of types can be a significant win
+
+// 4c.
+
+== State Machines
+
+System behaviour modelled as a finite state machine comprising:
+- States that reflect the status of the system
+- Events that trigger transitions between states
+- State variables that hold system configuration
+
+We can use enums to represent states and events, and structs to hold state variables. This is compact, makes states and events clear and has a clear states and transition table via mattern matching.
+Relies on a type system with more powerful enums.
+
+We can also use a struct based approach where struct methods are used to transition between states and update state variables. Less explicit as transitions are encoded in the return type of methods.
+- Define a struct representing each state
+- Model an event as a method call on a struct
+- Model state transitions by returning a struct representing the new state
+
+// 4d.
+
+== Ownership
+
+Rust tracks ownership of data - enforces that every value has a single owner.
