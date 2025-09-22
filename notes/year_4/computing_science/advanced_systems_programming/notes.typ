@@ -472,3 +472,24 @@ We can also use a struct based approach where struct methods are used to transit
 == Ownership
 
 Rust tracks ownership of data - enforces that every value has a single owner.
+
+= Resource Ownership and Memory Management
+
+// 5a.
+
+== Memory
+
+
+#grid(
+  columns: (1fr, 1fr),
+  rows: (auto),
+  [
+To understand memory management, must understand what memory is to be managed:
+- Program text, data, and global variables
+- Heap allocated memory
+- Stack
+- Memory mapped files and shared libraries
+- Operating system kernel
+  ],
+grid.cell(image("assets/layout-of-a-process-in-memory.png", width: 70%))
+)
