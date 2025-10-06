@@ -248,3 +248,80 @@ gradeFromGPA gpa
     | gpa >= 12 = "C"
     | otherwise = "below C"
 ```
+
+= Recursion and Algebraic Datatypes
+
+== Pattern matching
+
+Case expression:
+
+```hs
+case list of
+    [] -> "empty"
+    [x] -> "one element"
+    _ -> "more elements"
+```
+
+Pattern matching can also be done in function definitions
+
+```hs
+empty :: [a] -> Bool
+empty [] = True
+empty _ = False
+```
+
+== How are lists defined?
+
+Lists are inductively-defined data structures
+
+```hs
+[] :: [a]
+(:) :: a -> [a] -> [a]
+```
+
+== Tail Recursion
+
+Haskell uses tail call optimisation.
+
+All tail calls (where a call is the last part of an expression) can be implemented using constant stack space, since we stay in the same place in the stack.
+
+== Mutual Recursion
+
+Mutially recursive functions are functions that call each other.
+
+== Algebraic Datatypes
+
+We can define `sum` types
+
+```hs
+data Season = Spring | Summer | Autumn | Winter deriving (Show)
+```
+
+```hs
+data Suit = Hearts | Diamonds | Clubs | Spades
+
+data Card = King Suit | Queen Suit | Jack Suit | Ace Suit | Number Suit Int
+```
+
+```hs
+showCard :: Card -> String
+showCard (King _) = "K"
+showCard (Queen _) = "Q"
+showCard (Number _ n) = (show n)
+```
+
+```hs
+data Tree = Leaf | Node Int Tree Tree
+```
+
+```hs
+data BinaryTree a = Leaf | Node a (BinaryTree a) (BinaryTree a)
+```
+
+```hs
+data Maybe a = Just a | Nothing
+
+safeHead :: [a] -> Maybe a
+safeHead [] = Nothing
+safeHead (x : _) = Just x
+```
