@@ -479,17 +479,82 @@ Rust tracks ownership of data - enforces that every value has a single owner.
 
 == Memory
 
-
 #grid(
   columns: (1fr, 1fr),
   rows: (auto),
   [
+
 To understand memory management, must understand what memory is to be managed:
 - Program text, data, and global variables
 - Heap allocated memory
 - Stack
 - Memory mapped files and shared libraries
 - Operating system kernel
-  ],
+
+*Program Text* is compiled machine code of a program.
+
+*Data Segment* is variables initialised in source code.
+- String literals, initialised `static` global variables in C.
+- Values known at compile time
+
+*BSS Segment* reserved for uninitialised `static` global variables.
+- "block started by segment"
+- Initialised to 0 by runtime when the program loads
+
+*The Stack* holds function parameters, return address, local variables.
+],
 grid.cell(image("assets/layout-of-a-process-in-memory.png", width: 70%))
 )
+
+- Function calls push data onto the stack, growing down
+  - Parameters for the function; return address; pointer to previous stack frame; local variables.
+  - Data removed, stack shrinks, when function returns - stack managed automatically.
+    - Compiler generates code to manage the stack as part of the compiled program.
+    - The calling convention for functions, how parameters are pushed onto the stack, standardised for given processor and programming language.
+  - The operating system generates the stack frame for `main()` when the program starts.
+- Ownership of stack memory follows function invocation.
+
+Address of the previous stack frame is stored for ease of debugging, so stack trace can be printed, so it can easily be restored when function returns.
+
+*Buffer Overflow Attacks*
+
+- Language not type safe, doesn't enforce abstractions.
+- Write past array bounds - overflows space allocated to local variables, overwrite return address and following data.
+- Contents valid machine code; the overwritten function return address is made to point to that code.
+- When function returns code written during overflow is executed.
+
+Some workarounds
+- Mark stack as non-executable.
+- Randomise top of stack address each program run.
+- Various more complex buffer overflow attacks still possible.
+
+The solution is using a language that is type safe and enforces array bounds checks.
+
+*The Heap* holds explicitly allocated memory.
+- In C using `malloc()` and `calloc()`.
+- Starts at a low address in memory; later allocations follow in consecutive addresses.
+  - Sometimes padding to align to a 32 or 64-bit boundary.
+  - Modern `malloc()` implementations are thread aware, split heap into different parts, different threads to avoid cache sharing.
+- Memory management primarily concerned with reclaiming heap memory.
+  - Manually using `free()`.
+  - Automatically via reference counting / garbage collection.
+  - Automatically based on regions and lifetime analysis.
+
+*Memory Mapped Files and Shared Libraries*
+
+Memory mapped files allow data on disk to be directly mapped into address space.
+- Mappings created using `mmap()` system call.
+  - Returns a pointer to a memory address that acts as a proxy for the start of the file.
+  - Reads from/writes to subsequent address acts on the underlying file.
+  - File is demand pages from/to disk as needed - only the parts of the file that are accessed are read into memory.
+  - Useful for random access to parts of files.
+- Used to map shared libraries into memory.
+  - `.so` files on unix and `.dll` files on windows.
+
+*The Kernel*
+
+Operating system *kernel* resides at the top of the address space.
+  - Not directly accessible to user-space programs.
+    - Attempt to access kernel - segmentation violation.
+    - The `syscall` instruction x86_64 assembler calls into the kernel after permission check.
+  - Kernel can read/write memory of user processes.
