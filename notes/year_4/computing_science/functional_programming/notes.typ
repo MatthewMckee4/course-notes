@@ -249,6 +249,8 @@ gradeFromGPA gpa
     | otherwise = "below C"
 ```
 
+#pagebreak()
+
 = Recursion and Algebraic Datatypes
 
 == Pattern matching
@@ -289,12 +291,28 @@ All tail calls (where a call is the last part of an expression) can be implement
 
 Mutially recursive functions are functions that call each other.
 
+Haskell allows us ot do this since all other definitions are in scope
+
 == Algebraic Datatypes
 
-We can define `sum` types
+=== Sum Types
+
+We can define `sum` types, it is like an enum.
+
+Data constructors are a different way of creating values of this type (Spring, Summer, Autumn, Winter)
 
 ```hs
 data Season = Spring | Summer | Autumn | Winter deriving (Show)
+```
+
+=== Product Types
+
+Product types are like tuples, but with named fields.
+
+Here, `Product` is the data constructor.
+
+```hs
+data Product = Product Int String
 ```
 
 ```hs
@@ -303,6 +321,10 @@ data Suit = Hearts | Diamonds | Clubs | Spades
 data Card = King Suit | Queen Suit | Jack Suit | Ace Suit | Number Suit Int
 ```
 
+We can pattern match on `sum` types.
+
+We need brackets around compound values.
+
 ```hs
 showCard :: Card -> String
 showCard (King _) = "K"
@@ -310,13 +332,29 @@ showCard (Queen _) = "Q"
 showCard (Number _ n) = (show n)
 ```
 
+=== Recursive Types
+
 ```hs
 data Tree = Leaf | Node Int Tree Tree
 ```
 
+=== Parameterised Types
+
+We can *parameterise* a data type by putting a type variable on the left hand side of the data declaration.
+
 ```hs
 data BinaryTree a = Leaf | Node a (BinaryTree a) (BinaryTree a)
 ```
+
+*Example: Inverting a binary tree*
+
+```hs
+invert :: BinaryTree a -> BinaryTree a
+invert Leaf = Leaf
+invert (Node x l r) = Node x (invert r) (invert l)
+```
+
+=== The Maybe Type
 
 ```hs
 data Maybe a = Just a | Nothing
@@ -325,3 +363,50 @@ safeHead :: [a] -> Maybe a
 safeHead [] = Nothing
 safeHead (x : _) = Just x
 ```
+
+= Higher-Order Functions & Property-Based Testing
+
+== Libraries
+
+We can install libraries using `cabal` or `stack`.
+
+```bash
+cabal update
+cabal install --lib library-name
+```
+
+== Higher-Order Functions
+
+A higher-order function is a function which takes another function as an argument (`map` `filter`).
+
+=== Folding
+
+A fold is a way of reducing a list into a single value.
+
+We have two types of folder, depending on the the associativity:
+
+```hs
+foldl :: (b -> a -> b) -> b -> [a] -> b
+foldl _ acc [] = acc
+foldl f acc (x : xs) = foldl f (f acc x) xs
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+foldr f acc [] = acc
+foldr f acc (x : xs) = f x (foldr f acc xs)
+```
+
+== Property-Based Testing
+
+You specify some properties that should be true for that program, then run `QuickCheck` tool with your boolean predicates and it generates random inputs to test your program.
+
+Program testing can be used to show the presence of bugs, but never show their absence.
+
+This means passing property tests doesn't guarantee correctness, but failing tests do indicate a bug.
+
+For testing the length function, we can define a property as `a list containing n elements has length n`.
+
+```hs
+let prop_len = \n -> (if n>=0 then length [1..n] == n else True)
+```
+
+Then we can run `quickCheck prop_len` to test the `length` function.
