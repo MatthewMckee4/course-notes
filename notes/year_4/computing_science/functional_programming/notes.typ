@@ -410,3 +410,90 @@ let prop_len = \n -> (if n>=0 then length [1..n] == n else True)
 ```
 
 Then we can run `quickCheck prop_len` to test the `length` function.
+
+= Evaluation Strategies and Polymorphism
+
+== Evaluation Strategies
+
+Expressions are evaluated as a program runs. The order of expression evaluation depends on both the laguage semantics and the implementation pragmatics.
+
+*Eager evaluation* also know as strict evaluation or call by value.
+
+*Lazy evaluation* also known as non-strict evaluation or call by need.
+
+== Polymorphism
+
+In this case, polymorphism means we can operate over vaues from a variety of different types.
+
+=== Parametric Polymorphism
+
+Functions operate on the shape of the arguments rather than with the data, so we can operate on different types, and not care about the actual types.
+
+For this we use type variables.
+
+=== Ad-hoc Polymorphism
+
+This is like method overriding, We have the same function but different implementations for different types.
+
+This is about overloading (like using `@overload` in Python) functions.
+
+In Haskell, this is achieved using typeclasses. A typeclass specifies a list of operations to be defined for a type.
+
+// https://learnyouahaskell.com/making-our-own-types-and-typeclasses
+
+```hs
+class Show a where
+    show :: a -> String
+```
+
+We can specify that an algebraic data type belongs to a typeclass in two different ways.
+- `instance` declaration - here, we specify the implementations using default behaviour.
+- `deriving` clause - this will implement the typeclass using default behaviour.
+
+==== Instances
+
+```hs
+data Insect = Spider | Centipede | Ant
+
+class Eq a where
+    (==) :: a -> a -> Bool
+
+class Show a where
+    show :: a -> String
+
+instance Eq Insect where
+    Spider == Spider = True
+    Centipede == Centipede = True
+    Ant == Ant = True
+    _ == _ = False
+
+instance Show Insect where
+    show Spider = "Spider"
+    show Centipede = "Centipede"
+    show Ant = "Ant"
+```
+
+==== Deriving
+
+```hs
+data Insect = Spider | Centipede | Ant
+        deriving (Show, Eq)
+```
+
+The `deriving` clause provides us with default implementations for the appropriate functions, here `show` and `==` and `/=`.
+
+This is possible because we can derive a string by using the data constructor, and declare two insects equal if they use the same data constructor.
+If the data constructors had associated data, in order to support deriving, their types would need to support Show/Eq too.
+
+*The Read Typeclass*
+
+`read` allows us to convert String values into other values.
+
+```hs
+data Insect = Spider | Centipede | Ant
+    deriving (Read, Show, Eq)
+
+(read "Centipede") :: Insect
+```
+
+Note that we must give an explicity type annotation.
