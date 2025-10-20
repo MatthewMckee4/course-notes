@@ -497,3 +497,90 @@ data Insect = Spider | Centipede | Ant
 ```
 
 Note that we must give an explicity type annotation.
+
+= Introduction to IO
+
+== Purity
+
+Function purity means that a function always returns the same value for the same input.
+It also means that a function has no side effects.
+
+Though, our code needs to do IO, but these are externally visible operations, so they are not pure.
+
+=== IO Types
+
+each side-effecting operation is marked with a type constructor `IO` type.
+
+```hs
+putStrLn :: String -> IO ()
+```
+
+*Mixing pure functions and IO*
+
+A `String` is not the same thing as an `IO String`.
+
+A `String` is data, an `IO String` is an `IO` action that produces a `String`.
+
+```hs
+getAndPrintReverse :: IO ()
+getAndPrintReverse = do
+    str <- getLine
+    let revStr = reverse str
+    putStrLn revStr
+```
+
+Within a ‘do’ block, the `<-` operator allows us to give a name (str) to the result of an IO operation. Here str has type String
+
+```hs
+getAndReverse :: IO String
+getAndReverse = do
+    str <- getLine
+    let revStr = reverse str
+    return revStr
+```
+
+Note that we have to use the return function return :: a -> IO a -- roughly (since revStr is of type String, and we need an IO String)
+
+Every Haskell program has an entry point, `main`
+
+```hs
+main :: IO ()
+main = do
+    line <- getLine
+    putStrLn (makeUpper line)
+```
+
+Instead, think of IO as though you are using do-notation to build a bigger computation by stringing together smaller IO computations, with main as your entry point.
+
+
+=== Trace Debugging
+
+That said, it is sometimes useful to do ‘print debugging’ where we wish to print some program state to the console
+
+```hs
+import Debug.Trace
+trace :: String -> a -> a
+
+trace "returning 42" 42
+```
+
+=== Pseudo-Random Number Generation
+
+Random number generation might seem to be an impure operation.
+
+In fact, a pseudo-random number generator generates a random value, and a new generator.
+
+Only seeding the PRNG is impure, generation is pure.
+
+=== Reference Cells
+
+With IO we can make use of mutable reference cells that store some data, and its contents can be changed
+
+```hs
+newIORef :: a -> IO (IORef a)
+-- Creates a new IO reference with an initial value of type a
+readIORef :: IORef a -> IO a
+-- Reads the content of an IORef
+writeIORef :: IORef a -> a -> IO ()
+-- Writes to an IORef
+```
