@@ -584,3 +584,127 @@ readIORef :: IORef a -> IO a
 writeIORef :: IORef a -> a -> IO ()
 -- Writes to an IORef
 ```
+
+= Introduction to Monads
+
+== Nondeterministic Computations
+
+Sometimes we might want to have a computation that returns multiple possible results, we call this a nondeterministic computation.
+
+One example is coin tosses, we want to get a list of all possible outcomes of two coin tosses.
+
+```hs
+withEach :: [a] -> (a -> [b]) -> [b]
+withEach [] _ = []
+withEach (x:xs) f = f x ++ (withEach xs f)
+
+twoCoinTosses :: [(CoinToss, CoinToss)]
+twoCoinTosses =
+    coinToss `withEach` (\x ->
+    coinToss `withEach` (\y ->
+    [(x, y)]))
+
+twoCoinTosses :: [(CoinToss, CoinToss)]
+twoCoinTosses = [ (x, y) | x <- coinToss,
+    y <- coinToss ]
+```
+
+== More on IO
+
+So fare we've used do-notation to build up IO computations.
+
+We can write them without do-notation though.
+
+Take this previous example:
+
+```hs
+getAndPrintReverse :: IO ()
+getAndPrintReverse = do
+    str <- getLine
+    let revStr = reverse str
+    putStrLn revStr
+
+getAndPrintReverse :: IO ()
+getAndPrintReverse =
+    getLine `withIOResult` (\str ->
+    let revStr = reverse str in
+    putStrLn revStr)
+```
+
+The implementation of `withIOResult` maps to a primitive and is handled by the runtime
+system.
+
+It runs the IO computation and applies the given function to the result.
+
+== Monads
+
+We have seen many patterns of functions that are of the form `a -> (a -> b) -> b`.
+
+We can generalise the pattern we have seen so far.
+
+To be a monad, a data type needs two things:
+- A way of constructing a trivial computation from a value.
+  - a -> Maybe a (we can use Just)
+  - a -> [a] (we can use the singleton list constructor)
+  - a -> IO a (it’s a library function, but it creates a pure computation without side
+  effects)
+- A way of building a larger computation from the result of a previous one.
+
+The Monad type class is defined as:
+
+```hs
+class (Applicative m) => Monad m where
+    return :: a -> m a
+    (>>=) :: m a -> (a -> m b) -> m b
+    (>>) :: m a -> m b -> m b
+```
+
+- `return` injects a pure value into the monad.
+- `>>` (pronounced "sequence") runs but ignores first computation, returns result of second.
+This is derivable from the definition of `>>=`:
+- `>>=` (pronounced "bind") allows us to build up a computation. Takes a computation of type
+`m a` and a function `a -> m b` to build a new computation `m b` and returns `m b`.
+
+== do-notation
+
+We introduced IO using do-notation to get accross the intuation of building up IO computations.
+
+Since IO is a monad, we can also write IO computations using explicit `>>=`:
+
+```hs
+greetReverse :: IO ()
+greetReverse = do
+    name <- getLine
+    let reverseName = reverse name
+    putStrLn “hello”
+    putStrLn reverseName
+
+-- Into
+
+greetReverse :: IO ()
+greetReverse =
+    getLine >>= (\name ->
+    let reverseName = reverse name in
+    putStrLn “hello” >> putStrLn reverseName)
+```
+
+do-notation is syntactic sugar.
+
+== do-Notation Summarized
+
+The following table summarizes the translation between do-notation and monadic operations:
+
+#table(
+  columns: (auto, auto),
+  inset: 10pt,
+  align: (center, center),
+  [*do-notation*], [*Monadic notation*],
+  [`do x <- M
+  N`], [`M >>= \x -> N`],
+  [`do M
+   N`], [`M >> N`],
+  [`do let x = M
+     N`], [`do let x = M in N`]
+)
+
+do-notation works for any data type that is a member of the monad typeclass.
