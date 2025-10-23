@@ -497,3 +497,214 @@ data Insect = Spider | Centipede | Ant
 ```
 
 Note that we must give an explicity type annotation.
+
+= Introduction to IO
+
+== Purity
+
+Function purity means that a function always returns the same value for the same input.
+It also means that a function has no side effects.
+
+Though, our code needs to do IO, but these are externally visible operations, so they are not pure.
+
+=== IO Types
+
+each side-effecting operation is marked with a type constructor `IO` type.
+
+```hs
+putStrLn :: String -> IO ()
+```
+
+*Mixing pure functions and IO*
+
+A `String` is not the same thing as an `IO String`.
+
+A `String` is data, an `IO String` is an `IO` action that produces a `String`.
+
+```hs
+getAndPrintReverse :: IO ()
+getAndPrintReverse = do
+    str <- getLine
+    let revStr = reverse str
+    putStrLn revStr
+```
+
+Within a ‘do’ block, the `<-` operator allows us to give a name (str) to the result of an IO operation. Here str has type String
+
+```hs
+getAndReverse :: IO String
+getAndReverse = do
+    str <- getLine
+    let revStr = reverse str
+    return revStr
+```
+
+Note that we have to use the return function return :: a -> IO a -- roughly (since revStr is of type String, and we need an IO String)
+
+Every Haskell program has an entry point, `main`
+
+```hs
+main :: IO ()
+main = do
+    line <- getLine
+    putStrLn (makeUpper line)
+```
+
+Instead, think of IO as though you are using do-notation to build a bigger computation by stringing together smaller IO computations, with main as your entry point.
+
+
+=== Trace Debugging
+
+That said, it is sometimes useful to do ‘print debugging’ where we wish to print some program state to the console
+
+```hs
+import Debug.Trace
+trace :: String -> a -> a
+
+trace "returning 42" 42
+```
+
+=== Pseudo-Random Number Generation
+
+Random number generation might seem to be an impure operation.
+
+In fact, a pseudo-random number generator generates a random value, and a new generator.
+
+Only seeding the PRNG is impure, generation is pure.
+
+=== Reference Cells
+
+With IO we can make use of mutable reference cells that store some data, and its contents can be changed
+
+```hs
+newIORef :: a -> IO (IORef a)
+-- Creates a new IO reference with an initial value of type a
+readIORef :: IORef a -> IO a
+-- Reads the content of an IORef
+writeIORef :: IORef a -> a -> IO ()
+-- Writes to an IORef
+```
+
+= Introduction to Monads
+
+== Nondeterministic Computations
+
+Sometimes we might want to have a computation that returns multiple possible results, we call this a nondeterministic computation.
+
+One example is coin tosses, we want to get a list of all possible outcomes of two coin tosses.
+
+```hs
+withEach :: [a] -> (a -> [b]) -> [b]
+withEach [] _ = []
+withEach (x:xs) f = f x ++ (withEach xs f)
+
+twoCoinTosses :: [(CoinToss, CoinToss)]
+twoCoinTosses =
+    coinToss `withEach` (\x ->
+    coinToss `withEach` (\y ->
+    [(x, y)]))
+
+twoCoinTosses :: [(CoinToss, CoinToss)]
+twoCoinTosses = [ (x, y) | x <- coinToss,
+    y <- coinToss ]
+```
+
+== More on IO
+
+So fare we've used do-notation to build up IO computations.
+
+We can write them without do-notation though.
+
+Take this previous example:
+
+```hs
+getAndPrintReverse :: IO ()
+getAndPrintReverse = do
+    str <- getLine
+    let revStr = reverse str
+    putStrLn revStr
+
+getAndPrintReverse :: IO ()
+getAndPrintReverse =
+    getLine `withIOResult` (\str ->
+    let revStr = reverse str in
+    putStrLn revStr)
+```
+
+The implementation of `withIOResult` maps to a primitive and is handled by the runtime
+system.
+
+It runs the IO computation and applies the given function to the result.
+
+== Monads
+
+We have seen many patterns of functions that are of the form `a -> (a -> b) -> b`.
+
+We can generalise the pattern we have seen so far.
+
+To be a monad, a data type needs two things:
+- A way of constructing a trivial computation from a value.
+  - a -> Maybe a (we can use Just)
+  - a -> [a] (we can use the singleton list constructor)
+  - a -> IO a (it’s a library function, but it creates a pure computation without side
+  effects)
+- A way of building a larger computation from the result of a previous one.
+
+The Monad type class is defined as:
+
+```hs
+class (Applicative m) => Monad m where
+    return :: a -> m a
+    (>>=) :: m a -> (a -> m b) -> m b
+    (>>) :: m a -> m b -> m b
+```
+
+- `return` injects a pure value into the monad.
+- `>>` (pronounced "sequence") runs but ignores first computation, returns result of second.
+This is derivable from the definition of `>>=`:
+- `>>=` (pronounced "bind") allows us to build up a computation. Takes a computation of type
+`m a` and a function `a -> m b` to build a new computation `m b` and returns `m b`.
+
+== do-notation
+
+We introduced IO using do-notation to get accross the intuation of building up IO computations.
+
+Since IO is a monad, we can also write IO computations using explicit `>>=`:
+
+```hs
+greetReverse :: IO ()
+greetReverse = do
+    name <- getLine
+    let reverseName = reverse name
+    putStrLn “hello”
+    putStrLn reverseName
+
+-- Into
+
+greetReverse :: IO ()
+greetReverse =
+    getLine >>= (\name ->
+    let reverseName = reverse name in
+    putStrLn “hello” >> putStrLn reverseName)
+```
+
+do-notation is syntactic sugar.
+
+== do-Notation Summarized
+
+The following table summarizes the translation between do-notation and monadic operations:
+
+#table(
+  columns: (auto, auto),
+  inset: 10pt,
+  align: (center, center),
+  [*do-notation*], [*Monadic notation*],
+  [`do x <- M
+  N`], [`M >>= \x -> N`],
+  [`do M
+   N`], [`M >> N`],
+  [`do let x = M
+     N`], [`do let x = M in N`]
+)
+
+do-notation works for any data type that is a member of the monad typeclass.
