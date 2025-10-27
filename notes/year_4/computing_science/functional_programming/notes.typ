@@ -708,3 +708,81 @@ The following table summarizes the translation between do-notation and monadic o
 )
 
 do-notation works for any data type that is a member of the monad typeclass.
+
+#pagebreak()
+
+= More Monads
+
+== Other Monads
+
+These three monads involve an environment, which we pass around, threading it from function context to function context. Typical use cases for each monad are as follows:
+- Reader - shared environmental configuration
+- Writer - logging operations
+- State - computing a large value recursively
+
+=== Reader Monad
+
+Also known as the environment monad. It's useful for reading fixed values from a shared state environment, and for passing this shared state between multiple function calls in a sequence.
+
+Here is a small example
+
+```hs
+import Control.Monad.Reader
+
+hi = do
+    name <- ask
+    return ("hello " ++ name)
+
+conversation = do
+    start <- hi
+    return (start ++ " ... ")
+
+main = do
+    putStrLn $ runReader conversation "jeremy"
+```
+
+The reader structure has two parameters, the environment type and the result type.
+
+=== Writer Monad
+
+The writer monad builds up a growing sequence of state, which can be used for logging operations or other purposes.
+
+Here is a small example:
+
+```hs
+import Control.Monad.Writer
+
+logMessage :: String -> Writer String ()
+logMessage msg = tell $ msg ++ "\n"
+
+main = do
+    let log = runWriter $ do
+            logMessage "Starting program"
+            logMessage "Doing some work"
+            logMessage "Finishing program"
+    putStrLn log
+```
+
+=== State Monad
+
+The state monad is useful for computing a large value recursively, while maintaining a shared state between function calls.
+
+Here is a small example:
+
+```hs
+import Control.Monad.State
+
+factorial :: Int -> State Int Int
+factorial n = do
+    state <- get
+    put (state + 1)
+    if n == 0
+        then return 1
+        else do
+            result <- factorial (n - 1)
+            return (result * n)
+
+main = do
+    let (result, state) = runState factorial 0
+    putStrLn $ "Result: " ++ show result ++ ", State: " ++ show state
+```
