@@ -759,7 +759,6 @@ main = do
     let log = runWriter $ do
             logMessage "Starting program"
             logMessage "Doing some work"
-            logMessage "Finishing program"
     putStrLn log
 ```
 
@@ -785,4 +784,42 @@ factorial n = do
 main = do
     let (result, state) = runState factorial 0
     putStrLn $ "Result: " ++ show result ++ ", State: " ++ show state
+```
+
+== Semigroups
+
+A semigroup is a set S with an associative binary operation.
+
+There is a typeclass for this in haskell, but it does not and cannot enforce associativity.
+
+```hs
+class Semigroup m where
+    (<>) :: m -> m -> m
+```
+
+=== Monoids
+
+A monoid is a set S with an associative binary operation and an identity element.
+
+There is a typeclass for this in haskell, but it does not and cannot enforce associativity or the existence of an identity element.
+
+```hs
+class Semigroup m => Monoid m where
+    mempty :: m
+    mappend :: m -> m -> m
+
+    -- defining mconcat is optional, since it has the following default:
+    mconcat :: [m] -> m
+    mconcat = foldr mappend mempty
+```
+
+All instances of Monoid must satisfy the following laws:
+
+```hs
+-- left and right identity
+x <> mempty == x
+mempty <> x == x
+
+-- Associativity
+(x <> y) <> z == x <> (y <> z)
 ```
