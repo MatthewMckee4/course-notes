@@ -823,3 +823,13 @@ mempty <> x == x
 -- Associativity
 (x <> y) <> z == x <> (y <> z)
 ```
+
+Writers also use monoids, when using the `tell` function, it accumulates via `mappend`.
+
+Folders also use monoids, we can now see that we have a basic default value and accumulation function,
+so we can now use the `fold` function:
+
+```
+fold :: (Foldable t, Monoid m) => t m -> m
+foldMap :: (Foldable t, Monoid m) => (a -> m) -> t a -> m
+```
