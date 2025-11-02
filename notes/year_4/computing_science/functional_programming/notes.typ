@@ -708,3 +708,128 @@ The following table summarizes the translation between do-notation and monadic o
 )
 
 do-notation works for any data type that is a member of the monad typeclass.
+
+#pagebreak()
+
+= More Monads
+
+== Other Monads
+
+These three monads involve an environment, which we pass around, threading it from function context to function context. Typical use cases for each monad are as follows:
+- Reader - shared environmental configuration
+- Writer - logging operations
+- State - computing a large value recursively
+
+=== Reader Monad
+
+Also known as the environment monad. It's useful for reading fixed values from a shared state environment, and for passing this shared state between multiple function calls in a sequence.
+
+Here is a small example
+
+```hs
+import Control.Monad.Reader
+
+hi = do
+    name <- ask
+    return ("hello " ++ name)
+
+conversation = do
+    start <- hi
+    return (start ++ " ... ")
+
+main = do
+    putStrLn $ runReader conversation "jeremy"
+```
+
+The reader structure has two parameters, the environment type and the result type.
+
+=== Writer Monad
+
+The writer monad builds up a growing sequence of state, which can be used for logging operations or other purposes.
+
+Here is a small example:
+
+```hs
+import Control.Monad.Writer
+
+logMessage :: String -> Writer String ()
+logMessage msg = tell $ msg ++ "\n"
+
+main = do
+    let log = runWriter $ do
+            logMessage "Starting program"
+            logMessage "Doing some work"
+    putStrLn log
+```
+
+=== State Monad
+
+The state monad is useful for computing a large value recursively, while maintaining a shared state between function calls.
+
+Here is a small example:
+
+```hs
+import Control.Monad.State
+
+factorial :: Int -> State Int Int
+factorial n = do
+    state <- get
+    put (state + 1)
+    if n == 0
+        then return 1
+        else do
+            result <- factorial (n - 1)
+            return (result * n)
+
+main = do
+    let (result, state) = runState factorial 0
+    putStrLn $ "Result: " ++ show result ++ ", State: " ++ show state
+```
+
+== Semigroups
+
+A semigroup is a set S with an associative binary operation.
+
+There is a typeclass for this in haskell, but it does not and cannot enforce associativity.
+
+```hs
+class Semigroup m where
+    (<>) :: m -> m -> m
+```
+
+=== Monoids
+
+A monoid is a set S with an associative binary operation and an identity element.
+
+There is a typeclass for this in haskell, but it does not and cannot enforce associativity or the existence of an identity element.
+
+```hs
+class Semigroup m => Monoid m where
+    mempty :: m
+    mappend :: m -> m -> m
+
+    -- defining mconcat is optional, since it has the following default:
+    mconcat :: [m] -> m
+    mconcat = foldr mappend mempty
+```
+
+All instances of Monoid must satisfy the following laws:
+
+```hs
+-- left and right identity
+x <> mempty == x
+mempty <> x == x
+
+-- Associativity
+(x <> y) <> z == x <> (y <> z)
+```
+
+Writers also use monoids, when using the `tell` function, it accumulates via `mappend`.
+
+Folders also use monoids, we can now see that we have a basic default value and accumulation function,
+so we can now use the `fold` function:
+
+```
+fold :: (Foldable t, Monoid m) => t m -> m
+foldMap :: (Foldable t, Monoid m) => (a -> m) -> t a -> m
+```
