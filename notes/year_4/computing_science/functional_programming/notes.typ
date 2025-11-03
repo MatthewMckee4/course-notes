@@ -23,7 +23,7 @@ Haskell is statically typed: type errors are caught before a program is run.
 
 Haskell can infer a type for most expressions, but it is good practice to add in a type signature for top-level functions.
 
-*Evaluation in Imperitive vs Functional Languages*
+*Evaluation in Imperative vs Functional Languages*
 
 Imperative languages we have program counter, call stack, state.
 We record our current position in the program.
@@ -291,7 +291,7 @@ All tail calls (where a call is the last part of an expression) can be implement
 
 Mutially recursive functions are functions that call each other.
 
-Haskell allows us ot do this since all other definitions are in scope
+Haskell allows us to do this since all other definitions are in scope
 
 == Algebraic Datatypes
 
@@ -415,15 +415,15 @@ Then we can run `quickCheck prop_len` to test the `length` function.
 
 == Evaluation Strategies
 
-Expressions are evaluated as a program runs. The order of expression evaluation depends on both the laguage semantics and the implementation pragmatics.
+Expressions are evaluated as a program runs. The order of expression evaluation depends on both the language semantics and the implementation pragmatics.
 
-*Eager evaluation* also know as strict evaluation or call by value.
+*Eager evaluation* also known as strict evaluation or call by value.
 
 *Lazy evaluation* also known as non-strict evaluation or call by need.
 
 == Polymorphism
 
-In this case, polymorphism means we can operate over vaues from a variety of different types.
+In this case, polymorphism means we can operate over values from a variety of different types.
 
 === Parametric Polymorphism
 
@@ -496,7 +496,7 @@ data Insect = Spider | Centipede | Ant
 (read "Centipede") :: Insect
 ```
 
-Note that we must give an explicity type annotation.
+Note that we must give an explicit type annotation.
 
 = Introduction to IO
 
@@ -667,7 +667,7 @@ This is derivable from the definition of `>>=`:
 
 == do-notation
 
-We introduced IO using do-notation to get accross the intuation of building up IO computations.
+We introduced IO using do-notation to get across the intuition of building up IO computations.
 
 Since IO is a monad, we can also write IO computations using explicit `>>=`:
 
@@ -833,3 +833,128 @@ so we can now use the `fold` function:
 fold :: (Foldable t, Monoid m) => t m -> m
 foldMap :: (Foldable t, Monoid m) => (a -> m) -> t a -> m
 ```
+
+= Parser Combinators with Parsec
+
+== What is Parsing?
+
+A parser is a program that recognizes sentences from a grammar.
+
+In Haskell, there is an alternative approach involving the use of a parser combinators,
+whereby a parser can be constructed incrementally based on combining functions.
+
+Informally, a combinator is a higher-order function that combines 'things' to create more complex 'things'.
+
+In Haskell, we deal with the `Parser` type which has 3 type parameters:
+
+- The first type parameter represents the type of the input stream to be parsed.
+- The second type parameter represents the type of the user state.
+- The third type parameter represents the type of the value recognized by the parser.
+
+We can define a parser that recognizes and accepts String values containing 'c'.
+
+```hs
+firstParser = (char 'c') :: Parser String st Char
+
+-- We can use this
+parseTest firstParser "c"
+
+parse firstParser "foo" "hello"
+runParser firstParser () "foo" "cat"
+```
+
+
+== Parsers as Monads
+
+Since parser values are monads, we can sequence their operation using monadic do notation in Haskell.
+
+== Alternative typeclass
+
+Sometimes we want to try a computation then if it fails, try something else.
+
+The `Alternative` typeclass has `<|>` operator which means 'try the left side, if it fails, try the right side.
+
+```hs
+class Applicative f => Alternative f where
+    empty :: f a
+    (<|>) :: f a -> f a -> f a
+```
+
+= Monad Laws
+
+== Defining Custom Data Types
+
+We can model data in different ways:
+
+```hs
+type Student = (String, String, Int)
+
+data Student = Student String String Int
+```
+
+== Records
+
+Both of these solutions are not ideal, it is difficult to know which String is a name and which is an address.
+
+We need to pattern match to deconstruct and get a relevant field.
+
+We can instead use records, allowing us to have named fields.
+
+```hs
+data Student = Student { name :: String, address :: String, age :: Int }
+```
+
+We can construct a record as normal or by explicitly specifying the fields.
+
+```hs
+Student "John" "123 Main St" 25
+Student { name = "John", address = "123 Main St", age = 25 }
+```
+
+We can get fields using the field names as functions:
+
+```hs
+s = Student { name = "John", address = "123 Main St", age = 25 }
+name s
+address s
+age s
+```
+
+We can also update records without needing to specify all fields:
+
+```hs
+let s2 = s { age = 26 }
+```
+
+=== NewType
+
+A newtype declaration is a special form of a data declaration where there is only one data constructor.
+
+It can be used like a type alias, while ensureing that types are treated separately in the type system.
+
+```hs
+newtype Age = Age Int
+```
+
+== Laws
+
+There are some laws for the map function:
+
+1. Identity: map id = id
+2. Composition: map (f . g) = map f . map g
+
+There are also laws for the `Monoid` typeclass:
+
+1. Identity: mempty <> x = x <> mempty = x
+2. Associativity: (x <> y) <> z = x <> (y <> z)
+
+Here are the `Monad` laws.
+
+=== Left Identity
+1. Left Identity: return x >>= f = f x
+
+=== Right Identity
+2. Right Identity: m >>= return = m
+
+=== Associativity
+3. Associativity: (m >>= f) >>= g = m >>= (\x -> f x >>= g)
