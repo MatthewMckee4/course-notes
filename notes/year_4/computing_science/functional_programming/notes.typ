@@ -951,10 +951,124 @@ There are also laws for the `Monoid` typeclass:
 Here are the `Monad` laws.
 
 === Left Identity
+
 1. Left Identity: return x >>= f = f x
 
 === Right Identity
+
 2. Right Identity: m >>= return = m
 
 === Associativity
+
 3. Associativity: (m >>= f) >>= g = m >>= (\x -> f x >>= g)
+
+= Error Handling
+
+An error is a fault in the specification, implementation or operation of software, which causes an incorrect or unexpected result, leading to unanticipated behaviour.
+
+In haskell we can terminate a program with the error function `error`:
+
+```hs
+error :: String -> a
+```
+
+This has a polymorphic return type so that it matches any expression context.
+
+Commonly in Haskell, we use `Either` to handle errors. With Left indicating an error and Right indicating success.
+
+== Catching Exceptions
+
+We can also use the `catch` function to handle exceptions:
+
+```hs
+catch :: Exception e => IO a -> (e -> IO a) -> IO a
+```
+
+Not it is necassary to annotate the exception names with their types explicitly, since the type system can infer them.
+
+When we annotate the exception with the "wrong" type, the error handling function does not run and the program pushes
+up the actual error.
+
+== Try Clauses for Exceptions
+
+The `try` function embeds the result in an `Either` type:
+
+```hs
+try :: Exception e => IO a -> IO (Either e a)
+```
+
+Exceptions can be thrown in pure code, but can only be handled (with, for example, `catch` or `try`) in the `IO` monad.
+
+= Monad Transformers
+
+== What is a Monad Transformer?
+
+This is a technique for composing two monads into a single combined monad that has the join behaviour of both individual monads.
+Monad transformers are a monad composition technique.
+
+```hs
+class MonadTrans t where
+    lift :: Monad m => m a -> t m a
+```
+
+The lift function promotes a base monad function into the combined monad.
+
+Here is the example program, which looks for three executable files and returns a triple of
+their paths:
+
+```hs
+import Control.Monad.Trans.Maybe
+import System.Directory
+
+findAllExes :: MaybeT IO (FilePath, FilePath, FilePath)
+findAllExes = do
+    a <- MaybeT $ findExecutable "git"
+    b <- MaybeT $ findExecutable "ghc"
+    c <- MaybeT $ findExecutable "clang"
+    return (a, b, c)
+```
+
+What the `MaybeT` does here is "exits" the function if any of the `findExecutable` calls
+return `Nothing`.
+
+= Functors and Applicative Functors
+
+Functors help with lifting functions into the context of a encapsulated value(s).
+
+```hs
+class Functor f where
+    fmap :: (a -> b) -> f a -> f b
+    (<$>) :: (a -> b) -> f a -> f b
+    (<$>) = fmap
+```
+== Functor Laws
+
+Functors must preserve identity and composition.
+
+```hs
+fmap id = id
+fmap (f . g) = fmap f . fmap g
+```
+
+== Applicative Functors
+
+We can generalise thie pattern using applicative functors.
+
+```hs
+class Functor f => Applicative f where
+    pure :: a -> f a
+    (<*>) :: f (a -> b) -> f a -> f b
+```
+
+Some benefits of applicative functors are:
+
+- More general and reusable than pattern matching
+- More concise than using do-notation
+- Useful when you want sequence of actions but do not need intermiediate results
+
+We can also "flatten" applicative functors using the `join` function.
+
+```hs
+join :: Applicative f => f (f a) -> f a
+join = (<*> pure id)
+```
