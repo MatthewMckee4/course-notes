@@ -480,7 +480,7 @@ Rust tracks ownership of data - enforces that every value has a single owner.
 == Memory
 
 #grid(
-  columns: (1fr, 1fr),
+  columns: (5fr, 3fr),
   rows: (auto),
   [
 
@@ -497,15 +497,18 @@ To understand memory management, must understand what memory is to be managed:
 - String literals, initialised `static` global variables in C.
 - Values known at compile time
 
-*BSS Segment* reserved for uninitialised `static` global variables.
-- "block started by segment"
-- Initialised to 0 by runtime when the program loads
-
-*The Stack* holds function parameters, return address, local variables.
 ],
 grid.cell(image("assets/layout-of-a-process-in-memory.png", width: 70%))
 )
 
+*BSS Segment* reserved for uninitialised `static` global variables.
+- "block started by symbol"
+- Initialised to 0 by runtime when the program loads
+- Size know at compile time
+- In older OS, the program and data always started at a fixed location at the start of memory, in more modern system they are both started at the start of memory, but the starting address is randomized as a security mesure.
+  It makes it harder for code executed as a buffer overflow attack to call into other parts of the program, since it can't be located in memory.
+
+*The Stack* holds function parameters, return address, local variables.
 - Function calls push data onto the stack, growing down
   - Parameters for the function; return address; pointer to previous stack frame; local variables.
   - Data removed, stack shrinks, when function returns - stack managed automatically.
@@ -517,7 +520,6 @@ grid.cell(image("assets/layout-of-a-process-in-memory.png", width: 70%))
 Address of the previous stack frame is stored for ease of debugging, so stack trace can be printed, so it can easily be restored when function returns.
 
 *Buffer Overflow Attacks*
-
 - Language not type safe, doesn't enforce abstractions.
 - Write past array bounds - overflows space allocated to local variables, overwrite return address and following data.
 - Contents valid machine code; the overwritten function return address is made to point to that code.
@@ -541,7 +543,6 @@ The solution is using a language that is type safe and enforces array bounds che
   - Automatically based on regions and lifetime analysis.
 
 *Memory Mapped Files and Shared Libraries*
-
 Memory mapped files allow data on disk to be directly mapped into address space.
 - Mappings created using `mmap()` system call.
   - Returns a pointer to a memory address that acts as a proxy for the start of the file.
@@ -552,9 +553,97 @@ Memory mapped files allow data on disk to be directly mapped into address space.
   - `.so` files on unix and `.dll` files on windows.
 
 *The Kernel*
-
 Operating system *kernel* resides at the top of the address space.
   - Not directly accessible to user-space programs.
     - Attempt to access kernel - segmentation violation.
     - The `syscall` instruction x86_64 assembler calls into the kernel after permission check.
   - Kernel can read/write memory of user processes.
+
+
+// 5b.
+
+== Automatic Memory Management
+
+Automatic memory management is often distrusted by systems programmers, there is a genaral believe that it has high overheads, is cpu hungry and wastes memory.
+
+Common problems with memory management:
+- Unpredictle performance
+- Memory leaks
+- Memory corruption and buffer overflows
+- Use after free
+- Iterator invalidation
+
+New automatic memory management schesm solve many problems
+- Garbage collectors have lower overhead and are more predictable.
+- Region-based memory management, predictibilty and compile time guarantees
+
+Systems programs traditionaly use a mix of manual and automatic memory management.
+
+The goal of automatic memory management is to manage the heap. To find memory that is no longer in use and make that memory free.
+It is better to waste memory than deallocate an object that's in use.
+
+=== Reference Counting
+
+Allocations contain space for an additional reference count.
+- An extra int is allocated along with every object.
+  - Counts number of refences to the object.
+  - Increased when a new reference is made. (Arc::clone())
+- If reference count reaches 0, the memory can be reclaimed.
+
+The benefit of reference counting is predictable and understandable.
+
+There are still some costs.
+- Cyclic data structures contain mutual references. So, objects that reference each other aren't reclaimed, as reference counts dont go to 0.
+- Stores reference count alongside each object
+  - May need a mutex if concurrent access is possible.
+  - Significant overhead for small objects.
+
+Reference counting tends to be for large, long-lived data.
+
+// 5c.
+
+=== Region-based Memory Management
+
+Reference counting has relatively high overhead.
+Garbage collection has unpredictable timing and high overhead.
+
+Region-based memory management ains for a middle ground
+- Aims to be safe with predictable timing.
+- Forces some changes to the way code is written.
+
+With region-based memory management we can track the lifetime of data, values on the stack and references to the heap.
+
+In Rust, a `Box<T>` is a value stored on the stack that holds a reference to data of type T allocated on the heap.
+The heap allocated T has lifetime mathcing `Box<T>`, when the box goes out of scope, the reference heap memory is freed.
+This is RAII.
+
+Ownership of return value is moved to the calling function, the value is moved into the calling function's stack frame.
+
+This prevents common lifetime errors (dangling references).
+
+// 5d.
+
+== Resource Management
+
+Functions can take reference to data, this does not move ownership of the data, it borrows it. Functions can also return references to borrowed input parameters.
+
+There are problems with naive borrowing, which can lead to iterator invalidation. If we were iteratoring over the contents of the vector, changing the contents
+might lead to elements being skipped or duplicated.
+
+=== Safe Borrowing
+
+Rust has two kinds of pointers, immutable and mutable.
+
+*Benefits*
+Type system tracks ownership, turning run-time bugs into compile-time errors.
+- Prevents use-after-free bugs
+- Prevents iterator invalidation
+- Prevents race conditions with multiple threads.
+
+*Limitations*
+- Can't express cyclic data structures
+- Can't express shared ownership of mutable data.
+- Rust has `RefCell<T>` that dynamically enforces the borwowing rules.
+- Rust forces consideration of object ownership early and explicitly.
+
+Deterministic cleanup. You can implement the `Drop` trait in Rust to run some code when the struct is being freed.
