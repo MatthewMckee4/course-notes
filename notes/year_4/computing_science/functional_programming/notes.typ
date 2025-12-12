@@ -1072,3 +1072,30 @@ We can also "flatten" applicative functors using the `join` function.
 join :: Applicative f => f (f a) -> f a
 join = (<*> pure id)
 ```
+
+= Lambda Calculus and Equational Reasoning
+
+== The Lambda Calculus
+
+The lambda calculus is a core model of functional computation.
+It has three main constructs: variables, function abstraction and function application.
+
+=== Alpha Equivalence
+
+The following two functions have the same meaning:
+
+```hs
+fn1 :: Int -> Int -> Int
+fn1 x y z = x + y + z
+
+fn1 :: Int -> Int -> Int
+fn1 a b c = a + b + c
+```
+
+This is because their boud variables have been consistently renamed.
+We say that two expressions are alpha equivalent if they are the same up to renaming of bound variables.
+
+=== Beta Reduction
+
+Computation in the lambda calculus is driven by beta reduction:
+this involves substituting an argument for a parameter when applying a function.
