@@ -647,3 +647,103 @@ Type system tracks ownership, turning run-time bugs into compile-time errors.
 - Rust forces consideration of object ownership early and explicitly.
 
 Deterministic cleanup. You can implement the `Drop` trait in Rust to run some code when the struct is being freed.
+
+= Garbage Collection
+
+// 6a.
+
+== Basic Garbage Collection
+
+It is important to acknowledge why garbage collection is not as suited for systems languages.
+Since other memory managements trategies are still fairly new, we should still understand how garbage collection works.
+
+=== Garbage Collection
+
+The principle of garbage collection is to avoid some of the problems with reference counting and complexity of compile-time ownership tracking.
+
+The collector traces through memory through all objects that have been allocated on the heap, recording which are in use and disposing of unsued objects.
+
+This moves garbage collection to be a separate phase of the progrm's execution, rather than an integrated part of the objects lifecycle.
+Operation of the program (the mutator) and the garbage colector is interleaved.
+
+Many different algorithms exist:
+- Basic
+  - Mark-sweep
+  - Mark-compact
+  - Copying collectors
+- Generational
+
+=== Mark-Sweep Collectors
+
+This is a two phase algorithm. First, distinguish live objects from garbage (mark) and the reclaim the garbage (sweep).
+This is non-incremental: the program is paused to perform colection when memory becomes tight.
+
+==== Marking Phase
+
+Distinguishing live objects.
+
+First, determine the root set of objects: global variables and variables allocated on the stack in any existing stack frame.
+Then traverse the object graph starting at the root set to find other reachable objects, starting from the root set, follow pointers to other objects.
+FOllow every pointer in everh object to systematically find all reachable objects (bfs or dfs). A cycle of objects that reference each other,
+but are not reachable from the root set will not be marked.
+
+To mark reachable objects as alive, set a bit in the object header, or in some separate table of live objects.
+Stop traversal at previously seen objects to avoid cycles.
+
+==== Sweek phase
+
+Reclaiming objects that no longer live.
+
+Pass through the entire heap once, looking at each object for liveness. If not alive, it reclaims the object's space and marks the memory as being available for use.
+The system maintains a free list of blocks of unused memory. New objects are allcated in now unused memory if they fit, or in not yet used memory elsewhere on the heap.
+Fragmentation is a potential concern, but no worse than using malloc/free.
+
+==== Conclusion
+
+this kind of collection is simple, but inefficient.
+
+The program is stopped while the collector runs. The time to collect garbage is unpredictable, depends on the number of live objects, depends on size of the heap.
+
+Passing through the entire heap in unpredictable order distrupts operation of cache and virtual memory subsystem.
+Objects located where they fit, rather than where maintains locality of reference.
+
+=== Mark-Compact Collector
+
+This is a three phase algorithm. First, mark live objects, then reclaim unreachable objects (just like mark-sweep), and finally, compace live objects,
+moving them to leave contiguous free space.
+
+*Advantages*
+
+Solves fragmentation problems, all free space is in one contiguous block.
+Allocation is very fast, always allocating from the start of the free block, so allocation is just incrementing pointer to start of free space.
+
+*Disadvantages*
+
+Collection is slow, due to moving objects in memory, and time taken is unpredictable.
+Collection has poor locality of reference. Colelction is complex, needs to update all pointers to moved objects.
+
+=== Copying Collectors
+
+Integrate traversal (marking) and copying phases into one pass. All live data is copied into one region of memory, all remaining memory contains garbage.
+
+Split the heap into two halves. Allocations made linearly from one half of the heap. Memory is allocated contiguously, so allocation is fast.
+No problems with fragmentation when allocating data.
+
+The program only uses half of the heap. Then the collector runs and copies into the other half of the heap.
+
+The Cheney algorithm, breadth-first copying.
+A queue of objects is maintained, start with looking at the root set of objects.
+Any unprocessed objects they reference are added to the end of the queue.
+The object in the queue is then copied into the other esmispace, and the original is marked as having been processed.
+One the end of the queue is reached, all live obejcts have been copied.
+
+The time taken depends on te amount of data copied which depends on the number of live objects.
+Collection only happens when a semispace is full.
+
+If most objects die young, can trade-off collection time vs memory usage by increasing the size of the semi spaces.
+
+// 6b.
+
+== Generational and Incremental Garbage Collection
+
+Most objects have a short lifetime, a small percentage live much longer.
