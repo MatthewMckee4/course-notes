@@ -647,3 +647,200 @@ Type system tracks ownership, turning run-time bugs into compile-time errors.
 - Rust forces consideration of object ownership early and explicitly.
 
 Deterministic cleanup. You can implement the `Drop` trait in Rust to run some code when the struct is being freed.
+
+= Garbage Collection
+
+// 6a.
+
+// Questions
+// 1. How often does garbage collection happen on average?
+
+== Basic Garbage Collection
+
+It is important to acknowledge why garbage collection is not as suited for systems languages.
+Since other memory managements trategies are still fairly new, we should still understand how garbage collection works.
+
+=== Garbage Collection
+
+The principle of garbage collection is to avoid some of the problems with reference counting and complexity of compile-time ownership tracking.
+
+The collector traces through memory through all objects that have been allocated on the heap, recording which are in use and disposing of unsued objects.
+
+This moves garbage collection to be a separate phase of the progrm's execution, rather than an integrated part of the objects lifecycle.
+Operation of the program (the mutator) and the garbage colector is interleaved.
+
+Many different algorithms exist:
+- Basic
+  - Mark-sweep
+  - Mark-compact
+  - Copying collectors
+- Generational
+
+=== Mark-Sweep Collectors
+
+This is a two phase algorithm. First, distinguish live objects from garbage (mark) and the reclaim the garbage (sweep).
+This is non-incremental: the program is paused to perform colection when memory becomes tight.
+
+==== Marking Phase
+
+Distinguishing live objects.
+
+First, determine the root set of objects: global variables and variables allocated on the stack in any existing stack frame.
+Then traverse the object graph starting at the root set to find other reachable objects, starting from the root set, follow pointers to other objects.
+FOllow every pointer in everh object to systematically find all reachable objects (bfs or dfs). A cycle of objects that reference each other,
+but are not reachable from the root set will not be marked.
+
+To mark reachable objects as alive, set a bit in the object header, or in some separate table of live objects.
+Stop traversal at previously seen objects to avoid cycles.
+
+==== Sweek phase
+
+Reclaiming objects that no longer live.
+
+Pass through the entire heap once, looking at each object for liveness. If not alive, it reclaims the object's space and marks the memory as being available for use.
+The system maintains a free list of blocks of unused memory. New objects are allcated in now unused memory if they fit, or in not yet used memory elsewhere on the heap.
+Fragmentation is a potential concern, but no worse than using malloc/free.
+
+==== Conclusion
+
+this kind of collection is simple, but inefficient.
+
+The program is stopped while the collector runs. The time to collect garbage is unpredictable, depends on the number of live objects, depends on size of the heap.
+
+Passing through the entire heap in unpredictable order distrupts operation of cache and virtual memory subsystem.
+Objects located where they fit, rather than where maintains locality of reference.
+
+=== Mark-Compact Collector
+
+This is a three phase algorithm. First, mark live objects, then reclaim unreachable objects (just like mark-sweep), and finally, compace live objects,
+moving them to leave contiguous free space.
+
+*Advantages*
+
+Solves fragmentation problems, all free space is in one contiguous block.
+Allocation is very fast, always allocating from the start of the free block, so allocation is just incrementing pointer to start of free space.
+
+*Disadvantages*
+
+Collection is slow, due to moving objects in memory, and time taken is unpredictable.
+Collection has poor locality of reference. Colelction is complex, needs to update all pointers to moved objects.
+
+=== Copying Collectors
+
+Integrate traversal (marking) and copying phases into one pass. All live data is copied into one region of memory, all remaining memory contains garbage.
+
+Split the heap into two halves. Allocations made linearly from one half of the heap. Memory is allocated contiguously, so allocation is fast.
+No problems with fragmentation when allocating data.
+
+The program only uses half of the heap. Then the collector runs and copies into the other half of the heap.
+
+The Cheney algorithm, breadth-first copying.
+A queue of objects is maintained, start with looking at the root set of objects.
+Any unprocessed objects they reference are added to the end of the queue.
+The object in the queue is then copied into the other esmispace, and the original is marked as having been processed.
+One the end of the queue is reached, all live obejcts have been copied.
+
+The time taken depends on te amount of data copied which depends on the number of live objects.
+Collection only happens when a semispace is full.
+
+If most objects die young, can trade-off collection time vs memory usage by increasing the size of the semi spaces.
+
+// 6b.
+
+== Generational and Incremental Garbage Collection
+
+Most objects have a short lifetime, a small percentage live much longer.
+
+This has some important implications. When the garbage collector runs, live objects will be in a minority.
+Statistically, the longer an object has lived, the longer it is likely to live.
+
+=== Copying Generational Collectors
+
+In a generational garbage collector, the heap is split into regions for long-lived and youg objects.
+Regions holding young objects are garbage collected more frequently.
+Objects are moved to the region for long-lived objects if they're still alive after several collections.
+More sophisticated approaches may have multiple generations, although the gains diminish rapidly with increasing numbers of generations.
+
+When an object survives a garbage collection, the counter increments by 1.
+
+Young generation must be collected independent of long-lived generation.
+But, there may be references between generations.
+For references from young objects to long-lived objects, this is usually fine because most young objects die before the
+long-lived objects are collected.
+
+For references from long-lived objects to young objects, it is a bit more problematic, since this requires scan of long-lived generation
+to detect if we should collect it or not. We could store an indirection table (pointers to pointers) for references from long-lived
+generation to young generation. The indirection table forms part of the root set of the younger generation.
+Moving objects in younger generation requires updating indirecatoin table, but not long-lived objects.
+
+This approach is very widely used. It can be very efficient
+
+=== Incremental Garbage Collection
+
+Incremental garbage collection algorithms try to spread the cost of garbage collection out and try to run the garbage collection in
+a way so that the program doesn't need to be stopped for the garbage collector to run.
+Important for real time applications where you don't want any delay of program execution.
+
+It interleaves small amounts of garbage collection with small runs of program execution.
+
+Need to track changes made to the heap between garbage collector runs; be conservative and don't collect objects that might be referenced,
+can always collect on the next complete scan.
+
+This can be done using an algorithm known as tricolor marking. Each object in the system is labelled with a color.
+White - not yet checked, grey - live, but some direct children not yet checked, black - live and all children checked.
+
+Garbage collection proceeds with a wavefront of grey objects, where the colector is checking them, or objects they reference, for liveness.
+At the end anything which is still labelled white is unreachable and known to be garbage.
+Any program operation that will create a direct pointer from a black object to a white object requires coordination with the collector.
+
+The program and the collector need to coordinate.
+
+Coordination strategies:
+
+*Read barrier*
+
+Trap attempts by the program to read poitners to white objects, colour those objects grey, and then let the program continue.
+Makes it impossible for the program to get a white object, so it cannot make a black object point to a white object.
+
+*Write barrier*
+
+Trap attempts to change pointers from black objects to point to white objects.
+Either then re-colour the black objects as grey, or re-colour the white object being referenced as grey.
+The object coloured grey is moved onto the list of objects whose children must be checked.
+
+Performance trade-off differs depending on hardware characteristics, and on the way pointers are represented.
+
+Write barrier generally cheaper to implement than read barrier, as writes are less common in most code.
+
+If the program tries to create too many new nreferences from black to white objects, requiring coordination with
+the collector, the collection may never complete.
+
+Resolve by forcing a complete stop-the-world collection is free memory is exhausted, or after a certain amount of time.
+
+// 6c.
+
+== Practical Factors
+
+Real time collectors built from incremental collectors. Schedule an incremental collector as a periodic task.
+Runtime allocated determins amount of garbage that can be collected in each period.
+The amount of garbage that can be collected can be measured: how fast can the collector scan memory.
+
+=== Memory Overheads
+
+Garbage collection trades eas-of-use for predictability and overhead.
+
+Garbage collected programs will use significantly more memory than correctly written programs with manual memory management.
+Many copying collectors maintain two semispaces, so double memory usage. But many programs with manual memory management are not correct.
+
+=== Garbage Collection for Weakly-typed Languages
+
+Collectors rely on being able to identify and follow pointers, to determine what is a love object, they rely on strongly typed languages.
+Weakly typed languages, such as C, can cast any integer to a pointer, and perform pointer arithmetic.
+It is difficult, but not impossible, you need to be concervative such that you treat anything that could be a pointer, as a pointer.
+
+Strongly typed, but dynamic languages would not face the same issues.
+
+=== Memory Management Trade-offs
+
+Rust pushes memory management complexity onto the programmer, this results in predictable run-time performance and low run-time overheads.
+Garbage collection imposes run-time costs and complexity, but simpler to write code.
