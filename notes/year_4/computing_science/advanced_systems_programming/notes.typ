@@ -31,7 +31,7 @@ The I/O stack has become a bottleneck.
 
 Systems programs are responsible for managing shared mutable state. Like state shared across layers/between kernel and applications.
 Systems programs are often the bottleneck for performance. All higher-level applications depend on them.
-That's why systems programing languages offer low-level control over memory and I/O.
+That's why systems programming languages offer low-level control over memory and I/O.
 
 // Readings:
 // - https://dl.acm.org/doi/10.1145/1215995.1216004
@@ -52,9 +52,9 @@ Unix gained popularity due to portability and ease of source code access:
 - Easy to understand and extend.
 
 Portability was due to the C programming language:
-- Simple, easy to undestand, easy to port to new architectures.
+- Simple, easy to understand, easy to port to new architectures.
 - Explicit pointers, memory allocation, control of data representation.
-- Uniform treatement of memory, device registers, and data structures.
+- Uniform treatment of memory, device registers, and data structures.
 - Easy access to write device drivers, network protocols and interface with external formats.
 - Weak type system allows aliasing and sharing.
 
@@ -63,7 +63,7 @@ Portability was due to the C programming language:
 Unix:
 - Networking and filesystem APIs can be bottlenecks.
 - Security architecture insufficiently flexible.
-- No portable APIs for motibility, power management, etc.
+- No portable APIs for mobility, power management, etc.
 
 C:
 - Limited concurrency support.
@@ -93,13 +93,13 @@ Computing increasingly implies mobile devices, always on but constrained by batt
 
 Modern type systems and functional programming techniques can help to:
 - Improve memory management and safety - while maintaining control of allocation and data representation.
-- Improve security - elimenates common classes of vulnerabilities.
-- Improve support for concurrency - elimenates race conditions.
-- Improve correctness - elimenates common classes of bugs.
+- Improve security - eliminates common classes of vulnerabilities.
+- Improve support for concurrency - eliminates race conditions.
+- Improve correctness - eliminates common classes of bugs.
 
 *What is a modern type system?*
 
-Can provide useful gaurantees about program behaviour - prevent buffer overflows, use-after-free, race conditions.
+Can provide useful guarantees about program behaviour - prevent buffer overflows, use-after-free, race conditions.
 
 Provide a model of the problem that prevents inconsistencies in the solution - no cost abstractions, describe constraints on program behaviour in the types.
 
@@ -110,7 +110,7 @@ And so it is thread safe by default.
 
 *How to Improve Memory Management and Safety?*
 
-C has manual memory management through `malloc` and `free`. Arrays dont store length, so the runtime cannot check for out of bounds access. This was structured this way because memory used to be expensive.
+C has manual memory management through `malloc` and `free`. Arrays don't store length, so the runtime cannot check for out of bounds access. This was structured this way because memory used to be expensive.
 
 Manual memory management leads to:
 - Use-after-free bugs
@@ -118,7 +118,8 @@ Manual memory management leads to:
 - Buffer overflows
 - Iterator invalidation
 
-Modern machines have millions of times more memory and processors tens-of-thousands of times faster, making the old constraints less relevant. Compilers can now often remove unnecessary bounds checks through optimization.
+Modern machines have millions of times more memory and processors tens-of-thousands of times faster, making the old constraints less relevant.
+Compilers can now often remove unnecessary bounds checks through optimisation.
 
 *Security Impact*
 
@@ -326,7 +327,7 @@ enum Message {
 
 In Rust when looking up an item from a db for example, you can return Option, in C you can return a pointer to the item or NULL if not found.
 
-This is dangerous in C because it can lead to null pointer dereferences and undefined behavior. In Rust, Option provides a safe way to handle the absence of a value, preventing such issues.
+This is dangerous in C because it can lead to null pointer dereferences and undefined behaviour. In Rust, Option provides a safe way to handle the absence of a value, preventing such issues.
 
 // 3d.
 
@@ -420,7 +421,7 @@ Types and functions provide a model of the system.
 
 Represent units in the type system if numbers have extra context involved.
 
-We can think of an example where we are working with degrees in celcius and fahrenheit.
+We can think of an example where we are working with degrees in celsius and fahrenheit.
 We can naively just represent these with float values. This can easily result in incorrect calculations.
 We should instead create new types that wrap float values.
 
@@ -434,7 +435,7 @@ struct Fahrenheit(f32);
 Wrapping values inside struct adds zero runtime overhead in Rust.
 - No information is added to the struct, it's just a wrapper around the float value
 - Optimiser will recognise that the code collapses down to operations on primitive types, and generate code to do so
-- All the additinos are a compile-time model of the way the data is used, they dont affect the compiled code
+- All the additions are a compile-time model of the way the data is used, they don't affect the compiled code
 - Equivalent C++ code has the same properties
 
 *Typing Anti-Patterns*
@@ -444,7 +445,7 @@ Use `enum` to represent values that can be one of several alternatives.
 
 Use of boolean flags. enums should be used instead of boolean flags.
 
-Use the type system to describe features of the system design, so the compiler cancheck for correctness
+Use the type system to describe features of the system design, so the compiler can check for correctness
 There is an up-front cost: you must define the types
 - The benefit is that fixing compilation errors is easier than fixing silent data corruption
   - For small systems, the cost may outweigh the benefit
@@ -459,7 +460,7 @@ System behaviour modelled as a finite state machine comprising:
 - Events that trigger transitions between states
 - State variables that hold system configuration
 
-We can use enums to represent states and events, and structs to hold state variables. This is compact, makes states and events clear and has a clear states and transition table via mattern matching.
+We can use enums to represent states and events, and structs to hold state variables. This is compact, makes states and events clear and has a clear states and transition table via pattern matching.
 Relies on a type system with more powerful enums.
 
 We can also use a struct based approach where struct methods are used to transition between states and update state variables. Less explicit as transitions are encoded in the return type of methods.
@@ -505,7 +506,7 @@ grid.cell(image("assets/layout-of-a-process-in-memory.png", width: 70%))
 - "block started by symbol"
 - Initialised to 0 by runtime when the program loads
 - Size know at compile time
-- In older OS, the program and data always started at a fixed location at the start of memory, in more modern system they are both started at the start of memory, but the starting address is randomized as a security mesure.
+- In older OS, the program and data always started at a fixed location at the start of memory, in more modern system they are both started at the start of memory, but the starting address is randomised as a security measure.
   It makes it harder for code executed as a buffer overflow attack to call into other parts of the program, since it can't be located in memory.
 
 *The Stack* holds function parameters, return address, local variables.
@@ -564,20 +565,20 @@ Operating system *kernel* resides at the top of the address space.
 
 == Automatic Memory Management
 
-Automatic memory management is often distrusted by systems programmers, there is a genaral believe that it has high overheads, is cpu hungry and wastes memory.
+Automatic memory management is often distrusted by systems programmers, there is a general believe that it has high overheads, is cpu hungry and wastes memory.
 
 Common problems with memory management:
-- Unpredictle performance
+- Unpredictable performance
 - Memory leaks
 - Memory corruption and buffer overflows
 - Use after free
 - Iterator invalidation
 
-New automatic memory management schesm solve many problems
+New automatic memory management scheme solve many problems
 - Garbage collectors have lower overhead and are more predictable.
-- Region-based memory management, predictibilty and compile time guarantees
+- Region-based memory management, predictability and compile time guarantees
 
-Systems programs traditionaly use a mix of manual and automatic memory management.
+Systems programs traditionally use a mix of manual and automatic memory management.
 
 The goal of automatic memory management is to manage the heap. To find memory that is no longer in use and make that memory free.
 It is better to waste memory than deallocate an object that's in use.
@@ -586,14 +587,14 @@ It is better to waste memory than deallocate an object that's in use.
 
 Allocations contain space for an additional reference count.
 - An extra int is allocated along with every object.
-  - Counts number of refences to the object.
+  - Counts number of references to the object.
   - Increased when a new reference is made. (Arc::clone())
 - If reference count reaches 0, the memory can be reclaimed.
 
 The benefit of reference counting is predictable and understandable.
 
 There are still some costs.
-- Cyclic data structures contain mutual references. So, objects that reference each other aren't reclaimed, as reference counts dont go to 0.
+- Cyclic data structures contain mutual references. So, objects that reference each other aren't reclaimed, as reference counts don't go to 0.
 - Stores reference count alongside each object
   - May need a mutex if concurrent access is possible.
   - Significant overhead for small objects.
@@ -607,14 +608,14 @@ Reference counting tends to be for large, long-lived data.
 Reference counting has relatively high overhead.
 Garbage collection has unpredictable timing and high overhead.
 
-Region-based memory management ains for a middle ground
+Region-based memory management aims for a middle ground
 - Aims to be safe with predictable timing.
 - Forces some changes to the way code is written.
 
 With region-based memory management we can track the lifetime of data, values on the stack and references to the heap.
 
 In Rust, a `Box<T>` is a value stored on the stack that holds a reference to data of type T allocated on the heap.
-The heap allocated T has lifetime mathcing `Box<T>`, when the box goes out of scope, the reference heap memory is freed.
+The heap allocated T has lifetime matching `Box<T>`, when the box goes out of scope, the reference heap memory is freed.
 This is RAII.
 
 Ownership of return value is moved to the calling function, the value is moved into the calling function's stack frame.
@@ -627,7 +628,7 @@ This prevents common lifetime errors (dangling references).
 
 Functions can take reference to data, this does not move ownership of the data, it borrows it. Functions can also return references to borrowed input parameters.
 
-There are problems with naive borrowing, which can lead to iterator invalidation. If we were iteratoring over the contents of the vector, changing the contents
+There are problems with naive borrowing, which can lead to iterator invalidation. If we were iterating over the contents of the vector, changing the contents
 might lead to elements being skipped or duplicated.
 
 === Safe Borrowing
@@ -643,10 +644,12 @@ Type system tracks ownership, turning run-time bugs into compile-time errors.
 *Limitations*
 - Can't express cyclic data structures
 - Can't express shared ownership of mutable data.
-- Rust has `RefCell<T>` that dynamically enforces the borwowing rules.
+- Rust has `RefCell<T>` that dynamically enforces the borrowing rules.
 - Rust forces consideration of object ownership early and explicitly.
 
 Deterministic cleanup. You can implement the `Drop` trait in Rust to run some code when the struct is being freed.
+
+#pagebreak()
 
 = Garbage Collection
 
@@ -658,16 +661,16 @@ Deterministic cleanup. You can implement the `Drop` trait in Rust to run some co
 == Basic Garbage Collection
 
 It is important to acknowledge why garbage collection is not as suited for systems languages.
-Since other memory managements trategies are still fairly new, we should still understand how garbage collection works.
+Since other memory managements strategies are still fairly new, we should still understand how garbage collection works.
 
 === Garbage Collection
 
 The principle of garbage collection is to avoid some of the problems with reference counting and complexity of compile-time ownership tracking.
 
-The collector traces through memory through all objects that have been allocated on the heap, recording which are in use and disposing of unsued objects.
+The collector traces through memory through all objects that have been allocated on the heap, recording which are in use and disposing of unused objects.
 
-This moves garbage collection to be a separate phase of the progrm's execution, rather than an integrated part of the objects lifecycle.
-Operation of the program (the mutator) and the garbage colector is interleaved.
+This moves garbage collection to be a separate phase of the program's execution, rather than an integrated part of the objects life cycle.
+Operation of the program (the mutator) and the garbage collector is interleaved.
 
 Many different algorithms exist:
 - Basic
@@ -679,7 +682,7 @@ Many different algorithms exist:
 === Mark-Sweep Collectors
 
 This is a two phase algorithm. First, distinguish live objects from garbage (mark) and the reclaim the garbage (sweep).
-This is non-incremental: the program is paused to perform colection when memory becomes tight.
+This is non-incremental: the program is paused to perform collection when memory becomes tight.
 
 ==== Marking Phase
 
@@ -687,18 +690,18 @@ Distinguishing live objects.
 
 First, determine the root set of objects: global variables and variables allocated on the stack in any existing stack frame.
 Then traverse the object graph starting at the root set to find other reachable objects, starting from the root set, follow pointers to other objects.
-FOllow every pointer in everh object to systematically find all reachable objects (bfs or dfs). A cycle of objects that reference each other,
+Follow every pointer in every object to systematically find all reachable objects (bfs or dfs). A cycle of objects that reference each other,
 but are not reachable from the root set will not be marked.
 
 To mark reachable objects as alive, set a bit in the object header, or in some separate table of live objects.
 Stop traversal at previously seen objects to avoid cycles.
 
-==== Sweek phase
+==== Sweep phase
 
 Reclaiming objects that no longer live.
 
 Pass through the entire heap once, looking at each object for liveness. If not alive, it reclaims the object's space and marks the memory as being available for use.
-The system maintains a free list of blocks of unused memory. New objects are allcated in now unused memory if they fit, or in not yet used memory elsewhere on the heap.
+The system maintains a free list of blocks of unused memory. New objects are allocated in now unused memory if they fit, or in not yet used memory elsewhere on the heap.
 Fragmentation is a potential concern, but no worse than using malloc/free.
 
 ==== Conclusion
@@ -707,7 +710,7 @@ this kind of collection is simple, but inefficient.
 
 The program is stopped while the collector runs. The time to collect garbage is unpredictable, depends on the number of live objects, depends on size of the heap.
 
-Passing through the entire heap in unpredictable order distrupts operation of cache and virtual memory subsystem.
+Passing through the entire heap in unpredictable order disrupts operation of cache and virtual memory subsystem.
 Objects located where they fit, rather than where maintains locality of reference.
 
 === Mark-Compact Collector
@@ -844,3 +847,412 @@ Strongly typed, but dynamic languages would not face the same issues.
 
 Rust pushes memory management complexity onto the programmer, this results in predictable run-time performance and low run-time overheads.
 Garbage collection imposes run-time costs and complexity, but simpler to write code.
+
+#pagebreak()
+
+= Concurrency
+
+// 7a.
+
+== Implications of Multicore Systems
+
+Systems with four or eight cores are now mainstream. The obvious consequence of this is that parallel computation is now the norm.
+
+Each processor core has its own private cache that is not shared with other cores, and as a result, each processor has its own distinct view of memory.
+And memory is not always equally accessible to all processor cores.
+
+Memory access is no longer uniform. Different processor cores have a different view of the contents of memory, due to caching.
+
+To ensure programs work protably accros different ypes of processors, programming languages define their memory model.
+They need to define what gaurantees the language provides around concurrent memory accesses, and the compiler can turn this into machine code.
+
+=== Memory Models: Java
+
+Changes to a field are seen in program order within a thread.
+If a single threads writes a value to memory and later reads it back and provided no other threads wrote to the same location,
+then the value that the thread reads will be the same as it wrote.
+Changes to a field made by one threads are visible to another thread as follows:
+
+If a `volitile` field is changes, that change is done atomically and immediately becomes visible to other threads.
+
+If a `non-volatile` field is changed while holding a lock, and that lock is then released by the writing threads and acquired by the reading
+thread, then the change becomes visible to the reading threads.
+
+Access to all 32-bit fields is atomic, this does not hold for `long` or `double` fields which are 64 bits in size.
+
+// TODO: Add more inforamation here.
+
+=== Memory Models: Others
+
+Java is unusual in having such a clearly specified memory model.
+
+Other languages are less well specified, running the risk that new processor designs can subtly break previuosly working programs.
+
+C and C++ have historically had very poorly specified memory models.
+
+Rust also does not (yet) have a fully specified memory model.
+Recognised as a limitation - research efforts underway to fix this.
+Complicated by multiplicity of reference types and unsafe code.
+
+=== Concurrency, Threads, and Locks
+
+The memory model of a language is explicitly tied to the way it ties lock and communication between threads.
+
+Processes are isolated from each other and don't share memory.
+Threads within a process shared access to a common pool of memory and make use of synchronization to manage access to that shared memory.
+How this is done depends on the language.
+
+In Java, the locks are provided by the synchronized methods and statements.
+In C, they are provided by the pthreads library, in the form of `pthreads_mutex_lock` and `pthread_mutex_unlock`.
+
+Outside of locked regions there are very few gaurantees about access to shared memory.
+
+=== Limitations of Lock-bases Concurrency
+
+The approach of using multiple threads and using locks to provide access to shared memory is very common,
+but it is alo problematic.
+
+It is difficult to know when the locking is done correctly, incorrectly locked code tends to compile just fine.
+Errors tend to manifest themselves under heavy load.
+
+This makes such code hard to write and hard to debug.
+It is easy to over or under lock programs.
+
+=== Composition of Lock-base code
+
+It is difficult to compose code which uses locks.
+
+A common example of where the composition of two locking and safe operations is a banking system.
+When transferring money from one account to another, we must ensure that the money is in one bank account or the other
+at all times. There must never be a state where money is in both, or neither bank accounts.
+
+=== Alternative Concurrency Models
+
+Concurrency is increasingly important.
+
+There are alternatives to lock base concurrency: transactions and message passing.
+
+== Managing Concurrency Using Transactions
+
+An alternateive to locking is to use atomic transactions.
+Atomic actions either succeed or fail, and intermediate states are not visible to other threads.
+
+The runtime must ensure actions have the usual ACID properties:
+
+- Atomicity - all chanegs to the data are performed, or none are.
+- Consistency - data is in a consistent state when a transaction starts, and when it ends.
+- Isolation - intermediate states of a transaction are invisible to other transactions.
+- Durability - once committed, results of a transaction persist.
+
+Advantages of this are that atomic transactions can be composed arbitrarily, without affecting correctness,
+unlike locking. This avoids deadlocks due to incorrect locking, since there are no locks.
+
+=== Programming Model
+
+Blocks of code can be labelled as `atomic`, and they can be run concurrently and atomically with respect to
+every other `atomic` block.
+
+They are implemented via optimistic transactions. A thread-local transaction log is maintained,
+this records every memory read and write made inside the atomic block.
+When the atomic block completes, the log is validated to check that it has seen a consistent view of memory.
+If validation succeeds, the transaction commits its changes to memory; if not, the transaction is rolled
+back and retried from scratch.
+Progress may be slow if conflicting transactions cause repeated validation failures, but will eventually
+occur.
+
+// Question, why can we not "deadlock" with two transactions continuously failing and retrying.
+
+==== Consequences
+
+Transactions may be re-run automatically, this places restrictions on transaction behaviour.
+They must be referentially transparent. They must do nothing irrevocable.
+
+=== Controlling I/O
+
+Unrestricted I/O breaks transaction isolation:
+
+- Reading and writing files.
+- Sending and receiving data over the network.
+
+Sometimes the language makes global functions that perform I/O unavailable in atomic blocks.
+
+Haskell has a great way of modelling this with the type system, via the IO Monad.
+
+=== Controlling Side Effects
+
+Code that has side effects must be controlled.
+
+FUnctions that only perform memory actions can be executed normally, provided transaction log tracks the memory
+access and validates them before the transaction commits, and can potentially roll them back.
+Tracking memory actions can be done by language runtime (STM; software transactional memory), or via hardware
+enforced transaction memory behaviour and rollback.
+
+Disallow unrestricted heap access.
+Pass transaction context explicitly to transactions; this has operations to perform transactional memory operations,
+and rollback if the transaction fails to commit.
+
+=== Monadic STM Implementation
+
+The definition of the I/O monad type ensure that a function that is not passed the IO context
+cannot perform IO operations.
+
+How to track side-effecting memory actions?
+
+In Haskell, we can define a STM monad to wrap transactions.
+
+Based on the state monad; manages side-effects via a `TVar` type
+
+```hs
+newTVar :: a -> STM (TVar a)
+readTVar :: TVar a -> STM a
+writeTVar :: TVar a -> a -> STM ()
+```
+
+- The `newTVar` function takes a value of type a, returns new
+`TVar` to hold the value, wrapped in an STM monad
+- `readTVar` takes a `TVar` and returns an STM context; when performed this returns the value of that
+`TVar`; `writeTVar` function takes a `TVar` and a value, returns an STM context that can validate the
+transaction and commit the value to the `TVar`
+The `atomic {…}` function operates in an STM context and returns an IO context that performs the operations needed
+to validate and commit the transaction.
+
+```hs
+atomic :: STM a -> IO a
+```
+
+- The newTVar, readTVar, and writeTVar functions need an STM action, and so can only run in the
+context of an atomic block that provides such an action
+- I/O prohibited within transactions, since operations in atomic {…} don’t have access to I/O context
+
+// Look more into this lecture.
+
+// 7c.
+
+== Message Passing Systems
+
+The goal of a message passing system is that the system is structured as a set of communication processes, actors, with
+no mutable state. Message are required to be immutable.
+Some systems use linear types to ensure emssages are not references after they are sent, alowing mutable data to be safely
+transferred.
+
+Imlpementation of such a system is usually built with shared memory and locks.
+This is trivial to distribute, but the application can be unaware that the system is distributed.
+
+=== Message Handling
+
+Recievers pattern match against message. Type system can ensure an exhaustive match.
+Messages queued for processing. Receivers operate in message processing loop, single threaded.
+Sent messages enqueued for processing by other actors.
+
+=== Types of Message Passing
+
+Synchronous or asynchronous. Statically or dynamically typed. Direct or indirect message delivery
+
+==== Interaction Models
+
+Message passing can incolve rendezvous between sender and receiver.
+A synchronous message passing model, sender waits for receiver.
+
+Alternatively, communication may be asynchronous. The sender continues immediately after sending a message.
+Message is buffered for later delivery to the receiver.
+
+==== Typed Communication
+
+Statically-typed communication, used to explicitly define the types of message that can be transferred.
+Compiler checks that the reciever can handle all messages it can receive.
+
+Dynamically-typed communication, receiver uses pattern matching on the received message types to determine
+if it can respond to the message.
+
+==== Naming
+
+Are messages sent between named processes or indirectly via channel?
+
+Some systems directly send messages to actors, each of which has its own mailbox, others use explicit
+channels, with messages being sent indirectly to a mailbox via a channel.
+
+Explicit channels require more plumbing, bit the extra level of indirection between sender and receiver
+may be useful for evolving systems.
+Explicit channels are a natural place to define a communications protocol for statically typed
+messages.
+
+=== Implementations
+
+Two most common architectures
+
+==== Dynamically typed with direct delivery
+
+Erlang, Scala.
+
+Dynamically typed messages sent directly to named actors, not via channels.
+
+==== Statically typed, with explicit channels
+
+Rust.
+
+Uses asynchronous statically typed messages passed via explicit channels.
+
+=== Example: Scala
+
+```scala
+import akka.actor.Actor
+import akka.actor.ActorSystem
+import akka.actor.Props
+
+class HelloActor extends Actor {
+  def receive = {
+    case "hello" => println("hello back at you")
+    case _ => println("huh?")
+  }
+}
+
+object Main extends App {
+  // Initialise actor runtime
+  val runtime = ActorSystem("HelloSystem")
+
+  // Create an actor, running concurrently
+  val helloActor = runtime.actorOf(Props[HelloActor], name = "helloactor")
+
+  // Send it some messages
+  helloActor ! "hello"
+  helloActor ! "buenos dias"
+}
+```
+
+=== Example: Rust
+
+```rs
+use std::sync::mpsc::channel;
+use std::thread;
+
+fn main() {
+    let (tx, rx) = channel();
+
+    thread::spawn(move|| {
+        let _ = tx.send(42);
+    });
+
+    match rx.recv() {
+        Ok(value) => {
+            println!("Got {}", value);
+        }
+        Err(error) => {
+            // An error occurred…
+        }
+    }
+}
+```
+
+=== Tradeoffs
+
+In Scala, with dynamic typing, we can easily upgrade the system.
+Checking happens at runtime. Robust framework for error handling via separate processes.
+
+In Rust, we have static typing, so we can be sure of the type of the result.
+Requires more plumbing.
+
+// 7d.
+
+== Race Conditions
+
+A race condition can occur when the behaviour of a system depends on the relative timing of different actions,
+or when a shared value is modified without coordination.
+
+Introduces non-deterministic behaviour and hard-to-debug problems.
+Difficult to predict exact timing of program behaviour.
+
+=== Message Races
+
+In message passing systems, messages can be received from multiple senders.
+Runtime ensure receiver processes messages sequentiall, in the order they are received, but order of receipt can vary due
+to system and network load, external events.
+
+A *race condition* occurs when messages arrive in an unpredictable order.
+A *deadlock* occurs when a cycle forms, with actors waiting for messages from each other.
+
+=== Data Races
+
+In shared memory systems, data is conceptually moved from sender to receiver.
+A data race condition occurs if the data is modified after it is sent, and the modification is visible to the receiver via
+the reference.
+This is unpredictable if the receiver sees the old or new version.
+Two approaches to avoid this: immutable data or ownership tracking.
+
+==== Avoiding Data Races: Immutable Data
+
+Race conditions cannot occur if data is not modified.
+
+==== Avoiding Data Races: Ownership Transfer
+
+Race conditions cannot occur if data is not shared.
+Ensure ownership of an object is transferred, so the sender cannot access the object after it has been sent.
+Suitable for Rust. The `send` function gives ownership of the data. The `recv` function takes ownership of
+the received data.
+
+=== Aside: Efficiency of Message Passing
+
+Assuming immutable message or linear types, message passing has efficient implementation.
+- Copy messages data in distributed systems
+- Pass pointer to data in shared memory systems
+- Neither case needs to consider shared access to message data
+
+Garbage collected systems often allocate nmessages from a shared exchange heap.
+This is expensive to collect, since data in exchange heap is owned by multiple threads.
+Though, we can use a per-preocess heap that can be collected independently and concurrently,
+ensuring good performance.
+
+// 7e.
+
+== Robustness of Message Passing Systems
+
+=== System Upgrade and Evolution
+
+One of the key features of message passing systems is that the messages decouple different component of the system.
+There's an abstraction representing a channel or a mailbox that allows them to be teased apart a little.
+
+One advantage of this approach is that it makes it possible to insert a proxy into the message passing path.
+Message are then passed to the proxy and then onto the relevant server process.
+
+A proxy could handle migrating to a new version of a server.
+
+Use of dynamic typing may make upgrades easier.
+New components of the system can generate additional messages, which are ignored by old components.
+Supervisor hierarchy allows system to notice if components fail, and fallback to known good version.
+
+=== Error Handling
+
+This approach leads to one of the more interesting design decisions in Erlang.
+The Erlang language and runtime assume the system is massively concurrent.
+It's normal for Erlang systems to comprise of thousands of communicating processes.
+
+A consequence of this is that Erlang can handle errors differently.
+Erlang doesn't have a concept of error handling, if they encounter problems, they crash.
+
+The idea is that processes are cheap and plentiful, and that a process that's encountered an error
+is no longer trustworthy. So, we let the failing process die and replace it with another.
+
+We should be concerned with the overall system reliability, not the reliability of any one component.
+
+=== Let it Crash
+
+In a single-process system, that process must be responsible for handling errors, if it fails, the entire
+application fails.
+
+In a multi-process system, each individual process is less precious.
+
+=== Remote Error Handling
+
+Isolate the problem, let an unaffected process be responsible for recovery, don't trust the faulty component.
+
+=== Supervision Hierarchies
+
+Erlang applications are structured into tree-structured groups of processes, where the higher-level nodes in the tree
+supervise and correct errors in the low-level processes.
+
+They have direct supervisor processes that monitor their correct operation, and restart them if they fail.
+
+And the supervisor processes themselves tend to have higher-level managers that acount for failures of smaller
+components in the system. Either restart them on failure or handle problems by running multuple disparate versions
+of the subsystem, comparing results to pick the majority correct answer.
+
+// https://dl.acm.org/doi/10.1145/1810891.1810910
