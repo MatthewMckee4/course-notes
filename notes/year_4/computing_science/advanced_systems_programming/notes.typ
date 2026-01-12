@@ -1251,8 +1251,33 @@ supervise and correct errors in the low-level processes.
 
 They have direct supervisor processes that monitor their correct operation, and restart them if they fail.
 
-And the supervisor processes themselves tend to have higher-level managers that acount for failures of smaller
-components in the system. Either restart them on failure or handle problems by running multuple disparate versions
+And the supervisor processes themselves tend to have higher-level managers that account for failures of smaller
+components in the system. Either restart them on failure or handle problems by running multiple disparate versions
 of the subsystem, comparing results to pick the majority correct answer.
 
 // https://dl.acm.org/doi/10.1145/1810891.1810910
+
+= Coroutines and Asynchronous Programming
+
+== Motivation
+
+Why do we want async code?
+
+We want to be able to overlap I/O and computation, avoiding multithreading and building no blocking to I/O primitives.
+
+=== Blocking I/O
+
+I/O operations are slow, we need to wait for network, disk, etc. Operations can take millions of cycles.
+I/O operations block the thread. Disrupts the user experience and prevents other computations.
+
+We want to overlap I/O and computation, and ideally we want to allow multiple concurrent I/O operations.
+
+The usual solution to this is using multiple threads. We spawn multiple threads to perform I/O concurrently,
+and re-join once completed.
+
+Some disadvantages of this are:
+- complexity - requires partitioning the application into multiples threads.
+- resource heavy - each thread has its own stack, context switch overheads.
+- parallelism offers limited benefits for I/O
+  - threads performing I/O often spend majority of time blocked.
+  - wasteful to start a new threads that spends most of its time doing nothing.
