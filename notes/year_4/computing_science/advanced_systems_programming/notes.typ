@@ -1251,8 +1251,53 @@ supervise and correct errors in the low-level processes.
 
 They have direct supervisor processes that monitor their correct operation, and restart them if they fail.
 
-And the supervisor processes themselves tend to have higher-level managers that acount for failures of smaller
-components in the system. Either restart them on failure or handle problems by running multuple disparate versions
+And the supervisor processes themselves tend to have higher-level managers that account for failures of smaller
+components in the system. Either restart them on failure or handle problems by running multiple disparate versions
 of the subsystem, comparing results to pick the majority correct answer.
 
 // https://dl.acm.org/doi/10.1145/1810891.1810910
+
+= Coroutines and Asynchronous Programming
+
+== Motivation
+
+Why do we want async code?
+
+We want to be able to overlap I/O and computation, avoiding multithreading and building no blocking to I/O primitives.
+
+=== Blocking I/O
+
+I/O operations are slow, we need to wait for network, disk, etc. Operations can take millions of cycles.
+I/O operations block the thread. Disrupts the user experience and prevents other computations.
+
+We want to overlap I/O and computation, and ideally we want to allow multiple concurrent I/O operations.
+
+The usual solution to this is using multiple threads. We spawn multiple threads to perform I/O concurrently,
+and re-join once completed.
+
+Some disadvantages of this are:
+- complexity - requires partitioning the application into multiples threads.
+- resource heavy - each thread has its own stack, context switch overheads.
+- parallelism offers limited benefits for I/O
+  - threads performing I/O often spend majority of time blocked.
+  - wasteful to start a new threads that spends most of its time doing nothing.
+
+==== Non-blocking I/O and Polling
+
+Blocking I/O using threads is problematic. Threads have a high overhead in most languages.
+
+A lightweight alternative is to run multiplex I/O operations in a single thread.
+I/O operations complete asynchronously so why have threads block for them.
+We can provide a mechanism to start asynchronous I/O and poll the kernel for I/O events,
+all within a single thread.
+
+- Start an I/O operation
+- Periodically poll for progress of the I/O operation
+- If new data is available, a send operation has completed, or an error has occurred, then invoke the
+handler for that operation
+
+*Alternatives*
+
+Non-blocking I/O can be highly efficient, but requires significant re-write of code.
+
+== async and await
