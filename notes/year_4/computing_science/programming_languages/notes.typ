@@ -269,3 +269,41 @@ To write an interpreter, we need different cases based on each rule in the opera
 For our language, we know that a number is already a value. For a binary operation, we need to evaluate
 the left and right side, so they will evaluate down to an integer. Then we can do the appropriate operation
 on the integers.
+
+= Variables and Binding
+
+== Let-bindings
+
+An example of a let binding in our language is
+
+```
+let x = (5 + 10) in x * x
+let x = M in N
+```
+
+Let expressions act as a binder for a variable. All occurrences of x here are bound occurences.
+A variable is free if it is not in the scope of a quantifier. A quantifier $forall x . P$ binds
+all free occurrences of x in its body P.
+
+For example c is free in $"isFriday" -> "Rainy"(c)$,
+but bound in $exists c in "Cities", "isFriday" -> "Rainy"(c)$
+
+Free variables in our language formally
+
+== Name Shadowing
+
+Scopes of variables inside "in" inside a let binding.
+
+== Substitution
+
+We can define a substitution operation like
+
+$
+M {V \/ x}
+$
+
+This means, replace all free occurrences of x in term M with value V.
+
+== Alpha Equivalence
+
+Two terms are alpha equivalent if they are the same up to renaming of bound variables.
