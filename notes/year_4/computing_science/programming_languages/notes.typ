@@ -307,3 +307,34 @@ This means, replace all free occurrences of x in term M with value V.
 == Alpha Equivalence
 
 Two terms are alpha equivalent if they are the same up to renaming of bound variables.
+
+= Functions and Recursion
+
+== Lambdas
+
+We can use lambdas with currying to act like normal functions.
+
+$lambda x . M$
+
+Let and let fun are syntactic sugar, we can do everything with lambdas
+
+== Semantics
+
+A function on its own shouldn't reduce further.
+
+To evaluate a function application "M N" we evaluate the function down
+to a lambda expression. evaluate the argument down to a value V.
+Then replace all occurrences of x in M with V, and evaluate the result.
+
+== Variable Capture
+
+Substitution can capture variables, but this is not intended.
+Whenever we need to substitute under a binding, if we pick fresh names (unused elsewhere)
+for each of the binders, to generate an alpha equivalence.
+
+Let "M(x <-> y)" be a swapping operation that renames x to y, and y to x, in M.
+
+We define "subst(M, N, x)" as the operation to substitute N for x in M,
+freshening variables where required.
+
+= Types and Typechecking
