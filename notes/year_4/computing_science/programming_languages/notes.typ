@@ -338,3 +338,100 @@ We define "subst(M, N, x)" as the operation to substitute N for x in M,
 freshening variables where required.
 
 = Types and Typechecking
+
+== Types
+
+Types classify terms. Let's begin by considering base types.
+
+$
+  "Types" "A", "B" := "Int" | "Bool"
+$
+
+$ (tack M : "Int" quad tack N : "Int") / (tack M + N : "Int") $
+
+=== Generalising to other binary operations.
+
+We can specify meta-level functions: a function wh'er defining when describing our language.
+
+$
+  "ty"(compose) = A -> B -> C
+$
+
+$
+  (tack M : A quad tack N : B) / (tack M compose N ∶ C)
+$
+
+=== Conditionals
+
+$
+  (tack L : "Bool" quad tack M : A quad tack N : A) / (tack "if" L "then" M "else" N ∶ C)
+$
+
+=== Functions
+
+$
+  A, B := A -> B | "Int" | "Bool"
+$
+
+$
+  L, M, N := x | lambda x^A . M | M N
+$
+
+=== Type Environment
+
+To handle variables, we need to store their types in a type environment (or typing context).
+
+A type environment is a mapping from variables to types.
+
+$
+  Gamma := dot | Gamma, x : A
+$
+
+==== Typing Rules for variables and functions
+
+$
+  (x : A in Gamma) / (Gamma ⊢ x : A)
+$
+
+$
+  (x : A in tack M : B) / (Gamma ⊢ lambda x^A . M : A -> B)
+$
+
+= Data Types
+
+== Product Types
+
+It is often useful to have pairs of values. We say that pairs have a product type A x B.
+
+This can be thought of as the cartesian product of types.
+tuples of (A, B) is a product type.
+
+== Record Types
+
+We often want to give labels to values inside data.
+
+== Sum Types
+
+Can be thought of as enums.
+
+To construct a sum type A + B, we use sum injection functions to say whether we're
+providing a value of type A or B.
+
+To use a sum type, we need to analyse it to determine whether it was constructing
+using the left or right injection. We can match over it.
+
+=== Variant Types
+
+A sum type with more than two values. can also be encoded via nested sum types.
+
+Enums can be encoded as a variant type and then can be encoded as a sum type.
+
+== Recursive Types
+
+We can define lists as having a default case '[]' and then [1,2,3] is syntactic sugar for
+1 :: (2 :: (3 :: []))).
+
+```
+type IntList = [ ]
+  | Int :: IntList
+```
