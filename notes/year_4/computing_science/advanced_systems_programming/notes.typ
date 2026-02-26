@@ -910,7 +910,7 @@ Outside of locked regions there are very few gaurantees about access to shared m
 === Limitations of Lock-bases Concurrency
 
 The approach of using multiple threads and using locks to provide access to shared memory is very common,
-but it is alo problematic.
+but it is also problematic.
 
 It is difficult to know when the locking is done correctly, incorrectly locked code tends to compile just fine.
 Errors tend to manifest themselves under heavy load.
@@ -939,7 +939,7 @@ Atomic actions either succeed or fail, and intermediate states are not visible t
 
 The runtime must ensure actions have the usual ACID properties:
 
-- Atomicity - all chanegs to the data are performed, or none are.
+- Atomicity - all changes to the data are performed, or none are.
 - Consistency - data is in a consistent state when a transaction starts, and when it ends.
 - Isolation - intermediate states of a transaction are invisible to other transactions.
 - Durability - once committed, results of a transaction persist.
@@ -1032,15 +1032,15 @@ context of an atomic block that provides such an action
 
 The goal of a message passing system is that the system is structured as a set of communication processes, actors, with
 no mutable state. Message are required to be immutable.
-Some systems use linear types to ensure emssages are not references after they are sent, alowing mutable data to be safely
+Some systems use linear types to ensure messages are not references after they are sent, allowing mutable data to be safely
 transferred.
 
-Imlpementation of such a system is usually built with shared memory and locks.
+Implementation of such a system is usually built with shared memory and locks.
 This is trivial to distribute, but the application can be unaware that the system is distributed.
 
 === Message Handling
 
-Recievers pattern match against message. Type system can ensure an exhaustive match.
+Receivers pattern match against message. Type system can ensure an exhaustive match.
 Messages queued for processing. Receivers operate in message processing loop, single threaded.
 Sent messages enqueued for processing by other actors.
 
@@ -1300,4 +1300,151 @@ handler for that operation
 
 Non-blocking I/O can be highly efficient, but requires significant re-write of code.
 
+// 7b.
+
 == async and await
+
+Aims to provide language and runtime support for I/O multiplexing on a single thread, in a more natural style.
+
+```rust
+fn read_exact<T: Read>(input: &mut T, buf: &mut [u8]) -> Result<(), std::io::Error> {
+    let mut cursor = 0;
+    while cursor < buf.len() {
+        cursor += input.read(&mut buf[cursor..])?;
+    }
+}
+```
+
+The async version adds the `async` keyword to the function and `.await` to blocking I/O calls:
+
+```rust
+async fn read_exact<T: AsyncRead>(input: &mut T, buf: &mut [u8]) -> Result<(), std::io::Error> {
+    let mut cursor = 0;
+    while cursor < buf.len() {
+        cursor += input.read(&mut buf[cursor..]).await?;
+    }
+}
+```
+
+Runtime schedules `async` functions on a thread pool, yielding to other code on `await` calls, giving low-overhead concurrent I/O.
+
+=== Coroutines
+
+Structure I/O-based code as a set of concurrent *coroutines* that accept data from I/O sources and yield in place of blocking.
+
+A *generator* `yield`s a sequence of values. It is a function that can repeatedly run, yielding values while maintaining internal state. Calling it produces a generator object; the `for` loop protocol calls `next()` on that object, executing until the next `yield`. Generators are heap allocated, maintain state, and execute only in response to external stimulus.
+
+A *coroutine* more generally consumes and yields values. It executes in response to `next()` or `send()` calls. `next()` runs it until the next `yield`; `send()` passes a value into the coroutine to be returned by `(yield)`.
+
+A coroutine is a function that executes *concurrently* to -- but not in parallel with -- the rest of the code. It is event driven, and can accept and return values.
+
+=== Programming Model
+
+An `async` function is a coroutine:
+- Blocking I/O operations are labelled with `await` and cause control to pass to another coroutine while the I/O is performed
+- Provides concurrency without parallelism
+  - Coroutines operate concurrently, but typically within a single thread
+  - `await` passes control to another coroutine, and schedules a later wake-up for when the awaited operation completes
+  - Encodes down to a state machine with calls to `select()`, or similar
+- Mimics structure of code with multi-threaded I/O -- within a single thread
+
+=== `async` Functions
+
+An `async` function is one that can act as a coroutine. It is executed asynchronously by the runtime. Widely supported in Python 3, JavaScript, C\#, Rust.
+
+```python
+import asyncio
+
+async def fetch_html(url: str, session: ClientSession) -> str:
+    resp = await session.request(method="GET", url=url)
+    html = await resp.text()
+    return html
+```
+
+The main program must trigger asynchronous execution by the runtime via `asyncio.run(async_function)`. This starts the asynchronous polling runtime, runs until the specified `async` function completes. The runtime drives `async` functions to completion and handles switching between coroutines.
+
+=== `await` Future Results
+
+An `await` operation yields from the coroutine:
+- Triggers I/O operation and adds the corresponding file descriptor to the set polled by the runtime
+- Puts the coroutine in a queue to be woken by the runtime when the file descriptor becomes ready
+
+If another coroutine is ready to execute, schedule wake-up once the I/O completes and pass control to the other coroutine; else the runtime blocks until either this or some other I/O operation becomes ready. When the file descriptor becomes ready, the runtime reschedules the coroutine and execution continues.
+
+Annotations (`async`, `await`) indicate asynchrony and context switch points. Compiler and runtime work together to generate code that can be executed in fragments when I/O operations occur.
+
+=== Runtime Support
+
+Asynchronous code needs runtime support to execute the coroutines and poll I/O sources for activity.
+
+An `async` function that returns data of type `T` compiles to a regular function that returns `impl Future<Output=T>`.
+
+```rust
+pub trait Future {
+    type Output;
+    fn poll(self: Pin<&mut Self>, lw: &LocalWaker) -> Poll<Self::Output>;
+}
+
+pub enum Poll<T> {
+    Ready(T),
+    Pending,
+}
+```
+
+It returns a `Future` value that represents a value that will become available later. The runtime continually calls `poll()` on `Future` values until all are `Ready`. A future returns `Ready` when complete, `Pending` when blocked on awaiting I/O. Calling `tokio::run(future)` starts the runtime.
+
+Well supported in Python and JavaScript; runtime for Rust uses Tokio.
+
+// 7c.
+
+== Design Patterns for Asynchronous Code
+
+=== Composing `Future` Values
+
+`async` functions should be small and limited in scope, performing a single well-defined task (e.g. read and parse a file, or read, process, and respond to a network request).
+
+Rust provides combinators that can combine `Future` values to produce a new `Future`:
+- `for_each()`, `and_then()`, `read_exact()`, `select()`
+- Can ease composition of asynchronous functions, but can also obfuscate
+
+=== Avoid Blocking Operations
+
+Asynchronous code multiplexes I/O operations on a single thread. It provides asynchronous aware versions of I/O operations (`Read` becomes `AsyncRead`, `Write` becomes `AsyncWrite`):
+- File I/O, network I/O (TCP, UDP, Unix sockets)
+- Non-blocking, return `Future` values that interact with the runtime
+
+Does *not* interact well with blocking I/O. A `Future` that blocks on I/O will block the *entire* runtime. Programmer discipline is required to ensure asynchronous and blocking I/O are not mixed within a code base, including within library functions.
+
+=== Avoid Long-running Computations
+
+Control passing between `Future` values is explicit:
+- `await` calls switch control back to the runtime
+- Next runnable `Future` is then scheduled
+- A `Future` that doesn't call `await` and instead performs some long-running computation will starve other tasks
+
+Programmer discipline is required to spawn separate threads for long-running computations. Communicate with these via message passing, which can be scheduled within a `Future`.
+
+=== When to use Asynchronous I/O
+
+`async`/`await` restructures code to efficiently multiplex large numbers of I/O operations on a single thread.
+- Gives a *very natural programming model when each task is I/O bound*
+  - Code to perform asynchronous, non-blocking I/O is structured very similarly to code that uses blocking I/O operations
+  - Runtime can schedule many tasks to run concurrently on a single thread
+  - Each task is largely blocked awaiting I/O, with little overhead
+
+*Problematic* with blocking operations:
+- If a task performs a blocking operation, it locks the entire runtime -- all potentially blocking calls must be updated to use asynchronous I/O operations
+- Potential to fragment the library ecosystem
+
+*Problematic* with long-running computations:
+- Long-running computations starve other tasks of CPU time -- runtime only switches between tasks when an asynchronous operation is started
+- Need to insert context switch calls -- essentially cooperative multitasking reimagined (Windows 3.1, MacOS System 7)
+
+=== Performance of Asynchronous I/O
+
+Do you *really* need asynchronous I/O?
+- Threads are more expensive than `async` functions and tasks in a runtime
+- But threads are not that expensive -- a properly configured modern machine can run thousands of threads
+- Unless you're doing something very unusual, you can likely just spawn a thread, or use a pre-configured thread pool, and perform blocking I/O -- even if this means spawning thousands of threads
+
+Asynchronous I/O *can* give a performance benefit, but this benefit will usually be small. Choose asynchronous programming because you prefer the programming style, accepting that it will often not significantly improve performance.
