@@ -435,3 +435,33 @@ We can define lists as having a default case '[]' and then [1,2,3] is syntactic 
 type IntList = [ ]
   | Int :: IntList
 ```
+
+= Imperative Programming
+
+Statements do not evaluate, they affect a state and return a new state.
+
+= Small-step Semantics and Type Soundness
+
+== Rule Induction
+
+Structural induction is useful for reasoning over all ways of
+constructing an inductively-defined structure, but we have
+defined all of our formal definitions using inference rules
+Roughly speaking, rule induction allows us to assume that a
+property holds for all premises of a rule, and we then use this
+information to show that the property holds for the conclusion
+
+== Small-Step Operational Semantics
+
+Big-step evaluates M to a value V
+
+Small-step:
+Expression M takes a reduction step to expression N.
+M ->\* N means M takes zero or more reduction steps to N.
+
+== Type Soundness
+
+If $dot tack M : A$, then either $M$ is a value $V$, or there exists some $N$ such
+that $M arrow.long N$ and $dot tack N : A$
+
+== Proving Preservation and Progress
