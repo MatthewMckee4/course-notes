@@ -293,14 +293,14 @@ _The dual space $X'$ of a normed space $X$ is a Banach space (whether or not $X$
 
 === 3.1-1 Definition (Inner product space, Hilbert space)
 
-An *inner product space* (or _pre-Hilbert space_) is a vector space $X$ with an *inner product* $angle.l dot, dot angle.r: X times X -> K$ satisfying:
+An *inner product space* (or _pre-Hilbert space_) is a vector space $X$ with an *inner product* $chevron.l dot, dot chevron.r: X times X -> K$ satisfying:
 
-- *(IP1)* $angle.l x + y, z angle.r = angle.l x, z angle.r + angle.l y, z angle.r$
-- *(IP2)* $angle.l alpha x, y angle.r = alpha angle.l x, y angle.r$
-- *(IP3)* $angle.l x, y angle.r = overline(angle.l y, x angle.r)$
-- *(IP4)* $angle.l x, x angle.r >= 0$, and $angle.l x, x angle.r = 0 <==> x = 0$
+- *(IP1)* $chevron.l x + y, z chevron.r = chevron.l x, z chevron.r + chevron.l y, z chevron.r$
+- *(IP2)* $chevron.l alpha x, y chevron.r = alpha chevron.l x, y chevron.r$
+- *(IP3)* $chevron.l x, y chevron.r = #math.overline($chevron.l y, x chevron.r$)$
+- *(IP4)* $chevron.l x, x chevron.r >= 0$, and $chevron.l x, x chevron.r = 0 <==> x = 0$
 
-A *Hilbert space* is a complete inner product space. The inner product induces a norm $||x|| = sqrt(angle.l x, x angle.r)$ and metric $d(x, y) = ||x - y||$.
+A *Hilbert space* is a complete inner product space. The inner product induces a norm $||x|| = #math.sqrt($chevron.l x, x chevron.r$)$ and metric $d(x, y) = ||x - y||$.
 
 The inner product is *sesquilinear*: linear in the first argument, conjugate linear in the second.
 
@@ -310,17 +310,17 @@ If a norm does not satisfy this, it cannot come from an inner product.
 
 === 3.1-2 Definition (Orthogonality)
 
-$x perp y$ if $angle.l x, y angle.r = 0$.
+$x perp y$ if $chevron.l x, y chevron.r = 0$.
 
 === Examples
 
-*3.1-3 $RR^n$*: Hilbert space with $angle.l x, y angle.r = sum xi_j eta_j$.
+*3.1-3 $RR^n$*: Hilbert space with $chevron.l x, y chevron.r = sum xi_j eta_j$.
 
-*3.1-4 $CC^n$*: Hilbert space with $angle.l x, y angle.r = sum xi_j overline(eta)_j$.
+*3.1-4 $CC^n$*: Hilbert space with $chevron.l x, y chevron.r = sum xi_j overline(eta)_j$.
 
-*3.1-5 $L^2[a, b]$*: Hilbert space with $angle.l x, y angle.r = integral_a^b x(t) overline(y(t)) dif t$.
+*3.1-5 $L^2[a, b]$*: Hilbert space with $chevron.l x, y chevron.r = integral_a^b x(t) overline(y(t)) dif t$.
 
-*3.1-6 $l^2$*: Hilbert space with $angle.l x, y angle.r = sum_(j=1)^infinity xi_j overline(eta)_j$.
+*3.1-6 $l^2$*: Hilbert space with $chevron.l x, y chevron.r = sum_(j=1)^infinity xi_j overline(eta)_j$.
 
 *3.1-7 $l^p$ ($p != 2$)*: _Not_ an inner product space (parallelogram equality fails).
 
@@ -331,18 +331,18 @@ $x perp y$ if $angle.l x, y angle.r = 0$.
 === 3.2-1 Lemma (Schwarz inequality, triangle inequality)
 
 *(a) Schwarz inequality:*
-$ |angle.l x, y angle.r| <= ||x|| ||y|| $
+$ |chevron.l x, y chevron.r| <= ||x|| ||y|| $
 Equality iff ${x, y}$ is linearly dependent.
 
 *(b) Triangle inequality:*
 $ ||x + y|| <= ||x|| + ||y|| $
 Equality iff $y = 0$ or $x = c y$ with $c >= 0$.
 
-*Proof of (a).* For $y != 0$, choose $alpha$ with $overline(alpha) = angle.l y, x angle.r / angle.l y, y angle.r$. Then $0 <= ||x - alpha y||^2 = ||x||^2 - |angle.l x, y angle.r|^2 / ||y||^2$. $square$
+*Proof of (a).* For $y != 0$, choose $alpha$ with $overline(alpha) = chevron.l y, x chevron.r / chevron.l y, y chevron.r$. Then $0 <= ||x - alpha y||^2 = ||x||^2 - |chevron.l x, y chevron.r|^2 / ||y||^2$. $square$
 
 === 3.2-2 Lemma (Continuity of inner product)
 
-_If $x_n -> x$ and $y_n -> y$, then $angle.l x_n, y_n angle.r -> angle.l x, y angle.r$._
+_If $x_n -> x$ and $y_n -> y$, then $chevron.l x_n, y_n chevron.r -> chevron.l x, y chevron.r$._
 
 === 3.2-3 Theorem (Completion)
 
@@ -372,16 +372,16 @@ _If $M = Y$ is a complete subspace, then $z = x - y perp Y$._
 
 === 3.3-3 Definition (Direct sum)
 
-$X = Y plus.circle Z$ if each $x in X$ has a unique decomposition $x = y + z$ with $y in Y$, $z in Z$.
+$X = Y plus.o Z$ if each $x in X$ has a unique decomposition $x = y + z$ with $y in Y$, $z in Z$.
 
 === Orthogonal Complement
 
-$ Y^perp = {z in H : z perp Y} = {z in H : angle.l z, v angle.r = 0 "for all" v in Y} $
+$ Y^perp = {z in H : z perp Y} = {z in H : chevron.l z, v chevron.r = 0 "for all" v in Y} $
 
 === 3.3-4 Theorem (Projection theorem)
 
 _For any closed subspace $Y$ of a Hilbert space $H$:_
-$ H = Y plus.circle Y^perp $
+$ H = Y plus.o Y^perp $
 
 = Week 7: Orthogonal Complements (ctd), Orthonormal Sets
 
@@ -397,7 +397,7 @@ $Y^perp = cal(N)(P)$ (the null space of the projection).
 
 === Annihilator
 
-The *annihilator* of $M != emptyset$: $M^perp = {x in X : angle.l x, v angle.r = 0 "for all" v in M}$.
+The *annihilator* of $M != emptyset$: $M^perp = {x in X : chevron.l x, v chevron.r = 0 "for all" v in M}$.
 
 $M^perp$ is always a closed vector space, and $M subset M^(perp perp)$.
 
@@ -413,7 +413,7 @@ _For $M != emptyset$ in a Hilbert space $H$: $"span" M$ is dense in $H$ iff $M^p
 
 === 3.4-1 Definition
 
-An *orthonormal set* $M subset X$ satisfies $angle.l x, y angle.r = delta_(x y)$ (Kronecker delta) for all $x, y in M$.
+An *orthonormal set* $M subset X$ satisfies $chevron.l x, y chevron.r = delta_(x y)$ (Kronecker delta) for all $x, y in M$.
 
 === Pythagorean relation
 
@@ -430,27 +430,27 @@ _An orthonormal set is linearly independent._
 
 *3.4-4 $l^2$*: $e_n = (delta_(n j))$ form an orthonormal sequence.
 
-*3.4-5 Trigonometric functions.* On $[0, 2 pi]$ with $angle.l x, y angle.r = integral_0^(2 pi) x(t) y(t) dif t$, the orthonormal sequences are $e_0(t) = 1 / sqrt(2 pi)$, $e_n(t) = cos(n t) / sqrt(pi)$ and $tilde(e)_n(t) = sin(n t) / sqrt(pi)$.
+*3.4-5 Trigonometric functions.* On $[0, 2 pi]$ with $chevron.l x, y chevron.r = integral_0^(2 pi) x(t) y(t) dif t$, the orthonormal sequences are $e_0(t) = 1 / sqrt(2 pi)$, $e_n(t) = cos(n t) / sqrt(pi)$ and $tilde(e)_n(t) = sin(n t) / sqrt(pi)$.
 
 === Orthogonal Projection onto $Y_n$
 
 For any $x in X$ and orthonormal ${e_1, dots, e_n}$, the projection onto $Y_n = "span"{e_1, dots, e_n}$ is:
-$ y = sum_(k=1)^n angle.l x, e_k angle.r e_k $
+$ y = sum_(k=1)^n chevron.l x, e_k chevron.r e_k $
 
-Then $z = x - y perp y$ and $||x||^2 = ||y||^2 + ||z||^2 = sum_(k=1)^n |angle.l x, e_k angle.r|^2 + ||z||^2$.
+Then $z = x - y perp y$ and $||x||^2 = ||y||^2 + ||z||^2 = sum_(k=1)^n |chevron.l x, e_k chevron.r|^2 + ||z||^2$.
 
 === 3.4-6 Theorem (Bessel inequality)
 
 _For an orthonormal sequence $(e_k)$ and any $x in X$:_
-$ sum_(k=1)^infinity |angle.l x, e_k angle.r|^2 <= ||x||^2 $
+$ sum_(k=1)^infinity |chevron.l x, e_k chevron.r|^2 <= ||x||^2 $
 
-The quantities $angle.l x, e_k angle.r$ are the *Fourier coefficients* of $x$.
+The quantities $chevron.l x, e_k chevron.r$ are the *Fourier coefficients* of $x$.
 
 === Gram--Schmidt Process
 
 Given a linearly independent sequence $(x_j)$, produce an orthonormal sequence $(e_j)$ with $"span"{e_1, dots, e_n} = "span"{x_1, dots, x_n}$ for every $n$:
 
-$ e_1 = x_1 / ||x_1||, quad v_n = x_n - sum_(k=1)^(n-1) angle.l x_n, e_k angle.r e_k, quad e_n = v_n / ||v_n|| $
+$ e_1 = x_1 / ||x_1||, quad v_n = x_n - sum_(k=1)^(n-1) chevron.l x_n, e_k chevron.r e_k, quad e_n = v_n / ||v_n|| $
 
 = Week 8: Generalised Fourier Series, Total Orthonormal Sets
 
@@ -462,7 +462,7 @@ The *Fourier series* of a $2 pi$-periodic continuous function $x$ is $a_0 + sum_
 $ a_0 = 1/(2 pi) integral_0^(2 pi) x(t) dif t, quad a_k = 1/pi integral_0^(2 pi) x(t) cos k t dif t, quad b_k = 1/pi integral_0^(2 pi) x(t) sin k t dif t $
 
 In terms of the orthonormal sequences from 3.4-5:
-$ x = angle.l x, e_0 angle.r e_0 + sum_(k=1)^infinity [angle.l x, e_k angle.r e_k + angle.l x, tilde(e)_k angle.r tilde(e)_k] $
+$ x = chevron.l x, e_0 chevron.r e_0 + sum_(k=1)^infinity [chevron.l x, e_k chevron.r e_k + chevron.l x, tilde(e)_k chevron.r tilde(e)_k] $
 
 === 3.5-2 Theorem (Convergence)
 
@@ -470,15 +470,15 @@ _Let $(e_k)$ be orthonormal in a Hilbert space $H$. Then:_
 
 *(a)* $sum_(k=1)^infinity alpha_k e_k$ converges iff $sum_(k=1)^infinity |alpha_k|^2$ converges.
 
-*(b)* If $sum alpha_k e_k$ converges to $x$, then $alpha_k = angle.l x, e_k angle.r$.
+*(b)* If $sum alpha_k e_k$ converges to $x$, then $alpha_k = chevron.l x, e_k chevron.r$.
 
-*(c)* For any $x in H$, the series $sum angle.l x, e_k angle.r e_k$ converges.
+*(c)* For any $x in H$, the series $sum chevron.l x, e_k chevron.r e_k$ converges.
 
 *Proof of (a).* By orthonormality, $||s_n - s_m||^2 = |alpha_(m+1)|^2 + dots.c + |alpha_n|^2 = sigma_n - sigma_m$. So $(s_n)$ is Cauchy iff $sigma_n = sum_(k=1)^n |alpha_k|^2$ is Cauchy. Both $H$ and $RR$ are complete. $square$
 
 === 3.5-3 Lemma
 
-_Any $x$ in an inner product space has at most countably many nonzero Fourier coefficients with respect to an orthonormal family. The sum $sum angle.l x, e_k angle.r e_k$ is independent of the ordering._
+_Any $x$ in an inner product space has at most countably many nonzero Fourier coefficients with respect to an orthonormal family. The sum $sum chevron.l x, e_k chevron.r e_k$ is independent of the ordering._
 
 == Total Orthonormal Sets and Sequences (Sec 3.6)
 
@@ -497,9 +497,9 @@ Every Hilbert space $H != {0}$ has a total orthonormal set. All total orthonorma
 === 3.6-3 Theorem (Parseval relation)
 
 _An orthonormal set $M$ in a Hilbert space $H$ is total iff for all $x in H$:_
-$ sum_k |angle.l x, e_k angle.r|^2 = ||x||^2 quad ("Parseval relation") $
+$ sum_k |chevron.l x, e_k chevron.r|^2 = ||x||^2 quad ("Parseval relation") $
 
-*Proof.* If $M$ is not total, $exists x != 0$ with $x perp M$, giving $0 != ||x||^2$ but $sum |angle.l x, e_k angle.r|^2 = 0$. Conversely, if $M$ is total, define $y = sum angle.l x, e_k angle.r e_k$. Then $x - y perp M$, so $x - y in M^perp = {0}$ by 3.3-7, giving $x = y$ and $||x||^2 = sum |angle.l x, e_k angle.r|^2$. $square$
+*Proof.* If $M$ is not total, $exists x != 0$ with $x perp M$, giving $0 != ||x||^2$ but $sum |chevron.l x, e_k chevron.r|^2 = 0$. Conversely, if $M$ is total, define $y = sum chevron.l x, e_k chevron.r e_k$. Then $x - y perp M$, so $x - y in M^perp = {0}$ by 3.3-7, giving $x = y$ and $||x||^2 = sum |chevron.l x, e_k chevron.r|^2$. $square$
 
 === 3.6-4 Theorem (Separable Hilbert spaces)
 
@@ -518,19 +518,19 @@ _Two Hilbert spaces (both real or both complex) are isomorphic iff they have the
 === 3.8-1 Theorem (Riesz representation)
 
 _Every bounded linear functional $f$ on a Hilbert space $H$ has a unique representation_
-$ f(x) = angle.l x, z angle.r $
+$ f(x) = chevron.l x, z chevron.r $
 _where $z in H$ depends on $f$ and $||z|| = ||f||$._
 
-*Proof.* If $f = 0$, take $z = 0$. Let $f != 0$. Then $cal(N)(f)$ is closed and $cal(N)(f) != H$, so $cal(N)(f)^perp$ contains some $z_0 != 0$. For any $x in H$, $v = f(x) z_0 - f(z_0) x in cal(N)(f)$, so $angle.l v, z_0 angle.r = 0$ gives:
-$ f(x) = (f(z_0)) / (||z_0||^2) angle.l x, z_0 angle.r = angle.l x, z angle.r quad "where" z = (overline(f(z_0))) / (||z_0||^2) z_0 $
+*Proof.* If $f = 0$, take $z = 0$. Let $f != 0$. Then $cal(N)(f)$ is closed and $cal(N)(f) != H$, so $cal(N)(f)^perp$ contains some $z_0 != 0$. For any $x in H$, $v = f(x) z_0 - f(z_0) x in cal(N)(f)$, so $chevron.l v, z_0 chevron.r = 0$ gives:
+$ f(x) = (f(z_0)) / (||z_0||^2) chevron.l x, z_0 chevron.r = chevron.l x, z chevron.r quad "where" z = (overline(f(z_0))) / (||z_0||^2) z_0 $
 
-*Uniqueness:* $angle.l x, z_1 angle.r = angle.l x, z_2 angle.r$ for all $x$ implies $||z_1 - z_2||^2 = 0$.
+*Uniqueness:* $chevron.l x, z_1 chevron.r = chevron.l x, z_2 chevron.r$ for all $x$ implies $||z_1 - z_2||^2 = 0$.
 
-*Norm:* From $||z||^2 = f(z) <= ||f|| ||z||$ we get $||z|| <= ||f||$. From $|f(x)| = |angle.l x, z angle.r| <= ||x|| ||z||$ we get $||f|| <= ||z||$. $square$
+*Norm:* From $||z||^2 = f(z) <= ||f|| ||z||$ we get $||z|| <= ||f||$. From $|f(x)| = |chevron.l x, z chevron.r| <= ||x|| ||z||$ we get $||f|| <= ||z||$. $square$
 
 === 3.8-2 Lemma
 
-_If $angle.l v_1, w angle.r = angle.l v_2, w angle.r$ for all $w$, then $v_1 = v_2$._
+_If $chevron.l v_1, w chevron.r = chevron.l v_2, w chevron.r$ for all $w$, then $v_1 = v_2$._
 
 === 3.8-3 Definition (Sesquilinear form)
 
@@ -538,26 +538,26 @@ A *sesquilinear form* $h: X times Y -> K$ is linear in the first argument and co
 
 === 3.8-4 Theorem (Riesz representation for sesquilinear forms)
 
-_For a bounded sesquilinear form $h: H_1 times H_2 -> K$ on Hilbert spaces, there exists a unique bounded linear operator $S: H_1 -> H_2$ with $h(x, y) = angle.l S x, y angle.r$ and $||S|| = ||h||$._
+_For a bounded sesquilinear form $h: H_1 times H_2 -> K$ on Hilbert spaces, there exists a unique bounded linear operator $S: H_1 -> H_2$ with $h(x, y) = chevron.l S x, y chevron.r$ and $||S|| = ||h||$._
 
 == Hilbert-Adjoint Operator (Sec 3.9, first part)
 
 === 3.9-1 Definition
 
 The *Hilbert-adjoint operator* $T^*: H_2 -> H_1$ of a bounded linear operator $T: H_1 -> H_2$ is defined by:
-$ angle.l T x, y angle.r = angle.l x, T^* y angle.r quad "for all" x in H_1, y in H_2 $
+$ chevron.l T x, y chevron.r = chevron.l x, T^* y chevron.r quad "for all" x in H_1, y in H_2 $
 
 === 3.9-2 Theorem
 
 _$T^*$ exists, is unique, is a bounded linear operator, and $||T^*|| = ||T||$._
 
-*Proof.* $h(y, x) = angle.l y, T x angle.r$ is a bounded sesquilinear form with $||h|| = ||T||$. By Theorem 3.8-4, $h(y, x) = angle.l T^* y, x angle.r$ for a unique bounded linear $T^*$ with $||T^*|| = ||h|| = ||T||$. $square$
+*Proof.* $h(y, x) = chevron.l y, T x chevron.r$ is a bounded sesquilinear form with $||h|| = ||T||$. By Theorem 3.8-4, $h(y, x) = chevron.l T^* y, x chevron.r$ for a unique bounded linear $T^*$ with $||T^*|| = ||h|| = ||T||$. $square$
 
 === 3.9-3 Lemma (Zero operator)
 
-*(a)* $Q = 0 <==> angle.l Q x, y angle.r = 0$ for all $x, y$.
+*(a)* $Q = 0 <==> chevron.l Q x, y chevron.r = 0$ for all $x, y$.
 
-*(b)* If $X$ is complex and $angle.l Q x, x angle.r = 0$ for all $x$, then $Q = 0$.
+*(b)* If $X$ is complex and $chevron.l Q x, x chevron.r = 0$ for all $x$, then $Q = 0$.
 
 Part (b) fails for real spaces (e.g., rotation by $pi / 2$ in $RR^2$).
 
@@ -569,7 +569,7 @@ Part (b) fails for real spaces (e.g., rotation by $pi / 2$ in $RR^2$).
 
 For bounded linear operators $S, T: H_1 -> H_2$ and scalar $alpha$:
 
-- (a) $angle.l T^* y, x angle.r = angle.l y, T x angle.r$
+- (a) $chevron.l T^* y, x chevron.r = chevron.l y, T x chevron.r$
 - (b) $(S + T)^* = S^* + T^*$
 - (c) $(alpha T)^* = overline(alpha) T^*$
 - (d) $(T^*)^* = T$
@@ -577,7 +577,7 @@ For bounded linear operators $S, T: H_1 -> H_2$ and scalar $alpha$:
 - (f) $T^* T = 0 <==> T = 0$
 - (g) $(S T)^* = T^* S^*$ #h(2em) (when $H_2 = H_1$)
 
-*Proof of (e).* From $||T x||^2 = angle.l T x, T x angle.r = angle.l T^* T x, x angle.r <= ||T^* T|| ||x||^2$, taking $sup$ over $||x|| = 1$ gives $||T||^2 <= ||T^* T|| <= ||T^*|| ||T|| = ||T||^2$. $square$
+*Proof of (e).* From $||T x||^2 = chevron.l T x, T x chevron.r = chevron.l T^* T x, x chevron.r <= ||T^* T|| ||x||^2$, taking $sup$ over $||x|| = 1$ gives $||T||^2 <= ||T^* T|| <= ||T^*|| ||T|| = ||T||^2$. $square$
 
 == Self-Adjoint, Unitary and Normal Operators (Sec 3.10)
 
@@ -585,7 +585,7 @@ For bounded linear operators $S, T: H_1 -> H_2$ and scalar $alpha$:
 
 A bounded linear operator $T: H -> H$ is:
 
-- *Self-adjoint* (Hermitian) if $T^* = T$, equivalently $angle.l T x, y angle.r = angle.l x, T y angle.r$
+- *Self-adjoint* (Hermitian) if $T^* = T$, equivalently $chevron.l T x, y chevron.r = chevron.l x, T y chevron.r$
 - *Unitary* if $T$ is bijective and $T^* = T^(-1)$
 - *Normal* if $T T^* = T^* T$
 
@@ -601,9 +601,9 @@ For $T: CC^n -> CC^n$ with matrix $A$, the Hilbert-adjoint $T^*$ has matrix $ove
 
 === 3.10-3 Theorem (Self-adjointness)
 
-*(a)* If $T = T^*$, then $angle.l T x, x angle.r in RR$ for all $x$.
+*(a)* If $T = T^*$, then $chevron.l T x, x chevron.r in RR$ for all $x$.
 
-*(b)* If $H$ is complex and $angle.l T x, x angle.r in RR$ for all $x$, then $T = T^*$.
+*(b)* If $H$ is complex and $chevron.l T x, x chevron.r in RR$ for all $x$, then $T = T^*$.
 
 Part (b) requires $H$ to be complex.
 
