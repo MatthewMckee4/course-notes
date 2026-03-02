@@ -5,8 +5,7 @@
 #outline(title: none)
 #pagebreak()
 
-// 1.
-= Assets, Odds & Betting, Hedging, Arbitrage
+= Lecture 1: Assets, Odds & Betting, Hedging, Arbitrage
 
 == Assets
 
@@ -36,8 +35,7 @@ Equivalently the condition is $alpha beta > 1$ after normalising stakes.
 
 A *frictionless market* assumes: no transaction costs, no bid-ask spread, unlimited borrowing/lending at the risk-free rate, no restrictions on short selling, and no taxes.
 
-// 2.
-= Time Value of Money
+= Lecture 2: Time Value of Money
 
 == Simple Interest
 
@@ -81,8 +79,7 @@ $ P(t) = P(0) exp(integral_0^t r(s) dif s) $
 
 The *force of interest* $delta(t) = r(t)$ is the instantaneous rate of growth.
 
-// 3.
-= Mortgages, Annuities, Present Value
+= Lecture 3: Mortgages, Annuities, Present Value
 
 == Mortgage Payments
 
@@ -122,8 +119,7 @@ The *Annual Percentage Rate* (APR) is the interest rate $r^*$ such that the pres
 
 $ P = sum_(k=1)^N A_k (1 + r^* / n)^(-k) $
 
-// 4.
-= Bonds, Perpetuities, Zero-Coupon Bonds
+= Lecture 4: Bonds, Perpetuities, Zero-Coupon Bonds
 
 == APR via Newton-Raphson
 
@@ -163,8 +159,7 @@ $ P(T) = e^(-z(T) T) $
 
 *Bootstrapping*: extract zero rates from observed bond prices sequentially. Use short-maturity instruments to find short-term zero rates, then work outward to longer maturities.
 
-// 5.
-= Forward Contracts
+= Lecture 5: Forward Contracts
 
 == Definition
 
@@ -204,8 +199,7 @@ $ F_0 = S_0 e^((r - q) T) $
 
 A portfolio holding $xi_0$ units of asset 0 (at price $pi_0$) and $xi_1$ units of asset 1 (at price $pi_1$) has initial value $V_0 = xi_0 pi_0 + xi_1 pi_1$.
 
-// 6.
-= Options
+= Lecture 6: Options
 
 == Definitions
 
@@ -263,8 +257,7 @@ Put-call parity becomes: $pi_C - pi_P = S_0 - I - X e^(-r T)$.
 
 *Proposition*: If dividends are paid, $pi_C <= S_0 - I$.
 
-// 7.
-= American Options & Trading Strategies
+= Lecture 7: American Options & Trading Strategies
 
 == American vs European Options
 
@@ -299,8 +292,7 @@ $ S_0 - X <= pi_(C_A) - pi_(P_A) <= S_0 - X e^(-r T) $
 - *Long put*: bearish, limited downside ($-pi_P e^(r T)$), large upside
 - *Short put*: bullish/neutral, profit capped at $pi_P e^(r T)$
 
-// 8.
-= Trading Strategies: Spreads and Combinations
+= Lecture 8: Trading Strategies: Spreads and Combinations
 
 == Covered Call
 
@@ -360,8 +352,7 @@ Buy call and put at the same strike $X$. Payoff: $|S_T - X|$. Profits from large
 - *Butterfly spread*: buy calls at $X_1$ and $X_3$, sell 2 calls at $X_2 = (X_1 + X_3) / 2$. Profits when price stays near $X_2$.
 - *Iron condor*: sell OTM put and OTM call, buy further OTM put and call. Profits from low volatility.
 
-// 9.
-= One-Period Binomial Model
+= Lecture 9: One-Period Binomial Model
 
 == Setup
 
@@ -446,8 +437,7 @@ A European call with strike $X$ has payoff $C(omega) = max{S(omega) - X, 0}$.
 
 $ pi_C = max{S(U) - X, 0} dot pi_(phi^U) + max{S(D) - X, 0} dot pi_(phi^D) $
 
-// 10.
-= Probability Theory
+= Lecture 10: Probability Theory
 
 == Sample Spaces and Events
 
@@ -519,8 +509,7 @@ The triple $(Omega, cal(F), P)$ is a *probability space*.
 
 A set $N in cal(F)$ is a *$P$-nullset* if $P(N) = 0$. An event holds *$P$-almost surely* ($P$-a.s.) if it holds on a set $A$ with $P(A) = 1$.
 
-// 11.
-= Random Variables & Expectation
+= Lecture 11: Random Variables & Expectation
 
 == Random Variables
 
@@ -560,8 +549,7 @@ $ EE_P (X) = sum_(i=1)^n X(omega_i) P({omega_i}) $
 
 *Exponential distribution*: $X ~ "Exp"(lambda)$, $f(x) = lambda e^(-lambda x)$. Then $EE(X) = 1 / lambda$.
 
-// 12 (part 1).
-= One-Period Market Model
+= Lecture 12a: One-Period Market Model
 
 == Definition
 
@@ -596,8 +584,7 @@ A market is *arbitrage-free* if no such portfolio exists.
 
 *Lemma*: The market admits arbitrage iff there exists $xi in RR^d$ with $xi dot S >= (1 + r) xi dot pi$ $P$-a.s. and $P(xi dot S > (1 + r) xi dot pi) > 0$.
 
-// 12 (part 2).
-= FTAP, Law of One Price, Securities
+= Lecture 12b: FTAP, Law of One Price, Securities
 
 == Risk-Neutral Measure
 
@@ -651,8 +638,7 @@ A *security* is a random variable $C: Omega -> RR$ with $0 <= C < infinity$ $P$-
 
 A forward contract ($C = S - K$) is a derivative but not a security (payoff can be negative).
 
-// 13.
-= Arbitrage-Free Pricing
+= Lecture 13: Arbitrage-Free Pricing
 
 == Extended Market Model
 
