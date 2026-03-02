@@ -42,6 +42,11 @@ After I have finished each exam, the notes will be moved to the [Archived Notes]
 - [Functional Programming](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/functional_programming_notes.pdf)
 - [Software Product Release Engineering](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/software_product_release_engineering_notes.pdf)
 
+#### Mathematics
+
+- [Financial Mathematics](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/financial_mathematics_notes.pdf)
+- [Functional Analysis](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/functional_analysis_notes.pdf)
+
 ## Archived Notes
 
 > [!WARNING]
