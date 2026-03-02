@@ -442,26 +442,163 @@ Statements do not evaluate, they affect a state and return a new state.
 
 = Small-step Semantics and Type Soundness
 
-== Rule Induction
+== Limitations of Big-Step Semantics
 
-Structural induction is useful for reasoning over all ways of
-constructing an inductively-defined structure, but we have
-defined all of our formal definitions using inference rules
-Roughly speaking, rule induction allows us to assume that a
-property holds for all premises of a rule, and we then use this
-information to show that the property holds for the conclusion
+Big-step soundness: if $dot tack M : A$ then there exists some $V$ such that $M arrow.b.double V$ and $dot tack V : A$.
+
+This does not hold for $L_"Rec"$ since it requires every term terminates (e.g. `(rec f(x). f x) true` loops forever). Also fails with division by zero: $(1 + 2) / 0$ does not evaluate to a value.
+
+The answer: reason about evaluation step-by-step.
 
 == Small-Step Operational Semantics
 
-Big-step evaluates M to a value V
+$M arrow.long N$ -- expression $M$ takes a single reduction step to expression $N$.
+$M arrow.long^* N$ -- zero or more reduction steps.
 
-Small-step:
-Expression M takes a reduction step to expression N.
-M ->\* N means M takes zero or more reduction steps to N.
+Each language construct has a *reduction rule* (performs the actual computation on values) and *congruence rules* (reduce subexpressions to values). Congruence rules enforce *left-to-right evaluation order*.
+
+=== Rules for $L_"Arith"$
+
+$
+  (V "and" W "are values") / (V dot.o W arrow.long V hat(dot.o) W)
+  #h(2em)
+  (M arrow.long M') / (M dot.o N arrow.long M' dot.o N)
+  #h(2em)
+  (M arrow.long M') / (V dot.o M arrow.long V dot.o M')
+$
+
+=== Rules for $L_"If"$
+
+$
+  () / ("if" "true" "then" M "else" N arrow.long M)
+  #h(2em)
+  () / ("if" "false" "then" M "else" N arrow.long N)
+  #h(2em)
+  (L arrow.long L') / ("if" L "then" M "else" N arrow.long "if" L' "then" M "else" N)
+$
+
+=== Rules for $L_"Rec"$
+
+$
+  () / ((lambda x . M) V arrow.long M {V \/ x})
+  #h(2em)
+  () / (("rec" f(x) . M) V arrow.long M {"rec" f(x) . M \/ f, V \/ x})
+$
+
+$
+  (M arrow.long M') / (M N arrow.long M' N)
+  #h(2em)
+  (M arrow.long M') / (V M arrow.long V M')
+$
+
+=== Equivalence of Big- and Small-Step
+
+The two styles are equivalent:
+- If $M arrow.b.double V$, then $M arrow.long^* V$.
+- If $M arrow.long^* V$, then $M arrow.b.double V$.
+
+Big-step is closer to interpreters but can't reason about nontermination. Small-step gives finer-grained reasoning.
 
 == Type Soundness
 
-If $dot tack M : A$, then either $M$ is a value $V$, or there exists some $N$ such
-that $M arrow.long N$ and $dot tack N : A$
+If a program is well typed, then it is either already a value, or it can take a step while staying well typed. Proved via two properties:
 
-== Proving Preservation and Progress
+*Preservation*: if $Gamma tack M : A$ and $M arrow.long N$, then $Gamma tack N : A$.
+
+*Progress*: if $dot tack M : A$, then either $M$ is a value, or there exists some $N$ such that $M arrow.long N$.
+
+=== Violating Preservation
+
+Consider $M lt.tri N$ that evaluates $M$ then $N$, returning the result of $M$. The typing rule gives it type $B$ (from $N$), but $V lt.tri W arrow.long V$ returns type $A$ -- preservation violated.
+
+=== Violating Progress
+
+$L_"Arith"$ with division: $5 \/ 0$ is well typed ($"Int"$) but is not a value and cannot reduce further.
+
+=== Proving Preservation and Progress
+
+- *Preservation*: rule induction on $M arrow.long N$.
+- *Progress*: rule induction on $dot tack M : A$.
+
+For $L_"Lam"$ / $L_"Rec"$, proofs additionally require a *substitution lemma*:
+if $Gamma, x : A tack M : B$ and $Gamma tack V : A$, then $Gamma tack M {V \/ x} : B$.
+
+Some languages (e.g. Python, TypeScript) are *deliberately unsound* -- typable programs may still raise runtime errors.
+
+= VM Code Generation
+
+== Tree-Walk vs Bytecode Interpreters
+
+A *tree-walk interpreter* traverses the AST directly. This is simple but slow due to pointer chasing and poor cache locality.
+
+A *bytecode interpreter* compiles to a flat array of bytecode instructions (1-byte opcode + optional arguments), then executes via a fetch-decode-execute loop. Faster due to data locality and simpler dispatch.
+
+== Stack Machines
+
+A *stack machine* uses a stack for operands rather than registers. Examples: JVM, .NET CLR, WebAssembly.
+Advantages: simple code generation (no register allocation), compact bytecode.
+
+== SVM (Simple Virtual Machine)
+
+SVM state consists of:
+- *Code store*: array of instructions. `pc` (program counter) points to next instruction, `cl` (code length) is the total number of instructions.
+- *Data store*: stack-based. `sp` (stack pointer) points to the top.
+- *Status register*: `RUNNING` or `HALTED`.
+
+=== Instruction Set
+
+Arithmetic: `ADD`, `SUB`, `MUL`, `DIV` -- pop two operands, push result.
+
+Comparison: `CMPEQ`, `CMPLT` -- pop two, push boolean (0/1).
+
+Logic: `INV` -- pop boolean, push negation.
+
+Memory: `LOADC n` (push constant), `LOADG a` / `STOREG a` (global), `LOADL o` / `STOREL o` (local, relative to frame).
+
+Control: `HALT`, `JUMP a`, `JUMPF a` (jump if false), `JUMPT a` (jump if true).
+
+=== Fetch-Decode-Execute Loop
+
+```
+while status == RUNNING:
+  instruction = code[pc]
+  pc += 1
+  execute(instruction)
+```
+
+== Compiling Fun to SVM
+
+=== Constants and Binary Operations
+
+A constant $n$ compiles to `LOADC n`. A binary operation $M dot.o N$ compiles by: compile $M$, compile $N$, emit the corresponding instruction.
+
+=== Variables
+
+An *address table* maps variable names to (locale, address) pairs, where locale is `GLOBAL` or `LOCAL`.
+A variable reference compiles to `LOADG a` or `LOADL o` depending on locale.
+
+=== Conditionals (Back-Patching)
+
+For `if L then M`:
++ Compile $L$
++ Emit `JUMPF ?` (placeholder address)
++ Compile $M$
++ *Back-patch*: fill in the `?` with the current `pc`
+
+For `if L then M else N`:
++ Compile $L$
++ Emit `JUMPF ?` (placeholder $p_1$)
++ Compile $M$
++ Emit `JUMP ?` (placeholder $p_2$)
++ Back-patch $p_1$ to current `pc`
++ Compile $N$
++ Back-patch $p_2$ to current `pc`
+
+=== While Loops (Back-Patching)
+
++ Record current `pc` as $l$
++ Compile test expression
++ Emit `JUMPF ?` (placeholder $p$)
++ Compile loop body
++ Emit `JUMP l` (jump back to test)
++ Back-patch $p$ to current `pc`
