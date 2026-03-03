@@ -724,3 +724,151 @@ Parameterise risk-neutral measures: $q_1 = q - Delta/2$, $q_2 = 1/2 - q + Delta$
 $ pi_C = (a(1 - 2q)) / (2(1 + r)) $
 
 The set of arbitrage-free prices is $Pi(C) = (0, a / (2(1 + r)))$.
+
+= Lecture 14: Multi-Period Binomial Model
+
+== Introduction
+
+At each of $T$ discrete times the state of the market price may move 'Up' or 'Down'. The market history is a sequence $omega in Omega = {U, D}^T$, e.g. if $T = 4$ a typical market state would be $U D D U$. Note that $|Omega| = 2^T$.
+
+There is a riskless bond with risk-free rate $r$ within a single period. The initial price of the bond is $pi_0$ and at time $t$ it is $pi_t = pi_0 (1 + r)^t$.
+
+The risky asset price is a process $(S_t)_(t=0)^T$ with $S_t : Omega -> RR$. The initial price is $S_0$.
+
+We take the finest $sigma$-algebra on $Omega$ as $cal(F)_T = cal(P)(Omega)$, allowing us to assign probabilities to each of the $2^T$ market histories.
+
+== Filtrations
+
+A *filtration* is a sequence of $sigma$-algebras $cal(F)_(t-1) subset cal(F)_t$, where $cal(F)_0 = {emptyset, Omega}$. Define:
+
+$ B_U = {omega in Omega : "first element in sequence is" U} $
+
+i.e. the market histories that all start with $U$. Then $cal(F)_1 = {emptyset, B_U, B_D, Omega}$.
+
+The $sigma$-algebra $cal(F)_t$ contains the random events that depend only on the first $t$ market movements. If a random variable is $cal(F)_t$-measurable, then its value depends only on the first $t$ market movements.
+
+*Example ($T = 2$)*:
+
+$ cal(F)_0 &= {emptyset, Omega} \
+cal(F)_1 &= {emptyset, {U U, U D}, {D U, D D}, Omega} \
+cal(F)_2 &= cal(P)(Omega) $
+
+Note that $cal(F)_1$ distinguishes whether the first move was $U$ or $D$, but does not distinguish between $U U$ and $U D$.
+
+== Price Movements
+
+In general, the degree to which prices vary as a result of 'Up' and 'Down' movements may depend on time and the current node. But we assume the price process behaves as:
+
+$ S_(t+1)(omega) = Z_(t+1)(omega) S_t (omega), quad Z_(t+1) = cases(u & "the" (t+1)"-th component of" omega "is" U, d & "the" (t+1)"-th component of" omega "is" D) $
+
+The $S_t$ are $cal(F)_t$-measurable random variables.
+
+*Example*: if $T = 2$, then $S_2$ can take values $u^2 S_0$, $u d S_0$, and $d^2 S_0$ (corresponding to market movements $U U$, $U D$ or $D U$, and $D D$).
+
+== Arbitrage-Free Condition
+
+In the multi-period setting the requirement for the model to be arbitrage-free is the existence of a risk-neutral measure $Q$ on $(Omega, cal(F)_T)$ such that:
+
+$ EE_Q [S_(t+1) / (1 + r) | cal(F)_t] = S_t $
+
+This is the *conditional expectation*: the expectation of the discounted asset prices at $t + 1$ is equal to the price at $t$, but we must factor in that the price at $t$ is also random.
+
+This condition means that at every node of the tree, the one-step model based at that node must be arbitrage-free. In the homogeneous model (where all movements are either $u$ or $d$) this becomes the condition $d < 1 + r < u$.
+
+== FTAP for Multi-Period Binomial
+
+*Theorem (FTAP, multi-period binomial)*: The following are equivalent:
++ The model is arbitrage-free.
++ There exists a risk-neutral probability measure $Q$ on $(Omega, cal(F)_T)$, equivalent to a given probability measure $P$, such that the *discounted price process*
+  $ tilde(S)_t = S_t / (1 + r)^t $
+  is a *martingale*:
+  $ EE_Q [tilde(S)_(t+1) | cal(F)_t] = tilde(S)_t $
+
+== Pricing Path-Independent Contingent Claims
+
+We consider only *path-independent* contingent claims that are based on the terminal asset price, i.e. $C(omega) = f(S_T (omega))$ (e.g. a European call or put).
+
+As before, once we have a risk-neutral measure the arbitrage-free prices are:
+
+$ Pi(C) = {1 / (1 + r)^T EE_Q [C] : Q "risk-neutral", Q tilde P, EE_Q |C| < infinity} $
+
+The risk-neutral measure is unique in the multi-period binomial model, so there is a unique price.
+
+== Self-Financing Trading Strategies
+
+A *trading strategy* is a sequence of holdings of the riskless and risky asset $(xi_t^0, xi_t^1)$. In the interval $[t, t+1]$ we hold $xi_t^0$ units of the bond and $xi_t^1$ units of the risky asset. The value of the portfolio at time $t$ is:
+
+$ V_t (omega) = xi_t^0 dot B_t + xi_t^1 (omega) dot S_t (omega) $
+
+where $B_t = pi_0 (1 + r)^t$.
+
+A trading strategy is *self-financing* if:
+
+$ V_(t+1) = xi_t^0 dot B_(t+1) + xi_t^1 dot S_(t+1) = xi_(t+1)^0 dot B_(t+1) + xi_(t+1)^1 dot S_(t+1) $
+
+This means we may adjust our holdings (balance between riskless and risky asset) but cannot remove or add money.
+
+== Replication
+
+A path-independent contingent claim $C$ is *replicable* if there exists a self-financing strategy such that $V_T = C$.
+
+In the multi-period binomial model, every claim is replicable.
+
+=== Two-Period Model ($T = 2$)
+
+The outcomes of the claim are $C(U U)$, $C(U D)$, $C(D U)$, and $C(D D)$. To find a replicating portfolio on each branch we must match the payoffs $C(U U)$ and $C(U D)$ on the upper branch and $C(D U)$ and $C(D D)$ on the lower branch.
+
+*Upper branch*: At the node $S_0 u$ we solve:
+
+$ xi_0^1 (U) pi_0 (1 + r)^2 + xi_1^1 (U) u S_1 (U) &= C(U U) \
+xi_0^1 (U) pi_0 (1 + r)^2 + xi_1^1 (U) d S_1 (U) &= C(U D) $
+
+The value of the portfolio on the upper branch at $t = 1$ is:
+
+$ V_1 (U) = xi_0^1 (U) pi_0 (1 + r) + xi_1^1 (U) S_1 (U) = 1 / (1 + r) (q C(U U) + (1 - q) C(U D)) $
+
+where $q = (1 + r - d) / (u - d)$.
+
+*Lower branch*: Similarly at the node $S_0 d$:
+
+$ V_1 (D) = xi_0^1 (D) pi_0 (1 + r) + xi_1^1 (D) S_1 (D) = 1 / (1 + r) (q C(D U) + (1 - q) C(D D)) $
+
+*Initial branch*: Now the payoffs $V_1(U)$ and $V_1(D)$ can be replicated on the initial branch:
+
+$ V_0 &= xi_0^0 pi_0 + xi_1^0 S_0 = 1 / (1 + r) (q V_1 (U) + (1 - q) V_1 (D)) \
+&= 1 / (1 + r)^2 [q^2 C(U U) + q(1 - q)(C(U D) + C(D U)) + (1 - q)^2 C(D D)] \
+&= 1 / (1 + r)^2 sum_(k=0)^2 binom(2, k) q^k (1 - q)^(2 - k) f(S_0 u^k d^(2 - k)) $
+
+where $C(omega) = f(S_T (omega))$ and $S_T (omega) = S_0 u^k d^(T - k)$ where $k$ is the number of times $U$ appears in $omega$.
+
+== Backward Induction Formula
+
+In general:
+
+$ V_t = 1 / (1 + r) EE_Q [V_(t+1) | cal(F)_t] $
+
+*Arbitrage-free price in $T$ period binomial model*: If there are $T$ periods, each with risk-free rate $r$ and with price changes $u$ and $d$ on each branch, then the unique price of a path-independent contingent claim $C(omega) = f(S_T (omega))$ is:
+
+$ pi_C = 1 / (1 + r)^T sum_(k=0)^T binom(T, k) q^k (1 - q)^(T - k) f(S_0 u^k d^(T - k)) $
+
+where $q = (1 + r - d) / (u - d)$.
+
+== Worked Example: Straddle in $T = 2$ Model
+
+A straddle is a combination of a call and put on the same asset with the same strike price and expiry, with payoff:
+
+$ C = f(S_T) = (S_T - X)^+ + (X - S_T)^+ = |X - S_T| $
+
+Consider a straddle based on a single risky asset in the two-period model. The price is:
+
+$ pi_C = 1 / (1 + r)^2 [q^2 |X - S_0 u^2| + 2q(1 - q) |X - S_0 u d| + (1 - q)^2 |X - S_0 d^2|] $
+
+*Numerical example*: Take $X = 95$, $S_0 = 100$, $r = 0.05$, $u = 1.2$, $d = 0.9$. Then $q = (1.05 - 0.90) / (1.20 - 0.90) = 0.5$.
+
+The payoff in each terminal state:
+
+$ C_(u u) = |95 - 144| = 49, quad C_(u d) = C_(d u) = |95 - 108| = 13, quad C_(d d) = |95 - 81| = 14 $
+
+So:
+
+$ pi_C = 1 / 1.05^2 (0.25 dot 49 + 0.5 dot 13 + 0.25 dot 14) approx 20.18 $
