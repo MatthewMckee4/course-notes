@@ -393,90 +393,95 @@ Strings are Unicode text encoded in UTF-8 format
   - Prevents most memory leaks
 - Rules around references and ownership prevent data races in concurrent code
 
+// 3e.
+
+== Ownership in Rust
+
+Systems programs care about ownership of resources to control memory management, close files, and to model state machines.
+The programmer maintains a mental model of what part of the code owns each resource, i.e. what function is responsible for calling `free()`, `close()`, etc.
+Garbage collected languages still require understanding of ownership, but make `free()` automatic when lifetime ends.
+C++ and Python tie resource ownership to scoping, giving automatic resource clean-up at end of scope.
+
+=== Ownership Fundamentals
+
+Rust tracks ownership of data, enforcing that every value has a single owner.
+Function calls explicitly manage ownership of values via three patterns:
+- *Consume*: take explicit ownership of a value passed by value. No longer accessible to caller; freed at end of function.
+- *Borrow*: take a reference to a value (`&Resource`). Ownership remains with the caller.
+- *Return*: pass ownership of return value to caller.
+
+=== Returning Ownership of Data
+
+Returning data from a function causes it to outlive the region in which it was created.
+Ownership of return value is *moved* to the calling function.
+- The value is moved into the calling function's stack frame.
+- Original value, in the called function's stack frame, is deallocated.
+- Allows us to return a `Box<T>` that references a heap allocated value of type `T`: the `Box<T>` is moved, but the referenced `T` on the heap is not.
+- Variables not returned by a function go out of scope and are reclaimed. The heap-allocated `T` is deallocated when the `Box<T>` goes out of scope, i.e. the compiler generates the equivalent of a call to `free()`.
+
+=== No Dangling References
+
+The lifetime of a local variable ends when the function returns. Rust prevents returning a reference to an object that doesn't exist (error E0106: missing lifetime specifier). Equivalent C code will compile but crash at runtime.
+
+=== No Use-After-Free
+
+Once memory is freed, it cannot be accessed. Explicit `drop()` in Rust is equivalent of `free()` in C.
+Attempting to use a value after it has been moved results in a compile error (error E0382: use of moved value). Equivalent C program compiles and runs, but has undefined behaviour.
+
+=== Borrowing Data
+
+Functions can take *references* to data. This does *not* move ownership of the data, it borrows it -- moves ownership of the reference, not the referenced value.
+Functions can also return references to borrowed input parameters, since the parameters are borrowed from the calling function.
+
+=== Safe Borrowing
+
+Rust has two kinds of pointer:
+- `&T` -- shared reference to immutable object
+- `&mut T` -- unique reference to mutable object
+
+The compiler and runtime control reference ownership and use:
+- An object of type `T` can be referenced by one or more references of type `&T`, or by exactly one reference of type `&mut T`, but not both.
+- Cannot get an `&mut T` reference to data of type `T` that is marked as immutable.
+- Existence of an `&T` reference to mutable data makes the data immutable.
+
+This prevents iterator invalidation: the iterator requires an `&T` reference, so other code can't get a mutable reference to the contents to change them.
+
+=== Benefits and Limitations
+
+*Benefits:*
+Type system tracks ownership, turning run-time bugs into compile-time errors.
+- Prevents use-after-free bugs
+- Prevents iterator invalidation
+- Prevents race conditions with multiple threads -- borrowing rules prevent two threads from getting references to a mutable object
+Efficient run-time behaviour:
+- Generates exactly the same code as a correctly written program using `malloc()` and `free()`
+- Timing and memory usage are as predictable as a correct C program -- deterministic when memory allocated and freed
+
+*Limitations:*
+- Can't express cyclic data structures (e.g. doubly linked list in safe Rust). Many languages offer an escape hatch from the ownership rules (e.g. raw pointers and `unsafe` in Rust).
+- Can't express shared ownership of mutable data. Rust has `RefCell<T>` that dynamically enforces the borrowing rules, failing a run-time exception if there could be a race.
+- Forces consideration of object ownership early and explicitly.
+
+=== Rust Key Points
+
+Rust is largely a traditional systems programming language: basic types, control flow, and data structures are very familiar.
+Key innovations in a systems language:
+- Enumerated types and pattern matching (`Option` and `Result`)
+- Structure types and traits as an alternative to object oriented programming
+- Multiple reference types and ownership
+
+Little in Rust is novel. Rust adopts ideas from research languages:
+- Syntax is a mixture of C and Standard ML
+- Basic data types are heavily influenced by C and C++
+- Enumerated types and pattern matching adapted from Standard ML
+- Traits adapted from Haskell type classes
+- References and ownership rules extend ideas originally developed in Cyclone
+
 #pagebreak()
-
-= Type-based Modelling and Design
-
-// 4a.
-
-== Type-based Development
-
-In a type driven development approach, rather than structuring code around control flow, you structure it first around the types.
-
-First, define the types, think of the types you need to represent the problem domain.
-- Data exchanged
-- Data describing endpoints, interactors
-- States
-
-Make the behaviour obvious from the types, so the types constrain behaviour.
-- Use `Username` rather than `String` for user names
-- Encode states as types and state transitions as functions
-
-Types and functions provide a model of the system.
-- Interactive design using the compiler to check consistency
-
-// 4b.
-
-== Design Patterns
-
-Represent units in the type system if numbers have extra context involved.
-
-We can think of an example where we are working with degrees in celsius and fahrenheit.
-We can naively just represent these with float values. This can easily result in incorrect calculations.
-We should instead create new types that wrap float values.
-
-```rust
-struct Celsius(f32);
-struct Fahrenheit(f32);
-
-// impl add for each
-```
-
-Wrapping values inside struct adds zero runtime overhead in Rust.
-- No information is added to the struct, it's just a wrapper around the float value
-- Optimiser will recognise that the code collapses down to operations on primitive types, and generate code to do so
-- All the additions are a compile-time model of the way the data is used, they don't affect the compiled code
-- Equivalent C++ code has the same properties
-
-*Typing Anti-Patterns*
-
-Method parameters that are strings rather than some more appropriate type.
-Use `enum` to represent values that can be one of several alternatives.
-
-Use of boolean flags. enums should be used instead of boolean flags.
-
-Use the type system to describe features of the system design, so the compiler can check for correctness
-There is an up-front cost: you must define the types
-- The benefit is that fixing compilation errors is easier than fixing silent data corruption
-  - For small systems, the cost may outweigh the benefit
-  - For large systems, compiler enforced consistency checks due to use of types can be a significant win
-
-// 4c.
-
-== State Machines
-
-System behaviour modelled as a finite state machine comprising:
-- States that reflect the status of the system
-- Events that trigger transitions between states
-- State variables that hold system configuration
-
-We can use enums to represent states and events, and structs to hold state variables. This is compact, makes states and events clear and has a clear states and transition table via pattern matching.
-Relies on a type system with more powerful enums.
-
-We can also use a struct based approach where struct methods are used to transition between states and update state variables. Less explicit as transitions are encoded in the return type of methods.
-- Define a struct representing each state
-- Model an event as a method call on a struct
-- Model state transitions by returning a struct representing the new state
-
-// 4d.
-
-== Ownership
-
-Rust tracks ownership of data - enforces that every value has a single owner.
 
 = Resource Ownership and Memory Management
 
-// 5a.
+// 4a.
 
 == Memory
 
@@ -505,7 +510,7 @@ grid.cell(image("assets/layout-of-a-process-in-memory.png", width: 70%))
 *BSS Segment* reserved for uninitialised `static` global variables.
 - "block started by symbol"
 - Initialised to 0 by runtime when the program loads
-- Size know at compile time
+- Size known at compile time
 - In older OS, the program and data always started at a fixed location at the start of memory, in more modern system they are both started at the start of memory, but the starting address is randomised as a security measure.
   It makes it harder for code executed as a buffer overflow attack to call into other parts of the program, since it can't be located in memory.
 
@@ -561,7 +566,7 @@ Operating system *kernel* resides at the top of the address space.
   - Kernel can read/write memory of user processes.
 
 
-// 5b.
+// 4b.
 
 == Automatic Memory Management
 
@@ -601,7 +606,7 @@ There are still some costs.
 
 Reference counting tends to be for large, long-lived data.
 
-// 5c.
+// 4c.
 
 === Region-based Memory Management
 
@@ -621,8 +626,6 @@ This is RAII.
 Ownership of return value is moved to the calling function, the value is moved into the calling function's stack frame.
 
 This prevents common lifetime errors (dangling references).
-
-// 5d.
 
 == Resource Management
 
@@ -653,7 +656,7 @@ Deterministic cleanup. You can implement the `Drop` trait in Rust to run some co
 
 = Garbage Collection
 
-// 6a.
+// 5a.
 
 // Questions
 // 1. How often does garbage collection happen on average?
@@ -715,7 +718,7 @@ Objects located where they fit, rather than where maintains locality of referenc
 
 === Mark-Compact Collector
 
-This is a three phase algorithm. First, mark live objects, then reclaim unreachable objects (just like mark-sweep), and finally, compace live objects,
+This is a three phase algorithm. First, mark live objects, then reclaim unreachable objects (just like mark-sweep), and finally, compact live objects,
 moving them to leave contiguous free space.
 
 *Advantages*
@@ -726,7 +729,7 @@ Allocation is very fast, always allocating from the start of the free block, so 
 *Disadvantages*
 
 Collection is slow, due to moving objects in memory, and time taken is unpredictable.
-Collection has poor locality of reference. Colelction is complex, needs to update all pointers to moved objects.
+Collection has poor locality of reference. Collection is complex, needs to update all pointers to moved objects.
 
 === Copying Collectors
 
@@ -740,15 +743,15 @@ The program only uses half of the heap. Then the collector runs and copies into 
 The Cheney algorithm, breadth-first copying.
 A queue of objects is maintained, start with looking at the root set of objects.
 Any unprocessed objects they reference are added to the end of the queue.
-The object in the queue is then copied into the other esmispace, and the original is marked as having been processed.
-One the end of the queue is reached, all live obejcts have been copied.
+The object in the queue is then copied into the other semispace, and the original is marked as having been processed.
+One the end of the queue is reached, all live objects have been copied.
 
-The time taken depends on te amount of data copied which depends on the number of live objects.
+The time taken depends on the amount of data copied which depends on the number of live objects.
 Collection only happens when a semispace is full.
 
 If most objects die young, can trade-off collection time vs memory usage by increasing the size of the semi spaces.
 
-// 6b.
+// 5b.
 
 == Generational and Incremental Garbage Collection
 
@@ -759,7 +762,7 @@ Statistically, the longer an object has lived, the longer it is likely to live.
 
 === Copying Generational Collectors
 
-In a generational garbage collector, the heap is split into regions for long-lived and youg objects.
+In a generational garbage collector, the heap is split into regions for long-lived and young objects.
 Regions holding young objects are garbage collected more frequently.
 Objects are moved to the region for long-lived objects if they're still alive after several collections.
 More sophisticated approaches may have multiple generations, although the gains diminish rapidly with increasing numbers of generations.
@@ -774,7 +777,7 @@ long-lived objects are collected.
 For references from long-lived objects to young objects, it is a bit more problematic, since this requires scan of long-lived generation
 to detect if we should collect it or not. We could store an indirection table (pointers to pointers) for references from long-lived
 generation to young generation. The indirection table forms part of the root set of the younger generation.
-Moving objects in younger generation requires updating indirecatoin table, but not long-lived objects.
+Moving objects in younger generation requires updating indirection table, but not long-lived objects.
 
 This approach is very widely used. It can be very efficient
 
@@ -820,26 +823,26 @@ the collector, the collection may never complete.
 
 Resolve by forcing a complete stop-the-world collection is free memory is exhausted, or after a certain amount of time.
 
-// 6c.
+// 5c.
 
 == Practical Factors
 
 Real time collectors built from incremental collectors. Schedule an incremental collector as a periodic task.
-Runtime allocated determins amount of garbage that can be collected in each period.
+Runtime allocated determines amount of garbage that can be collected in each period.
 The amount of garbage that can be collected can be measured: how fast can the collector scan memory.
 
 === Memory Overheads
 
-Garbage collection trades eas-of-use for predictability and overhead.
+Garbage collection trades ease-of-use for predictability and overhead.
 
 Garbage collected programs will use significantly more memory than correctly written programs with manual memory management.
 Many copying collectors maintain two semispaces, so double memory usage. But many programs with manual memory management are not correct.
 
 === Garbage Collection for Weakly-typed Languages
 
-Collectors rely on being able to identify and follow pointers, to determine what is a love object, they rely on strongly typed languages.
+Collectors rely on being able to identify and follow pointers, to determine what is a live object, they rely on strongly typed languages.
 Weakly typed languages, such as C, can cast any integer to a pointer, and perform pointer arithmetic.
-It is difficult, but not impossible, you need to be concervative such that you treat anything that could be a pointer, as a pointer.
+It is difficult, but not impossible, you need to be conservative such that you treat anything that could be a pointer, as a pointer.
 
 Strongly typed, but dynamic languages would not face the same issues.
 
@@ -852,7 +855,7 @@ Garbage collection imposes run-time costs and complexity, but simpler to write c
 
 = Concurrency
 
-// 7a.
+// 6a.
 
 == Implications of Multicore Systems
 
@@ -863,30 +866,29 @@ And memory is not always equally accessible to all processor cores.
 
 Memory access is no longer uniform. Different processor cores have a different view of the contents of memory, due to caching.
 
-To ensure programs work protably accros different ypes of processors, programming languages define their memory model.
-They need to define what gaurantees the language provides around concurrent memory accesses, and the compiler can turn this into machine code.
+To ensure programs work portably across different types of processors, programming languages define their memory model.
+They need to define what guarantees the language provides around concurrent memory accesses, and the compiler can turn this into machine code.
 
 === Memory Models: Java
 
 Changes to a field are seen in program order within a thread.
 If a single threads writes a value to memory and later reads it back and provided no other threads wrote to the same location,
 then the value that the thread reads will be the same as it wrote.
-Changes to a field made by one threads are visible to another thread as follows:
+Changes to a field made by one thread are visible to another thread as follows:
 
-If a `volitile` field is changes, that change is done atomically and immediately becomes visible to other threads.
+If a `volatile` field is changes, that change is done atomically and immediately becomes visible to other threads.
 
 If a `non-volatile` field is changed while holding a lock, and that lock is then released by the writing threads and acquired by the reading
 thread, then the change becomes visible to the reading threads.
 
 Access to all 32-bit fields is atomic, this does not hold for `long` or `double` fields which are 64 bits in size.
 
-// TODO: Add more inforamation here.
 
 === Memory Models: Others
 
 Java is unusual in having such a clearly specified memory model.
 
-Other languages are less well specified, running the risk that new processor designs can subtly break previuosly working programs.
+Other languages are less well specified, running the risk that new processor designs can subtly break previously working programs.
 
 C and C++ have historically had very poorly specified memory models.
 
@@ -905,7 +907,7 @@ How this is done depends on the language.
 In Java, the locks are provided by the synchronized methods and statements.
 In C, they are provided by the pthreads library, in the form of `pthreads_mutex_lock` and `pthread_mutex_unlock`.
 
-Outside of locked regions there are very few gaurantees about access to shared memory.
+Outside of locked regions there are very few guarantees about access to shared memory.
 
 === Limitations of Lock-bases Concurrency
 
@@ -932,9 +934,11 @@ Concurrency is increasingly important.
 
 There are alternatives to lock base concurrency: transactions and message passing.
 
+// 6b.
+
 == Managing Concurrency Using Transactions
 
-An alternateive to locking is to use atomic transactions.
+An alternative to locking is to use atomic transactions.
 Atomic actions either succeed or fail, and intermediate states are not visible to other threads.
 
 The runtime must ensure actions have the usual ACID properties:
@@ -982,7 +986,7 @@ Haskell has a great way of modelling this with the type system, via the IO Monad
 
 Code that has side effects must be controlled.
 
-FUnctions that only perform memory actions can be executed normally, provided transaction log tracks the memory
+Functions that only perform memory actions can be executed normally, provided transaction log tracks the memory
 access and validates them before the transaction commits, and can potentially roll them back.
 Tracking memory actions can be done by language runtime (STM; software transactional memory), or via hardware
 enforced transaction memory behaviour and rollback.
@@ -1024,15 +1028,13 @@ atomic :: STM a -> IO a
 context of an atomic block that provides such an action
 - I/O prohibited within transactions, since operations in atomic {…} don’t have access to I/O context
 
-// Look more into this lecture.
-
-// 7c.
+// 6c.
 
 == Message Passing Systems
 
 The goal of a message passing system is that the system is structured as a set of communication processes, actors, with
 no mutable state. Message are required to be immutable.
-Some systems use linear types to ensure messages are not references after they are sent, allowing mutable data to be safely
+Some systems use linear types to ensure messages are not referenced after they are sent, allowing mutable data to be safely
 transferred.
 
 Implementation of such a system is usually built with shared memory and locks.
@@ -1050,7 +1052,7 @@ Synchronous or asynchronous. Statically or dynamically typed. Direct or indirect
 
 ==== Interaction Models
 
-Message passing can incolve rendezvous between sender and receiver.
+Message passing can involve rendezvous between sender and receiver.
 A synchronous message passing model, sender waits for receiver.
 
 Alternatively, communication may be asynchronous. The sender continues immediately after sending a message.
@@ -1059,7 +1061,7 @@ Message is buffered for later delivery to the receiver.
 ==== Typed Communication
 
 Statically-typed communication, used to explicitly define the types of message that can be transferred.
-Compiler checks that the reciever can handle all messages it can receive.
+Compiler checks that the receiver can handle all messages it can receive.
 
 Dynamically-typed communication, receiver uses pattern matching on the received message types to determine
 if it can respond to the message.
@@ -1071,7 +1073,7 @@ Are messages sent between named processes or indirectly via channel?
 Some systems directly send messages to actors, each of which has its own mailbox, others use explicit
 channels, with messages being sent indirectly to a mailbox via a channel.
 
-Explicit channels require more plumbing, bit the extra level of indirection between sender and receiver
+Explicit channels require more plumbing, but the extra level of indirection between sender and receiver
 may be useful for evolving systems.
 Explicit channels are a natural place to define a communications protocol for statically typed
 messages.
@@ -1151,7 +1153,7 @@ Checking happens at runtime. Robust framework for error handling via separate pr
 In Rust, we have static typing, so we can be sure of the type of the result.
 Requires more plumbing.
 
-// 7d.
+// 6d.
 
 == Race Conditions
 
@@ -1164,7 +1166,7 @@ Difficult to predict exact timing of program behaviour.
 === Message Races
 
 In message passing systems, messages can be received from multiple senders.
-Runtime ensure receiver processes messages sequentiall, in the order they are received, but order of receipt can vary due
+Runtime ensure receiver processes messages sequentially, in the order they are received, but order of receipt can vary due
 to system and network load, external events.
 
 A *race condition* occurs when messages arrive in an unpredictable order.
@@ -1196,12 +1198,12 @@ Assuming immutable message or linear types, message passing has efficient implem
 - Pass pointer to data in shared memory systems
 - Neither case needs to consider shared access to message data
 
-Garbage collected systems often allocate nmessages from a shared exchange heap.
+Garbage collected systems often allocate messages from a shared exchange heap.
 This is expensive to collect, since data in exchange heap is owned by multiple threads.
-Though, we can use a per-preocess heap that can be collected independently and concurrently,
+Though, we can use a per-process heap that can be collected independently and concurrently,
 ensuring good performance.
 
-// 7e.
+// 6e.
 
 == Robustness of Message Passing Systems
 
@@ -1258,6 +1260,8 @@ of the subsystem, comparing results to pick the majority correct answer.
 // https://dl.acm.org/doi/10.1145/1810891.1810910
 
 = Coroutines and Asynchronous Programming
+
+// 7a.
 
 == Motivation
 
@@ -1448,3 +1452,213 @@ Do you *really* need asynchronous I/O?
 - Unless you're doing something very unusual, you can likely just spawn a thread, or use a pre-configured thread pool, and perform blocking I/O -- even if this means spawning thousands of threads
 
 Asynchronous I/O *can* give a performance benefit, but this benefit will usually be small. Choose asynchronous programming because you prefer the programming style, accepting that it will often not significantly improve performance.
+
+#pagebreak()
+
+= Type-based Modelling and Design
+
+// 8a.
+
+== Type-driven Development
+
+In a type-driven development approach, rather than structuring code around control flow, you structure it first around the types.
+
+The process is: define types, then write functions, then refine.
+
+First, define the types needed to represent the problem domain:
+- Data exchanged
+- Data describing endpoints, interactors
+- Properties of the data and the entities
+- States
+
+Make the behaviour obvious from the types, so the types constrain behaviour.
+- Use `Username` rather than `String` for user names
+- Encode states as types and state transitions as functions
+
+Types and functions provide a model of the system.
+- Interactive design using the compiler to check consistency
+- The compiler becomes a model checking tool: *correct by construction*
+
+=== State as Types
+
+Consider an email connection that requires authentication before use.
+We can model the connection states as distinct types:
+
+```rust
+struct UnauthenticatedConnection { /* ... */ }
+struct AuthenticatedConnection { /* ... */ }
+
+fn connect(server: &str) -> UnauthenticatedConnection { /* ... */ }
+fn authenticate(conn: UnauthenticatedConnection, creds: &Credentials)
+    -> AuthenticatedConnection { /* ... */ }
+fn send_email(conn: &AuthenticatedConnection, email: &Email) { /* ... */ }
+```
+
+State transitions are modelled as functions that consume one type and return another.
+The type system enforces that `send_email` can only be called with an `AuthenticatedConnection`, making it impossible to send email without authenticating first.
+
+// 8b.
+
+== Design Patterns
+
+=== Numeric Types
+
+The Mars Climate Orbiter was lost because one team used imperial units and another used metric, with no type distinction between them.
+
+Represent units in the type system if numbers have extra context involved.
+
+```rust
+struct Celsius(f32);
+struct Fahrenheit(f32);
+
+impl Add for Celsius {
+    type Output = Celsius;
+    fn add(self, other: Celsius) -> Celsius {
+        Celsius(self.0 + other.0)
+    }
+}
+```
+
+We can also define conversion between units:
+
+```rust
+impl Add<Fahrenheit> for Celsius {
+    type Output = Celsius;
+    fn add(self, other: Fahrenheit) -> Celsius {
+        Celsius(self.0 + (other.0 - 32.0) * 5.0 / 9.0)
+    }
+}
+```
+
+Some operations make sense for some types but not others. For example, `Ord` (ordering) makes sense for `Celsius`, but not for `UserID`, even though both wrap a number.
+
+Wrapping values inside struct adds zero runtime overhead in Rust.
+- No information is added to the struct, it's just a wrapper around the float value
+- Optimiser will recognise that the code collapses down to operations on primitive types, and generate code to do so
+- All the additions are a compile-time model of the way the data is used, they don't affect the compiled code
+- Equivalent C++ code has the same properties
+
+=== `Option<T>`
+
+`Option<T>` represents a value that may or may not be present: `Some(T)` or `None`.
+
+Used for function return values when a result may not exist (e.g. looking up an item in a database).
+Also used in struct fields to represent optional data (e.g. an optional extension header in an RTP packet).
+
+The compiler enforces that both `Some` and `None` cases are handled, preventing null pointer dereferences.
+
+=== `Result<T, E>`
+
+`Result<T, E>` represents an operation that can succeed (`Ok(T)`) or fail (`Err(E)`).
+
+The `?` operator provides early return on error, propagating the error to the caller:
+
+```rust
+fn read_file(path: &str) -> Result<String, io::Error> {
+    let mut file = File::open(path)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    Ok(contents)
+}
+```
+
+This is safer than C's approach of using signal values (e.g. returning -1 or NULL to indicate error), where checking is optional and easily forgotten.
+
+=== Typing Anti-Patterns
+
+*String typing:* Method parameters that are strings rather than some more appropriate type.
+Use `enum` to represent values that can be one of several alternatives.
+
+*Boolean flags:* Use of boolean flags for mode selection. For example, `File.Open(path, true, false, true)` is unclear. Use enums instead:
+
+```rust
+enum FileMode { Read, Write, Append }
+enum LockMode { Shared, Exclusive }
+
+fn open(path: &str, mode: FileMode, lock: LockMode) { /* ... */ }
+```
+
+Use the type system to describe features of the system design, so the compiler can check for correctness.
+There is an up-front cost: you must define the types.
+- The benefit is that fixing compilation errors is easier than fixing silent data corruption
+  - For small systems, the cost may outweigh the benefit
+  - For large systems, compiler enforced consistency checks due to use of types can be a significant win
+
+// 8c.
+
+== State Machines
+
+System behaviour modelled as a finite state machine comprising:
+- *States* that reflect the status of the system
+- *Events* that trigger transitions between states
+- *State variables* that hold system configuration
+
+=== Enum-based Approach
+
+Represent states and events as enums, and write a transition function using pattern matching:
+
+```rust
+enum ApcState { Idle, Running, Paused, Error }
+enum ApcEvent { Start, Pause, Resume, Stop, Fault }
+
+fn next(state: ApcState, event: ApcEvent) -> ApcState {
+    match (state, event) {
+        (ApcState::Idle,    ApcEvent::Start)  => ApcState::Running,
+        (ApcState::Running, ApcEvent::Pause)  => ApcState::Paused,
+        (ApcState::Running, ApcEvent::Fault)  => ApcState::Error,
+        (ApcState::Paused,  ApcEvent::Resume) => ApcState::Running,
+        (ApcState::Running, ApcEvent::Stop)   => ApcState::Idle,
+        (ApcState::Paused,  ApcEvent::Stop)   => ApcState::Idle,
+        (state, _) => state,
+    }
+}
+```
+
+A state machine struct holds the current state and runs an event loop:
+
+```rust
+struct ApcStateMachine { state: ApcState }
+
+impl ApcStateMachine {
+    fn run(&mut self, events: Vec<ApcEvent>) {
+        for event in events {
+            self.state = next(self.state, event);
+        }
+    }
+}
+```
+
+This is compact, makes states and events clear, and has a clear transition table via pattern matching.
+Relies on a type system with expressive enums.
+
+=== Struct-based Approach
+
+Define a struct representing each state. Model an event as a method call on a struct. Model state transitions by returning a struct representing the new state:
+
+```rust
+struct Idle;
+struct Running;
+struct Paused;
+
+impl Idle {
+    fn start(self) -> Running { Running }
+}
+
+impl Running {
+    fn pause(self) -> Paused { Paused }
+    fn stop(self) -> Idle { Idle }
+}
+
+impl Paused {
+    fn resume(self) -> Running { Running }
+    fn stop(self) -> Idle { Idle }
+}
+```
+
+Transitions are encoded in the return type of methods. Ownership enforces that the old state is consumed on transition: calling `start()` on an `Idle` value consumes it, so it can no longer be used as `Idle`.
+
+=== Comparison
+
+*Enum-based:* Compact, clear transition table via pattern matching, all transitions visible in one function. Needs expressive enums.
+
+*Struct-based:* Ownership enforces that invalid transitions cannot occur (e.g. can't call `pause()` on `Idle`). Transition table is less explicit, spread across multiple `impl` blocks.
