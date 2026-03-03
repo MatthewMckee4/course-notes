@@ -18,6 +18,10 @@ Financial Mathematics:
   - changed-files:
       - any-glob-to-any-file: notes/year_4/maths/financial_mathematics/**
 
+Functional Analysis:
+  - changed-files:
+      - any-glob-to-any-file: notes/year_4/maths/functional_analysis/**
+
 Github Actions:
   - changed-files:
       - any-glob-to-any-file: .github/**
