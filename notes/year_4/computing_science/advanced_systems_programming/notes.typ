@@ -1662,3 +1662,147 @@ Transitions are encoded in the return type of methods. Ownership enforces that t
 *Enum-based:* Compact, clear transition table via pattern matching, all transitions visible in one function. Needs expressive enums.
 
 *Struct-based:* Ownership enforces that invalid transitions cannot occur (e.g. can't call `pause()` on `Idle`). Transition table is less explicit, spread across multiple `impl` blocks.
+
+#pagebreak()
+
+= Security Considerations
+
+// 9a.
+
+== Memory Safety
+
+A *memory safe* language ensures that the only memory accessed is that owned by the program, and that such access is consistent with the declared type of the data. The program can access memory through its global and local variables, or through explicit references to them. It can access heap memory it allocated via an explicit reference. All accesses obey the type rules of the language.
+
+*Memory safe* languages include Java, Scala, C\#, Rust, Go, Python, Ruby, Haskell, Erlang, Ada, Pascal, etc.
+*Memory unsafe* languages include C, C++, and Objective-C.
+
+Memory unsafe languages fail to prevent accesses that break the type rules. C and C++ declare such behaviour to be *undefined*, but do nothing to prevent it from occurring.
+
+=== Undefined Behaviour in C and C++
+
+Types of memory unsafe behaviour in C and C++:
+
++ *Type unsafe allocation* -- `malloc()` does not check if the amount of memory allocated matches the size required by the type. A memory safe language requires the allocation size to match the type at compile time. Allocation should be "allocate enough memory for an object of type T and return a reference-to-T", not "allocate n bytes and return an untyped reference".
+
++ *Use before allocation* -- using a pointer before the memory it references has been allocated. Memory safe languages require that all references be initialised and refer to valid data.
+
++ *Use after explicit `free()`* -- accessing memory that has been explicitly freed. Automatic memory management eliminates this class of bug.
+
++ *Use after implicit free* -- returning a reference to stack-allocated memory that is used after the stack frame has been destroyed. Automatic memory management eliminates this class of bug.
+
++ *Use of memory as the wrong type* -- casting from `char *` buffers to more specific types (e.g. a `struct` representing a network packet format). Efficient (no memory copies) but unsafe since it makes assumptions about `struct` layout in memory and size of the block being cast. Memory safe languages disallow arbitrary casts; write conversion functions instead.
+
++ *Use of string functions on non-string values* -- C strings are zero terminated, but functions like `read()` do not add a terminator, leading to buffer overflow. Memory safe languages apply string bounds checks, resulting in a runtime exception rather than undefined behaviour.
+
++ *Heap allocation overflow* -- copying data into a heap-allocated buffer without bounds checking (e.g. `strcpy(buf, argv[1])` into a fixed-size `malloc`'d buffer). Memory safe languages apply bounds checks to heap allocated memory.
+
++ *Array bounds overflow* -- writing past the end of a stack-allocated array. Memory safe languages apply array bounds checks.
+
++ *Arbitrary pointer arithmetic* -- `sizeof()` returns size in bytes, but arithmetic on `int *` pointers is on pointer-sized values; bounds checks can be too lax. Memory safe languages disallow arbitrary pointer arithmetic.
+
++ *Use of uninitialised memory* -- memory allocated with `malloc()` has undefined contents. Memory safe languages require memory to be initialised, or mandate that the runtime fills with a known value.
+
++ *Use of memory via dangling pointer* -- accessing memory through a pointer that no longer refers to valid data.
+
++ *Use of memory via `null` pointer* -- a lookup may fail and return `null`; dereferencing without checking causes a crash. Memory safe languages either fail safely with an exception or use `Option<>` types to enforce the null pointer check is done.
+
+=== Impact of Memory Unsafe Languages
+
+Lack of memory safety breaks the machine abstraction. With luck, the program crashes with a segmentation violation. If unlucky, memory unsafe behaviour corrupts other data owned by the program: undefined behaviour occurs, the result cannot be predicted without knowing the precise layout of the program in memory, it is difficult to debug, and it is a *potential security risk* since program state can be corrupted to force arbitrary code execution.
+
+=== Security Impact
+
+Half of *all* security vulnerabilities are memory safety violations that should be caught by a modern type system: buffer overflows, memory corruption, treating data as executable code. Use of type-based modelling of the problem domain can help address others by more rigorous checking of assumptions.
+
+Approximately 70% of Microsoft security updates fix bugs relating to unsafe memory usage. This has not significantly changed in over 10 years. We are *not* getting better at writing secure code in memory unsafe languages.
+
+// 9b.
+
+== Parsing and Network Security
+
+=== Remotely Exploitable Vulnerabilities
+
+Writing safe code in unsafe languages is difficult. It is easy to rationalise each individual bug, but people will continue to make mistakes. Remotely exploitable vulnerabilities threaten any networked system. The question is whether there are particular classes of bug that cause such vulnerabilities.
+
+=== Parsing Untrusted Input
+
+The input parser is critical to the security of a networked system. It takes untrusted input from the network and generates validated, strongly typed data structures that are processed by the rest of the code. The parser is the security boundary.
+
+=== The Robustness Principle (Postel's Law)
+
+Traditional guidance when writing networked systems is expressed in Postel's law (RFC 1122): "Be liberal in what you accept, and conservative in what you send."
+
+However, this principle is increasingly seen as inappropriate for today's internet. As Poul-Henning Kamp noted: "Postel lived on a network with all his friends. We live on a network with all our enemies." Being liberal in what you accept increases the attack surface.
+
+=== Defining Legal Inputs and Failure Responses
+
+A parser is a rule-driven automaton. It parses input according to some grammar; if the input does not match the grammar, it fails. The protocol grammar should be *formally specified* in a machine-checkable manner. Define the grammar in as restrictive a manner as possible -- e.g. don't use a Turing-complete parser when a regular expression will suffice. Specify what happens if the input data does not match the grammar: what causes a failure and how is it handled.
+
+=== Generating the Parser
+
+It is difficult to reason about ad-hoc, manually written parsing code. It performs low-level bit manipulation, string parsing, etc., all of which are hard to get correct and tend to be poorly structured.
+
+Rather, *auto-generate the parsing code*:
+- If the input language is regular, use a regular expression
+- If the input language is context free, use a context free grammar
+- If neither of these work, use a more sophisticated parser with minimal computational power
+- Generate strongly typed data structures, with explicit types to identify different data items
+
+Focus on parser correctness and readability. *Parsing performance matters less than security.*
+
+Use existing, well-tested parser libraries. For Rust code, use `nom` (byte-by-byte parser combinator) or `combine`. For C or C++, use `hammer` (parser combinators for binary formats).
+
+The approach is: specify the types into which parsed data is stored, describe the parser using an appropriate formal language, and generate the parser from that language. Parsing is performed first, and either succeeds in its entirety or fails -- the rest of the code uses only safe, pre-parsed data.
+
+=== Designing Parsable Protocols
+
+When designing network protocols, consider ease of parsing:
+- Minimise the amount of state and look-ahead required to parse the data
+- Prefer a predictable, regular grammar to one that saves bits at the expense of complex parsing
+  - Networks get faster, security vulnerabilities remain
+  - The benefit of saving a few bits gets less over time
+  - The benefit of being easy to parse securely remains
+
+// 9c.
+
+== Modern Type Systems and Security
+
+=== Causes of Security Vulnerabilities
+
+Security vulnerabilities are generally caused by persuading a program to do something the programmer did not expect: write past the end of a buffer, treat user input as executable, confuse a permission check, etc. They involve violating an assumption in the code.
+
+Strong typing makes assumptions explicit:
+- Use explicit types rather than generic types
+- Define safe conversion functions
+- Use phantom types where necessary, to apply semantic tags to data
+
+=== Prefer Explicit Types
+
+Vulnerabilities come from inconsistent data processing. For example, passing un-sanitised user-entered data to a function that expects valid SQL. A `StudentName` and an `SqlString` are different; give them different types so the compiler can catch inconsistent usage. Certain characters must be escaped before an arbitrary student name can be safely stored in an SQL database.
+
+If `String` is used everywhere, the programmer must manually check for consistency. This is easy to make mistakes with, and if all the types are the same, the compiler can't help.
+
+=== Convert Data Carefully
+
+Explicit types require type conversions. This enforces security boundaries: untrusted user input must be converted to an escaped, safe, internal form before use. Ensure only legal conversions occur.
+
+=== Phantom Types for Semantic Tags
+
+A *phantom type parameter* is one that doesn't show up at runtime but is checked at compile time. In Rust, a `struct` with no fields has a type but is zero-sized.
+
+Useful as type parameters to add semantic tags to data:
+
+```rust
+struct UserInput;  // As received from the user
+struct Sanitised;  // After HTML codes have been escaped
+
+fn sanitise_html(html: Html<UserInput>) -> Html<Sanitised> {
+    // ...
+}
+```
+
+Also useful to represent states in a state machine, enforcing at compile time that operations only happen in valid states.
+
+=== No Silver Bullet
+
+Memory safety and strong typing won't eliminate security vulnerabilities. But, used carefully, they eliminate certain classes of vulnerability, and make others less likely by making hidden assumptions visible.
