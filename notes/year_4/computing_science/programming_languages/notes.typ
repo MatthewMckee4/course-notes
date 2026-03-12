@@ -602,3 +602,81 @@ For `if L then M else N`:
 + Compile loop body
 + Emit `JUMP l` (jump back to test)
 + Back-patch $p$ to current `pc`
+
+= Native Code Generation (1)
+
+== Why Compile to Native Code
+
+- *Performance*: no interpretation overhead, code runs directly on hardware. Can exploit architecture-specific optimisations.
+- *Bootstrapping*: bytecode interpreters themselves must be written in a compiled language.
+- *Systems programming*: low-level code requiring system calls or inline assembly.
+- *JIT compilers*: can compile hot code to native code based on profiling.
+
+== Virtual Machines vs Physical Machines
+
+Bytecode VMs are stack-based, have simple instruction sets, are portable, but have interpretation overhead.
+
+Native code is register-based, architecture-specific (RISC vs CISC), with no interpretation overhead.
+
+== Compilation Pipeline
+
+Frontend (parsing/typechecking) $arrow.r$ Compilation to IR $arrow.r$ Instruction Selection $arrow.r$ Control Flow Graph $arrow.r$ Liveness Analysis $arrow.r$ Register Allocation.
+
+== Intermediate Representations
+
+It is better to compile to an IR first rather than directly to native code. A classic example is LLVM. This allows many frontends to share the same backend pipeline. Many compilers use multiple IRs.
+
+=== Tree-Based IR
+
+Our IR forms a single tree with two entities: expressions (return a value) and statements (perform side-effects). Labels name program locations for jumps. All flow-control constructs are compiled to explicit labels and jumps.
+
+*IR Expressions:*
+- `Local(var)`: reference to a local variable
+- `Name(labelName)`: reference to a code location
+- `Const(n)`: integer constant
+- `BinOp(op, e1, e2)`: binary operation on subexpressions
+
+*IR Statements:*
+- `Seq(s1, s2)`: s1 followed by s2
+- `Label(labelName)`: define a named location
+- `Move(e1, e2)`: assign e2 to the variable in e1
+- `Jump(e)`: unconditional jump
+- `CJump(e, l1, l2)`: if e is true jump to l1, else l2
+- `Return(e)`: return expression to caller
+
+=== Translating Fun to IR
+
+Expressions translate directly: integer constants to `Const(n)`, `true`/`false` to `Const(1)`/`Const(0)`, binary operators recursively to `BinOp`. Assignments become `Move` instructions.
+
+*Conditionals:* generate labels for thenBlock, elseBlock, and afterBlock. Compile the test as a `CJump` to thenBlock or elseBlock, and emit an unconditional `Jump` to afterBlock at the end of thenBlock.
+
+*While loops:* generate labels for whileCond, bodyBlock, and afterWhile. Compile the test as a `CJump` to bodyBlock or afterWhile. Emit an unconditional `Jump` back to whileCond at the end of the body.
+
+=== Linearisation
+
+Most generated IR is a right-leaning tree of `Seq` nodes. Linearisation flattens this into a sequence of non-`Seq` instructions.
+
+== Three-Address Code
+
+Three-address code breaks complex expressions into smaller assignments to temporary variables. Each assignment has at most one operation on variables or values. Instructions: `v <- e` (assign), `jump label`, `jump if v label`, `return v`.
+
+For example, `a = (b + c) * (d - e)` becomes:
+```
+t1 <- b + c
+t2 <- d - e
+a <- t1 * t2
+```
+
+== Basic Blocks
+
+A *basic block* is a straight-line sequence of instructions where:
+- Other blocks can only jump to the first instruction
+- There is only one (potentially conditional) jump at the end
+- If a conditional jump is not taken, control falls through to the next block
+
+== Control-Flow Graphs
+
+A *control-flow graph* (CFG) represents the control flow of a program:
+- Each node is a basic block
+- Each edge is a jump (explicit, conditional, or fall-through)
+- One BB is marked as entry, one as exit

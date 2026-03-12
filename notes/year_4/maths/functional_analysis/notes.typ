@@ -213,7 +213,7 @@ _If $X$ is finite dimensional, every linear operator on $X$ is bounded._
 
 *(b)* _If $T$ is continuous at a single point, it is continuous everywhere._
 
-*Proof of (a).* If $T$ is bounded, then $||T x - T x_0|| = ||T(x - x_0)|| <= ||T|| ||x - x_0|| < epsilon$ whenever $||x - x_0|| < epsilon / ||T||$. Conversely, if $T$ is continuous at $x_0$, there is $delta > 0$ with $||T x - T x_0|| <= epsilon$ for $||x - x_0|| <= delta$. For any $y != 0$, set $x = x_0 + (delta / ||y||) y$. Then $||T y|| <= (epsilon / delta) ||y||$. $square$
+*Proof of (a).* If $T$ is bounded, then $||T x - T x_0|| = ||T(x - x_0)|| <= ||T|| ||x - x_0|| < epsilon$ whenever $||x - x_0|| < epsilon / (||T||)$. Conversely, if $T$ is continuous at $x_0$, there is $delta > 0$ with $||T x - T x_0|| <= epsilon$ for $||x - x_0|| <= delta$. For any $y != 0$, set $x = x_0 + (delta / (||y||)) y$. Then $||T y|| <= (epsilon / delta) ||y||$. $square$
 
 === 2.7-10 Corollary
 
@@ -338,7 +338,7 @@ Equality iff ${x, y}$ is linearly dependent.
 $ ||x + y|| <= ||x|| + ||y|| $
 Equality iff $y = 0$ or $x = c y$ with $c >= 0$.
 
-*Proof of (a).* For $y != 0$, choose $alpha$ with $overline(alpha) = chevron.l y, x chevron.r / chevron.l y, y chevron.r$. Then $0 <= ||x - alpha y||^2 = ||x||^2 - |chevron.l x, y chevron.r|^2 / ||y||^2$. $square$
+*Proof of (a).* For $y != 0$, choose $alpha$ with $overline(alpha) = (chevron.l y, x chevron.r)  / (chevron.l y, y chevron.r)$. Then $0 <= ||x - alpha y||^2 = ||x||^2 - |chevron.l x, y chevron.r|^2 / (||y||^2)$. $square$
 
 === 3.2-2 Lemma (Continuity of inner product)
 
@@ -368,11 +368,11 @@ so $(y_n)$ is Cauchy and converges to $y in M$ with $||x - y|| = delta$. Uniquen
 
 === 3.3-2 Lemma (Orthogonality)
 
-_If $M = Y$ is a complete subspace, then $z = x - y perp Y$._
+_Let $Y$ be a complete subspace of an inner product space $X$, and let $x in X$ with $y$ the minimizing vector from 3.3-1. Then $z = x - y perp Y$._
 
 === 3.3-3 Definition (Direct sum)
 
-$X = Y plus.o Z$ if each $x in X$ has a unique decomposition $x = y + z$ with $y in Y$, $z in Z$.
+Let $Y, Z$ be subspaces of $X$ with $Y inter Z = {0}$. Then $X = Y plus.o Z$ if each $x in X$ has a unique decomposition $x = y + z$ with $y in Y$, $z in Z$.
 
 === Orthogonal Complement
 
