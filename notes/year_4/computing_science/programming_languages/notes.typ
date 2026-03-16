@@ -680,3 +680,116 @@ A *control-flow graph* (CFG) represents the control flow of a program:
 - Each node is a basic block
 - Each edge is a jump (explicit, conditional, or fall-through)
 - One BB is marked as entry, one as exit
+
+= Native Code Generation (2)
+
+== Liveness Analysis
+
+The IR and three-address code assume an infinite number of registers, but CPUs only have a limited number. We can re-use a register for two separate variables as long as the variables are not "in use" at the same time. Liveness analysis gives us the information to allocate variables to physical registers.
+
+=== Liveness Within a Basic Block
+
+A variable is *live* at a location if it may be inspected at a later point. We want to know the range of locations between when a variable is assigned and when it is last used. Variables with non-overlapping liveness ranges can be assigned to the same register.
+
+=== Liveness with Control Flow
+
+With control flow (e.g. loops), liveness ranges can span across jumps. A variable may be live on paths that loop back to its use site. Since basic blocks have multiple instructions and no intermediate control flow, we can group instructions and compute liveness on basic blocks directly.
+
+=== Flow Graph Definitions
+
+- A node has *out-edges* that lead to *successor nodes*: $"succ"(n)$ is the set of successors of node $n$.
+- A node has *in-edges* that come from *predecessor nodes*: $"pred"(n)$ is the set of predecessors of node $n$.
+- An assignment to a variable in a node *defines* that variable: $"def"(n)$ is the set of variables defined in node $n$.
+- A node *uses* a variable if it appears on the right-hand side of an assignment: $"use"(n)$ is the set of variables used in node $n$.
+
+=== Dataflow Equations
+
+$
+  "in"[b] = "use"[b] union ("out"[b] backslash "def"[b])
+$
+
+The live-in variables of block $b$ are all of the variables it uses, along with its live-out variables (except for any variables it defines). Defining a variable makes its previous value irrelevant.
+
+$
+  "out"[b] = "in"[b_1] union "in"[b_2] union dots union "in"[b_n]
+$
+
+where $b_1, dots, b_n$ are *successors* of $b$. The live-out variables of block $b$ are the union of live-in sets of $b$'s successors.
+
+Once we have calculated the out-sets, the live variables of a block $b$ are:
+
+$
+  "live"[b] = "out"[b] union "def"[b]
+$
+
+=== Solving Dataflow Equations
+
+We can iteratively compute the in and out sets by starting from empty sets and repeatedly applying the dataflow equations until we reach a *fixpoint* (future iterations do not change the sets). Since we are tracing how data flows from its uses to its definitions, it is more efficient to process the CFG *backwards*.
+
+```
+for each basic block n:
+  in[n] <- { }
+  out[n] <- { }
+repeat for each n:
+  old_in[n] <- in[n]
+  old_out[n] <- out[n]
+  in[n] <- use[n] U (out[n] \ def[n])
+  out[n] <- U_{s in succ(n)} in[s]
+until for all n: old_in[n] = in[n]
+                  and old_out[n] = out[n]
+```
+
+== Register Allocation
+
+Once we have performed liveness analysis, we can use the liveness information to construct an *interference graph*:
+- Every variable is a vertex / node in the graph
+- We add an edge between two variables if they are live at the same time
+
+We then allocate registers by *colouring the graph*: no adjacent node can be given the same colour. Each colour corresponds to a register.
+
+=== Graph Colouring
+
+Graph colouring is an NP-complete problem. However, there is a *linear time approximation* algorithm used in practice that gives good results.
+
+Sometimes we will get a graph that we cannot colour with the available number of registers: in this case we need to write the variable to memory. This is called *spilling*.
+
+== Instruction Selection
+
+=== Refining the IR
+
+The `Local("var")` instruction is replaced with more concrete representations since CPUs do not have a concept of variables. Each local variable is stored at an offset from the frame pointer on the stack.
+
+- `Mem(e)`: a reference to memory at address $e$
+- `Temp(t)`: a temporary variable $t$ created to hold intermediate results, eventually mapped to a register
+- `Move(e_1, e_2)`: copy the result of evaluating $e_2$ into $e_1$ (a `Temp` or memory address)
+
+=== Tree Pattern Matching
+
+We have a tree-based IR where nodes have subtrees. The key idea for instruction selection is to match subtrees against patterns, and use these to guide how we emit code. When compiling, we create a `Temp` to store the output, emit code that writes to the temporary variable, and return the `Temp`, allowing us to recursively emit code for subtrees.
+
+=== Binary Operations
+
+If one subtree is a constant (fitting in a machine word), we can emit an immediate instruction (e.g. `addi tmpOut, tmp, c`). Otherwise, we recursively emit code for both subtrees and emit a register-register instruction (e.g. `add tmpOut, tmp1, tmp2`).
+
+=== Load and Store Operations
+
+A common pattern is loading memory at a given offset (e.g. loading a local variable from the stack frame). If the address is a base plus constant offset, we can use offset notation: `lw tmpOut, tmp(c)`. Otherwise we fall back to `lw tmpOut, tmp`. Move statements (stores) follow a similar pattern.
+
+=== Control Flow: Jumps
+
+There are two types of unconditional jumps: a *direct jump* to a name (`j lbl`), or an *indirect jump* to the address contained in a register (`jr tmp`). Conditional jumps are similar: we match on the binary operator and generate the corresponding branch instruction.
+
+=== Maximal Munch
+
+To minimise the number of instructions, a simple greedy algorithm called *maximal munch* suffices. It selects the locally best (largest) pattern match at each step.
+
+```
+maximalMunch(t, ps):
+  p = largest pattern in ps that covers the top of t
+  uncoveredSubtrees = subtrees of t not covered by p
+  for s in uncoveredSubtrees:
+    maximalMunch(s, ps)
+  emit(t, p)
+```
+
+The algorithm is linear in the size of the tree and produces a minimal number of instructions for the given pattern set. For other definitions of "best" (e.g. applying cost heuristics), dynamic programming techniques may be necessary.
