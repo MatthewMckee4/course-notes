@@ -40,7 +40,6 @@ After I have finished each exam, the notes will be moved to the [Archived Notes]
 - [Programming Languages](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/programming_languages_notes.pdf)
 - [Advanced Systems Programming](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/advanced_systems_programming_notes.pdf)
 - [Functional Programming](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/functional_programming_notes.pdf)
-- [Software Product Release Engineering](https://github.com/MatthewMckee4/exam_notes/releases/latest/download/software_product_release_engineering_notes.pdf)
 
 #### Mathematics
 
