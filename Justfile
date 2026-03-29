@@ -17,8 +17,6 @@ watch file:
         typst watch notes/year_4/computing_science/programming_languages/notes.typ; \
     elif [ "{{file}}" = "fp" ]; then \
         typst watch notes/year_4/computing_science/functional_programming/notes.typ; \
-    elif [ "{{file}}" = "spre" ]; then \
-        typst watch notes/year_4/computing_science/software_product_release_engineering/notes.typ; \
     else \
         typst watch notes/year_4/computing_science/advanced_systems_programming/notes.typ; \
     fi

@@ -161,6 +161,10 @@ For a Cauchy sequence $(x_m)$ in $RR^n$, each component sequence $(xi_j^((m)))$ 
 
 For a Cauchy sequence $(x_m)$ in $l^infinity$ with $x_m = (xi_j^((m)))$, each $(xi_j^((m)))_(m=1)^infinity$ is Cauchy in $RR$ (or $CC$) and converges to $xi_j$. Define $x = (xi_j)$. Since $|xi_j^((m)) - xi_j| <= epsilon$ for $m > N$ and $|xi_j| <= epsilon + k_m$ (where $|xi_j^((m))| <= k_m$), $x in l^infinity$. Also $d(x_m, x) = sup_j |xi_j^((m)) - xi_j| <= epsilon$.
 
+=== 1.5-3 Completeness of space $c$
+
+The space $c$ of all convergent sequences is a subspace of $l^infinity$. Since $c$ is closed in $l^infinity$ (if $x_n -> x$ in $l^infinity$ and each $x_n$ is convergent, then $x$ is convergent), completeness of $c$ follows from Theorem 1.4-7.
+
 === 1.5-4 Completeness of $l^p$
 
 For a Cauchy sequence in $l^p$, componentwise limits exist. Using Minkowski's inequality and letting $n -> infinity$ in the Cauchy condition shows $x = (xi_j) in l^p$ and $x_m -> x$.
@@ -200,7 +204,7 @@ Key inequality: $||T x|| <= ||T|| ||x||$.
 === Examples
 
 - *Identity*: $||I|| = 1$ on $X != {0}$.
-- *Differentiation*: $T x = x'$ on polynomials with sup-norm is *unbounded* (take $x_n (t) = t^n$: $||T x_n|| / ||x_n|| = n$).
+- *Differentiation*: $T x = x'$ on polynomials with sup-norm is *unbounded* (take $x_n (t) = t^n$: $(||T x_n||) / (||x_n||) = n$).
 - *Integral operator*: $y(t) = integral_0^1 k(t, tau) x(tau) dif tau$ with continuous kernel $k$ is bounded: $||T x|| <= k_0 ||x||$ where $k_0 = max |k|$.
 
 === 2.7-8 Theorem (Finite dimension)
@@ -225,7 +229,7 @@ _If $T: cal(D)(T) -> Y$ is bounded linear with $Y$ a Banach space, then $T$ has 
 
 == Linear Functionals (Sec 2.8, first part)
 
-A *functional* maps into $RR$ or $CC$. A *linear functional* $f: cal(D)(f) -> K$ satisfies $f(alpha x + beta y) = alpha f(x) + beta f(y)$. A *bounded linear functional* satisfies $|f(x)| <= c ||x||$ with norm $||f|| = sup_(x != 0) |f(x)| / ||x||$.
+A *functional* maps into $RR$ or $CC$. A *linear functional* $f: cal(D)(f) -> K$ satisfies $f(alpha x + beta y) = alpha f(x) + beta f(y)$. A *bounded linear functional* satisfies $|f(x)| <= c ||x||$ with norm $||f|| = sup_(x != 0) (|f(x)|) / (||x||)$.
 
 === Examples
 
@@ -306,7 +310,10 @@ The inner product is *sesquilinear*: linear in the first argument, conjugate lin
 
 The *parallelogram equality*: $||x + y||^2 + ||x - y||^2 = 2(||x||^2 + ||y||^2)$.
 
-If a norm does not satisfy this, it cannot come from an inner product.
+If a norm does not satisfy this, it cannot come from an inner product. Conversely, if the parallelogram equality holds, the norm is induced by an inner product given by the *polarization identity*:
+
+$ chevron.l x, y chevron.r = 1/4 (||x + y||^2 - ||x - y||^2) quad ("real case") $
+$ chevron.l x, y chevron.r = 1/4 (||x + y||^2 - ||x - y||^2 + i||x + i y||^2 - i||x - i y||^2) quad ("complex case") $
 
 === 3.1-2 Definition (Orthogonality)
 
@@ -450,7 +457,7 @@ The quantities $chevron.l x, e_k chevron.r$ are the *Fourier coefficients* of $x
 
 Given a linearly independent sequence $(x_j)$, produce an orthonormal sequence $(e_j)$ with $"span"{e_1, dots, e_n} = "span"{x_1, dots, x_n}$ for every $n$:
 
-$ e_1 = x_1 / ||x_1||, quad v_n = x_n - sum_(k=1)^(n-1) chevron.l x_n, e_k chevron.r e_k, quad e_n = v_n / ||v_n|| $
+$ e_1 = x_1 / (||x_1||), quad v_n = x_n - sum_(k=1)^(n-1) chevron.l x_n, e_k chevron.r e_k, quad e_n = v_n / (||v_n||) $
 
 = Week 8: Generalised Fourier Series, Total Orthonormal Sets
 
@@ -500,6 +507,13 @@ _An orthonormal set $M$ in a Hilbert space $H$ is total iff for all $x in H$:_
 $ sum_k |chevron.l x, e_k chevron.r|^2 = ||x||^2 quad ("Parseval relation") $
 
 *Proof.* If $M$ is not total, $exists x != 0$ with $x perp M$, giving $0 != ||x||^2$ but $sum |chevron.l x, e_k chevron.r|^2 = 0$. Conversely, if $M$ is total, define $y = sum chevron.l x, e_k chevron.r e_k$. Then $x - y perp M$, so $x - y in M^perp = {0}$ by 3.3-7, giving $x = y$ and $||x||^2 = sum |chevron.l x, e_k chevron.r|^2$. $square$
+
+=== Generalised Parseval relation
+
+If $M = (e_k)$ is a total orthonormal set in a Hilbert space $H$, then for all $x, y in H$:
+$ chevron.l x, y chevron.r = sum_k chevron.l x, e_k chevron.r #math.overline($chevron.l y, e_k chevron.r$) $
+
+This follows from the Parseval relation applied to $x + y$ and $x + i y$ via the polarization identity.
 
 === 3.6-4 Theorem (Separable Hilbert spaces)
 
