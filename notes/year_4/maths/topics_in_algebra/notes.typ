@@ -23,21 +23,21 @@ _Let $phi: G -> G'$ be a group homomorphism with kernel $K = ker(phi)$. Then $K 
 
 === 34.3 Second Isomorphism Theorem (Diamond Isomorphism Theorem)
 
-_Let $H leq G$ and $N triangle.l G$. Then $H N = {h n mid(|) h in H, n in N}$ is a subgroup of $G$, $N triangle.l H N$, $H sect N triangle.l H$, and_
-$ H N \/ N tilde.equiv H \/ (H sect N). $
+_Let $H lt.eq G$ and $N triangle.l G$. Then $H N = {h n mid(|) h in H, n in N}$ is a subgroup of $G$, $N triangle.l H N$, $H inter N triangle.l H$, and_
+$ H N \/ N tilde.equiv H \/ (H inter N). $
 
-*Proof sketch.* Define $phi: H -> H N \/ N$ by $phi(h) = h N$. This is a surjective homomorphism with $ker(phi) = H sect N$. Apply the First Isomorphism Theorem.
+*Proof sketch.* Define $phi: H -> H N \/ N$ by $phi(h) = h N$. This is a surjective homomorphism with $ker(phi) = H inter N$. Apply the First Isomorphism Theorem.
 
 === 34.4 Third Isomorphism Theorem
 
-_Let $N triangle.l G$ and $M triangle.l G$ with $N leq M$. Then $M \/ N triangle.l G \/ N$ and_
+_Let $N triangle.l G$ and $M triangle.l G$ with $N lt.eq M$. Then $M \/ N triangle.l G \/ N$ and_
 $ (G \/ N) \/ (M \/ N) tilde.equiv G \/ M. $
 
 *Proof sketch.* Define $phi: G \/ N -> G \/ M$ by $phi(g N) = g M$. This is a well-defined surjective homomorphism with $ker(phi) = M \/ N$. Apply the First Isomorphism Theorem.
 
 === 34.5 Correspondence Theorem
 
-_Let $N triangle.l G$. There is a bijection between subgroups of $G$ containing $N$ and subgroups of $G \/ N$, given by $H mapsto H \/ N$. This bijection preserves normality: $H triangle.l G$ if and only if $H \/ N triangle.l G \/ N$._
+_Let $N triangle.l G$. There is a bijection between subgroups of $G$ containing $N$ and subgroups of $G \/ N$, given by $H arrow.r.bar H \/ N$. This bijection preserves normality: $H triangle.l G$ if and only if $H \/ N triangle.l G \/ N$._
 
 == Examples and Applications
 
@@ -68,9 +68,9 @@ Two subnormal series are *equivalent* if they have the same length and their fac
 === 35.3 Example
 
 For $G = ZZ_(18)$, the series
-$ {0} < angle.l 9 angle.r < angle.l 3 angle.r < ZZ_(18) $
+$ {0} < chevron.l 9 chevron.r < chevron.l 3 chevron.r < ZZ_(18) $
 has factor groups $ZZ_3, ZZ_3, ZZ_2$, while
-$ {0} < angle.l 6 angle.r < angle.l 2 angle.r < ZZ_(18) $
+$ {0} < chevron.l 6 chevron.r < chevron.l 2 chevron.r < ZZ_(18) $
 has factor groups $ZZ_3, ZZ_2, ZZ_3$. These are equivalent.
 
 = Lecture 4: Zassenhaus Lemma and Schreier's Theorem
@@ -79,15 +79,15 @@ has factor groups $ZZ_3, ZZ_2, ZZ_3$. These are equivalent.
 
 === 35.7 Zassenhaus Lemma
 
-_Let $H' triangle.l H leq G$ and $K' triangle.l K leq G$. Then:_
-- _$H'(H sect K') triangle.l H'(H sect K)$_
-- _$K'(K sect H') triangle.l K'(K sect H)$_
-- _$H'(H sect K) \/ H'(H sect K') tilde.equiv K'(K sect H) \/ K'(K sect H')$_
-- _$(H sect K) \/ (H sect K')(H' sect K) tilde.equiv (H sect K) \/ (H' sect K)(H sect K')$_
+_Let $H' triangle.l H lt.eq G$ and $K' triangle.l K lt.eq G$. Then:_
+- _$H'(H inter K') triangle.l H'(H inter K)$_
+- _$K'(K inter H') triangle.l K'(K inter H)$_
+- _$H'(H inter K) \/ H'(H inter K') tilde.equiv K'(K inter H) \/ K'(K inter H')$_
+- _$(H inter K) \/ (H inter K')(H' inter K) tilde.equiv (H inter K) \/ (H' inter K)(H inter K')$_
 
 The name "butterfly" comes from the diamond-shaped diagram formed by the subgroups involved.
 
-*Proof.* The key observation is that both quotients are isomorphic to $(H sect K) \/ ((H' sect K)(H sect K'))$. This follows by applying the Second Isomorphism Theorem carefully.
+*Proof.* The key observation is that both quotients are isomorphic to $(H inter K) \/ ((H' inter K)(H inter K'))$. This follows by applying the Second Isomorphism Theorem carefully.
 
 == Schreier's Theorem
 
@@ -100,8 +100,8 @@ $ {e} = H_0 triangle.l H_1 triangle.l dots.c triangle.l H_m = G $
 and
 $ {e} = K_0 triangle.l K_1 triangle.l dots.c triangle.l K_n = G $
 be two subnormal series. Define
-$ H_(i, j) = H_i (H_(i+1) sect K_j) $
-for $0 leq i leq m-1$ and $0 leq j leq n$. Inserting these between $H_i$ and $H_(i+1)$ (using the Zassenhaus Lemma to verify each inclusion is normal) gives a refinement of the first series. Similarly define $K_(i,j) = K_j(K_(j+1) sect H_i)$ for the second. The Zassenhaus Lemma then gives $H_(i,j+1) \/ H_(i,j) tilde.equiv K_(j,i+1) \/ K_(j,i)$, establishing equivalence.
+$ H_(i, j) = H_i (H_(i+1) inter K_j) $
+for $0 lt.eq i lt.eq m-1$ and $0 lt.eq j lt.eq n$. Inserting these between $H_i$ and $H_(i+1)$ (using the Zassenhaus Lemma to verify each inclusion is normal) gives a refinement of the first series. Similarly define $K_(i,j) = K_j(K_(j+1) inter H_i)$ for the second. The Zassenhaus Lemma then gives $H_(i,j+1) \/ H_(i,j) tilde.equiv K_(j,i+1) \/ K_(j,i)$, establishing equivalence.
 
 = Lecture 5: Jordan-Hölder Theorem and Commutator Subgroups
 
@@ -118,8 +118,8 @@ Not every group has a composition series (e.g., $ZZ$ does not), but every finite
 === Example: Using Schreier's Algorithm
 
 To find equivalent refinements of
-$ \{0\} < angle.l 6 angle.r < ZZ_(24) quad "and" quad \{0\} < angle.l 4 angle.r < ZZ_(24) $
-insert subgroups $H_(0,j) = \{0\}(angle.l 6 angle.r sect K_j)$ and $K_(0,j) = \{0\}(angle.l 4 angle.r sect H_j)$ using the Zassenhaus construction.
+$ \{0\} < chevron.l 6 chevron.r < ZZ_(24) quad "and" quad \{0\} < chevron.l 4 chevron.r < ZZ_(24) $
+insert subgroups $H_(0,j) = \{0\}(chevron.l 6 chevron.r inter K_j)$ and $K_(0,j) = \{0\}(chevron.l 4 chevron.r inter H_j)$ using the Zassenhaus construction.
 
 === 35.15 Jordan-Hölder Theorem
 
@@ -135,7 +135,7 @@ The Jordan-Hölder theorem says composition factors are intrinsic invariants of 
 
 For $a, b in G$, the *commutator* of $a$ and $b$ is $[a, b] = a^(-1) b^(-1) a b$. Note $[a, b] = e$ iff $a b = b a$.
 
-The *commutator subgroup* (or *derived subgroup*) of $G$ is $[G, G] = G' = angle.l [a, b] mid(|) a, b in G angle.r$, the subgroup generated by all commutators. We have $G' triangle.l G$ and $G \/ G'$ is abelian. Moreover, $G \/ G'$ is the *largest abelian quotient* of $G$: if $N triangle.l G$ and $G \/ N$ is abelian, then $G' leq N$.
+The *commutator subgroup* (or *derived subgroup*) of $G$ is $[G, G] = G' = chevron.l [a, b] mid(|) a, b in G chevron.r$, the subgroup generated by all commutators. We have $G' triangle.l G$ and $G \/ G'$ is abelian. Moreover, $G \/ G'$ is the *largest abelian quotient* of $G$: if $N triangle.l G$ and $G \/ N$ is abelian, then $G' lt.eq N$.
 
 = Lecture 6: Solvable and Nilpotent Groups (End of Chapter 35)
 
@@ -154,7 +154,7 @@ Equivalently, $G$ is solvable iff its *derived series* $G^((0)) = G supset.eq G^
 - Every abelian group is solvable (take $\{e\} triangle.l G$, with factor $G$ abelian).
 - $S_3$ is solvable: $\{e\} triangle.l A_3 = ZZ_3 triangle.l S_3$, with factors $ZZ_3$ and $ZZ_2$.
 - $S_4$ is solvable via $\{e\} triangle.l V_4 triangle.l A_4 triangle.l S_4$ where $V_4 = \{e, (12)(34), (13)(24), (14)(23)\}$.
-- $S_n$ for $n geq 5$ is *not* solvable (since $A_n$ is simple and non-abelian for $n geq 5$).
+- $S_n$ for $n gt.eq 5$ is *not* solvable (since $A_n$ is simple and non-abelian for $n gt.eq 5$).
 
 === Theorem
 
@@ -164,13 +164,13 @@ _Subgroups and quotient groups of solvable groups are solvable. An extension of 
 
 === Definition (Lower Central Series)
 
-The *lower central series* of $G$ is defined by $G_0 = G$ and $G_(i+1) = [G, G_i] = angle.l [g, x] mid(|) g in G, x in G_i angle.r$.
+The *lower central series* of $G$ is defined by $G_0 = G$ and $G_(i+1) = [G, G_i] = chevron.l [g, x] mid(|) g in G, x in G_i chevron.r$.
 
 A group $G$ is *nilpotent* if its lower central series reaches $\{e\}$, i.e., $G_c = \{e\}$ for some $c$ (called the *nilpotency class*).
 
 === Examples
 
-- Every abelian group is nilpotent of class $leq 1$ (since $G_1 = [G, G] = \{e\}$ iff $G$ is abelian).
+- Every abelian group is nilpotent of class $lt.eq 1$ (since $G_1 = [G, G] = \{e\}$ iff $G$ is abelian).
 - Every nilpotent group is solvable (but not conversely: $S_3$ is solvable but not nilpotent).
 - Every $p$-group (group of order $p^n$ for a prime $p$) is nilpotent.
 - The quaternion group $Q_8$ is nilpotent of class 2.
@@ -185,7 +185,7 @@ _Subgroups, quotients, and finite direct products of nilpotent groups are nilpot
 
 === Definition (Group Action)
 
-A *group action* of a group $G$ on a set $S$ is a map $G times S -> S$, written $(g, s) mapsto g dot.c s$, such that:
+A *group action* of a group $G$ on a set $S$ is a map $G times S -> S$, written $(g, s) arrow.r.bar g dot.c s$, such that:
 - $e dot.c s = s$ for all $s in S$
 - $(g_1 g_2) dot.c s = g_1 dot.c (g_2 dot.c s)$ for all $g_1, g_2 in G$, $s in S$
 
@@ -225,11 +225,11 @@ where $C_G(x) = \{g in G mid(|) g x = x g\}$ is the *centraliser* of $x$.
 
 The *normaliser* of a subgroup $H$ in $G$ is
 $ N_G(H) = \{g in G mid(|) g H g^(-1) = H\} = \{g in G mid(|) g H = H g\}. $
-This is the largest subgroup of $G$ in which $H$ is normal. We have $H triangle.l N_G(H) leq G$.
+This is the largest subgroup of $G$ in which $H$ is normal. We have $H triangle.l N_G(H) lt.eq G$.
 
 === 36.6 Very Useful Lemma
 
-_Let $P$ be a $p$-subgroup of a finite group $G$ (i.e., $|P| = p^k$ for some $k geq 0$). Let $\mathcal{C}$ be the set of left cosets of a subgroup $H$ in $G$. Let $P$ act on $\mathcal{C}$ by left multiplication: $x dot.c (g H) = (x g) H$. If $g H$ is a fixed point of this action, then $g^(-1) P g leq H$. In particular, if $|\mathcal{C}|$ is not divisible by $p$, then $P$ is conjugate to a subgroup of $H$._
+_Let $P$ be a $p$-subgroup of a finite group $G$ (i.e., $|P| = p^k$ for some $k gt.eq 0$). Let $cal(C)$ be the set of left cosets of a subgroup $H$ in $G$. Let $P$ act on $cal(C)$ by left multiplication: $x dot.c (g H) = (x g) H$. If $g H$ is a fixed point of this action, then $g^(-1) P g lt.eq H$. In particular, if $|cal(C)|$ is not divisible by $p$, then $P$ is conjugate to a subgroup of $H$._
 
 === 36.7 Corollary
 
@@ -245,15 +245,15 @@ Let $G$ be a finite group with $|G| = p^n m$ where $p$ is prime and $gcd(p, m) =
 
 === 36.8 First Sylow Theorem
 
-_Let $G$ be a finite group with $|G| = p^n m$ and $gcd(p, m) = 1$. Then $G$ has at least one Sylow $p$-subgroup. Moreover, for each $0 leq k leq n$, $G$ has a subgroup of order $p^k$._
+_Let $G$ be a finite group with $|G| = p^n m$ and $gcd(p, m) = 1$. Then $G$ has at least one Sylow $p$-subgroup. Moreover, for each $0 lt.eq k lt.eq n$, $G$ has a subgroup of order $p^k$._
 
-*Proof.* By induction on $|G|$. The class equation gives $|G| = |Z(G)| + sum [G : C_G(x)]$. If $p mid |Z(G)|$, then by Cauchy's theorem $Z(G)$ has an element $a$ of order $p$; $angle.l a angle.r triangle.l G$ and $|G \/ angle.l a angle.r| = |G| \/ p$, so by induction $G \/ angle.l a angle.r$ has a Sylow $p$-subgroup $P'$ of order $p^(n-1)$; the preimage in $G$ has order $p^n$. If $p nmid |Z(G)|$ then some term $[G : C_G(x)]$ is not divisible by $p$, so $p^n mid |C_G(x)|$; apply induction to $C_G(x)$.
+*Proof.* By induction on $|G|$. The class equation gives $|G| = |Z(G)| + sum [G : C_G(x)]$. If $p mid |Z(G)|$, then by Cauchy's theorem $Z(G)$ has an element $a$ of order $p$; $chevron.l a chevron.r triangle.l G$ and $|G \/ chevron.l a chevron.r| = |G| \/ p$, so by induction $G \/ chevron.l a chevron.r$ has a Sylow $p$-subgroup $P'$ of order $p^(n-1)$; the preimage in $G$ has order $p^n$. If $p divides.not |Z(G)|$ then some term $[G : C_G(x)]$ is not divisible by $p$, so $p^n mid |C_G(x)|$; apply induction to $C_G(x)$.
 
 === 36.10 Second Sylow Theorem
 
 _Any two Sylow $p$-subgroups of $G$ are conjugate: if $P$ and $P'$ are both Sylow $p$-subgroups, then $P' = g P g^(-1)$ for some $g in G$._
 
-*Proof.* Let $P$ act on the set of left cosets of $P'$ by left multiplication. The total number of cosets is $[G : P'] = m$, which is not divisible by $p$. So some coset $g P'$ is fixed by all of $P$, meaning $P leq g P' g^(-1)$. Since $|P| = |P'| = p^n$, we get $P = g P' g^(-1)$.
+*Proof.* Let $P$ act on the set of left cosets of $P'$ by left multiplication. The total number of cosets is $[G : P'] = m$, which is not divisible by $p$. So some coset $g P'$ is fixed by all of $P$, meaning $P lt.eq g P' g^(-1)$. Since $|P| = |P'| = p^n$, we get $P = g P' g^(-1)$.
 
 = Lecture 10: Third Sylow Theorem and Applications
 
@@ -262,14 +262,14 @@ _Any two Sylow $p$-subgroups of $G$ are conjugate: if $P$ and $P'$ are both Sylo
 === 36.11 Third Sylow Theorem
 
 _The number $n_p$ of Sylow $p$-subgroups of $G$ satisfies:_
-- _$n_p equiv 1 pmod{p}$_
+- _$n_p equiv 1 (mod p)$_
 - _$n_p mid m$ (where $|G| = p^n m$, $gcd(p,m) = 1$)_
 
-*Proof.* By the Second Sylow Theorem, $G$ acts transitively on the set of Sylow $p$-subgroups by conjugation, so $n_p = [G : N_G(P)]$. Since $P leq N_G(P)$, we have $n_p mid [G : P] = m$. For the congruence, let $P$ act on the set of Sylow $p$-subgroups by conjugation. The only fixed point is $P$ itself, so all other orbits have size divisible by $p$, giving $n_p equiv 1 pmod{p}$.
+*Proof.* By the Second Sylow Theorem, $G$ acts transitively on the set of Sylow $p$-subgroups by conjugation, so $n_p = [G : N_G(P)]$. Since $P lt.eq N_G(P)$, we have $n_p mid [G : P] = m$. For the congruence, let $P$ act on the set of Sylow $p$-subgroups by conjugation. The only fixed point is $P$ itself, so all other orbits have size divisible by $p$, giving $n_p equiv 1 (mod p)$.
 
 === Applications: Groups That Cannot Be Simple
 
-*Groups of order $p q$ (distinct primes $p < q$).* We have $n_q mid p$ and $n_q equiv 1 pmod{q}$. Since $p < q$, the only option is $n_q = 1$, so the Sylow $q$-subgroup is normal and $G$ is not simple.
+*Groups of order $p q$ (distinct primes $p < q$).* We have $n_q mid p$ and $n_q equiv 1 (mod q)$. Since $p < q$, the only option is $n_q = 1$, so the Sylow $q$-subgroup is normal and $G$ is not simple.
 
 *Groups of order $30$.* $n_5 in \{1, 6\}$ and $n_3 in \{1, 10\}$. If $n_5 = 6$ and $n_3 = 10$ then we would need $6 times 4 + 10 times 2 = 44 > 30$ elements, contradiction. So $n_5 = 1$ or $n_3 = 1$, hence $G$ is not simple.
 
@@ -284,7 +284,7 @@ _The number $n_p$ of Sylow $p$-subgroups of $G$ satisfies:_
 To classify all groups of a given order $n$:
 1. Use Sylow theorems to constrain $n_p$ for each prime $p mid n$.
 2. If some $n_p = 1$, that Sylow subgroup is normal — use semidirect products.
-3. If $G = H N$ with $H sect N = \{e\}$ and $N triangle.l G$, then $G$ is a *semidirect product* $N rtimes H$, determined by the action $phi: H -> "Aut"(N)$ via $phi(h)(n) = h n h^(-1)$.
+3. If $G = H N$ with $H inter N = \{e\}$ and $N triangle.l G$, then $G$ is a *semidirect product* $N ⋊ H$, determined by the action $phi: H -> "Aut"(N)$ via $phi(h)(n) = h n h^(-1)$.
 
 === Example: Groups of Order 6
 
@@ -296,7 +296,7 @@ Any group of order $p^2$ is abelian (since $Z(G) != \{e\}$ for $p$-groups, and i
 
 === Semi-direct Products
 
-The *internal semidirect product* $N rtimes_phi H$ for $N triangle.l G$, $H leq G$, $N H = G$, $N sect H = \{e\}$ has the product formula $(n_1, h_1)(n_2, h_2) = (n_1 phi(h_1)(n_2), h_1 h_2)$.
+The *internal semidirect product* $N ⋊_phi H$ for $N triangle.l G$, $H lt.eq G$, $N H = G$, $N inter H = \{e\}$ has the product formula $(n_1, h_1)(n_2, h_2) = (n_1 phi(h_1)(n_2), h_1 h_2)$.
 
 === Example: Groups of Order 12
 
@@ -308,7 +308,7 @@ $12 = 2^2 dot.c 3$. $n_3 in \{1, 4\}$, $n_2 in \{1, 3\}$. The groups of order 12
 
 === 38.1 Definition (Free Abelian Group)
 
-A group $F$ is a *free abelian group* with *basis* $B = \{a_i\}_(i in I)$ if every element of $F$ can be written uniquely as a finite sum $sum n_i a_i$ (with $n_i in ZZ$, almost all zero). Equivalently, $F tilde.equiv plus.circle.big_(i in I) ZZ$.
+A group $F$ is a *free abelian group* with *basis* $B = \{a_i\}_(i in I)$ if every element of $F$ can be written uniquely as a finite sum $sum n_i a_i$ (with $n_i in ZZ$, almost all zero). Equivalently, $F tilde.equiv plus.o.big_(i in I) ZZ$.
 
 The *rank* of a free abelian group is the cardinality of a basis. The rank is well-defined (any two bases have the same cardinality).
 
@@ -324,9 +324,9 @@ If $F$ is free abelian with basis $B$ and $A$ is any abelian group, then any fun
 
 === 38.6 Theorem (Subgroups of Free Abelian Groups)
 
-_Every subgroup of a free abelian group of rank $n$ is free abelian of rank $leq n$._
+_Every subgroup of a free abelian group of rank $n$ is free abelian of rank $lt.eq n$._
 
-*Proof (first part).* Let $F$ have basis $\{x_1, dots, x_n\}$ and let $H leq F$. Define $H_k = H sect (ZZ x_1 plus.circle dots.c plus.circle ZZ x_k)$. We proceed by induction, constructing a basis for $H$ by finding generators for each $H_k$ from $H_(k-1)$.
+*Proof (first part).* Let $F$ have basis $\{x_1, dots, x_n\}$ and let $H lt.eq F$. Define $H_k = H inter (ZZ x_1 plus.o dots.c plus.o ZZ x_k)$. We proceed by induction, constructing a basis for $H$ by finding generators for each $H_k$ from $H_(k-1)$.
 
 = Lecture 13: Subgroup Structure and Theorem 38.11
 
@@ -334,9 +334,9 @@ _Every subgroup of a free abelian group of rank $n$ is free abelian of rank $leq
 
 === 38.6 Theorem (completed)
 
-_Every subgroup $H$ of a free abelian group $F$ of rank $n$ is itself free abelian of rank $m leq n$, and there exists a basis $\{y_1, dots, y_n\}$ of $F$ and positive integers $d_1 mid d_2 mid dots.c mid d_m$ such that $\{d_1 y_1, dots, d_m y_m\}$ is a basis for $H$._
+_Every subgroup $H$ of a free abelian group $F$ of rank $n$ is itself free abelian of rank $m lt.eq n$, and there exists a basis $\{y_1, dots, y_n\}$ of $F$ and positive integers $d_1 mid d_2 mid dots.c mid d_m$ such that $\{d_1 y_1, dots, d_m y_m\}$ is a basis for $H$._
 
-The key step uses that if we project $H_k$ to the $x_k$-coordinate, the image is a subgroup of $ZZ$, hence of the form $d ZZ$ for some $d geq 0$; choosing a preimage of $d$ adds a new basis element.
+The key step uses that if we project $H_k$ to the $x_k$-coordinate, the image is a subgroup of $ZZ$, hence of the form $d ZZ$ for some $d gt.eq 0$; choosing a preimage of $d$ adds a new basis element.
 
 === 38.9 Theorem (Smith Normal Form — statement)
 
@@ -346,13 +346,13 @@ This is used in the proof of the Fundamental Theorem but we do not prove it here
 
 === 38.11 Theorem
 
-_Let $F$ be a finitely generated free abelian group and $H leq F$. Then there is a basis $\{y_1, dots, y_n\}$ for $F$ and $d_1 mid d_2 mid dots.c mid d_m$ (positive integers, $m leq n$) such that $\{d_1 y_1, dots, d_m y_m\}$ is a basis for $H$._
+_Let $F$ be a finitely generated free abelian group and $H lt.eq F$. Then there is a basis $\{y_1, dots, y_n\}$ for $F$ and $d_1 mid d_2 mid dots.c mid d_m$ (positive integers, $m lt.eq n$) such that $\{d_1 y_1, dots, d_m y_m\}$ is a basis for $H$._
 
 *Proof idea.* Write the inclusion $H -> F$ in terms of bases; this gives an integer matrix. Apply Smith Normal Form (Theorem 38.9) to simultaneously change the basis for $F$ and $H$ to achieve the diagonal form with divisibility.
 
 === Example
 
-For $F = ZZ^2$ and $H = angle.l (2, 0), (0, 6), (3, 3) angle.r$, the matrix of generators is $mat(2, 0; 0, 6; 3, 3)$. Applying Smith Normal Form gives $d_1 = 1, d_2 = 6$ (or similar), yielding a basis change making the structure apparent.
+For $F = ZZ^2$ and $H = chevron.l (2, 0), (0, 6), (3, 3) chevron.r$, the matrix of generators is $mat(2, 0; 0, 6; 3, 3)$. Applying Smith Normal Form gives $d_1 = 1, d_2 = 6$ (or similar), yielding a basis change making the structure apparent.
 
 = Lecture 14: Proof of Theorem 38.11
 
@@ -373,11 +373,11 @@ After reduction, $H$ has generators $d_1 y_1, dots, d_r y_r$ where $\{y_i\}$ ext
 === 38.12 Fundamental Theorem of Finitely Generated Abelian Groups
 
 _Every finitely generated abelian group $G$ is isomorphic to a direct sum_
-$ G tilde.equiv ZZ^r plus.circle ZZ_(d_1) plus.circle ZZ_(d_2) plus.circle dots.c plus.circle ZZ_(d_t) $
-_where $r geq 0$ (the *free rank* or *Betti number*) and $d_1 mid d_2 mid dots.c mid d_t geq 2$. The integer $r$ and the sequence $d_1, dots, d_t$ are uniquely determined by $G$._
+$ G tilde.equiv ZZ^r plus.o ZZ_(d_1) plus.o ZZ_(d_2) plus.o dots.c plus.o ZZ_(d_t) $
+_where $r gt.eq 0$ (the *free rank* or *Betti number*) and $d_1 mid d_2 mid dots.c mid d_t gt.eq 2$. The integer $r$ and the sequence $d_1, dots, d_t$ are uniquely determined by $G$._
 
-*Proof (existence).* Since $G$ is finitely generated abelian, there is a surjective homomorphism $phi: F -> G$ where $F = ZZ^n$ for some $n$. Let $H = ker(phi)$, so $G tilde.equiv F \/ H$ by the First Isomorphism Theorem. By Theorem 38.11, choose bases $\{y_1, dots, y_n\}$ for $F$ and $d_1 mid dots.c mid d_m$ such that $H = angle.l d_1 y_1, dots, d_m y_m angle.r$. Then
-$ G tilde.equiv F \/ H tilde.equiv (ZZ \/ d_1 ZZ) plus.circle dots.c plus.circle (ZZ \/ d_m ZZ) plus.circle ZZ^(n-m). $
+*Proof (existence).* Since $G$ is finitely generated abelian, there is a surjective homomorphism $phi: F -> G$ where $F = ZZ^n$ for some $n$. Let $H = ker(phi)$, so $G tilde.equiv F \/ H$ by the First Isomorphism Theorem. By Theorem 38.11, choose bases $\{y_1, dots, y_n\}$ for $F$ and $d_1 mid dots.c mid d_m$ such that $H = chevron.l d_1 y_1, dots, d_m y_m chevron.r$. Then
+$ G tilde.equiv F \/ H tilde.equiv (ZZ \/ d_1 ZZ) plus.o dots.c plus.o (ZZ \/ d_m ZZ) plus.o ZZ^(n-m). $
 Discarding $ZZ \/ 1 ZZ = \{0\}$ factors (those with $d_i = 1$) and separating the $ZZ^(n-m)$ gives the result.
 
 *Uniqueness.* The rank $r$ is $"rank"(G \/ G_"tors")$ where $G_"tors"$ is the torsion subgroup. Uniqueness of $d_i$ uses the Smith Normal Form uniqueness (not proved).
@@ -385,7 +385,7 @@ Discarding $ZZ \/ 1 ZZ = \{0\}$ factors (those with $d_i = 1$) and separating th
 === Alternative: Invariant Factor vs Primary Decomposition
 
 Equivalently, each $ZZ_(d_i)$ can be decomposed by the Chinese Remainder Theorem into primary cyclic groups $ZZ_(p^k)$, giving the *primary decomposition*:
-$ G tilde.equiv ZZ^r plus.circle plus.circle.big_p plus.circle.big_k ZZ_(p^(a_(p,k))) $
+$ G tilde.equiv ZZ^r plus.o plus.o.big_p plus.o.big_k ZZ_(p^(a_(p,k))) $
 
 == Introduction to Free Groups (Chapter 39)
 
@@ -417,9 +417,9 @@ Free groups are characterised up to isomorphism by this universal property. The 
 
 === Properties
 
-- $F(A)$ is infinite if $|A| geq 1$ (the word $a, a^2, a^3, dots$ are all distinct).
+- $F(A)$ is infinite if $|A| gt.eq 1$ (the word $a, a^2, a^3, dots$ are all distinct).
 - $F(\{a\}) tilde.equiv ZZ$ (infinite cyclic group).
-- $F(A)$ is non-abelian if $|A| geq 2$ (e.g., $a b != b a$ in $F(\{a,b\})$).
+- $F(A)$ is non-abelian if $|A| gt.eq 2$ (e.g., $a b != b a$ in $F(\{a,b\})$).
 - Every group is a quotient of a free group (every group is finitely generated, map $F(A) -> G$ surjectively).
 - Subgroups of free groups are free (Nielsen-Schreier theorem).
 
@@ -431,7 +431,7 @@ _If $|A| = |A'|$ then $F(A) tilde.equiv F(A')$; the rank is well-defined._
 
 === 40.1 Definition (Group Presentation)
 
-A *presentation* of a group $G$ is an expression $G = angle.l A mid R angle.r$ where:
+A *presentation* of a group $G$ is an expression $G = chevron.l A mid R chevron.r$ where:
 - $A$ is a set of *generators*
 - $R subset F(A)$ is a set of *relators* (words that equal $e$ in $G$)
 
@@ -441,14 +441,14 @@ $G tilde.equiv F(A) \/ N(R)$ where $N(R)$ is the normal closure of $R$ in $F(A)$
 
 === Examples
 
-- $ZZ_n = angle.l a mid a^n angle.r$: cyclic group of order $n$.
-- $ZZ = angle.l a mid angle.r$: infinite cyclic group (no relations).
-- $S_3 = angle.l a, b mid a^3 = e, b^2 = e, b a b^(-1) = a^(-1) angle.r$: symmetric group on 3 elements.
-- $D_n = angle.l r, s mid r^n = e, s^2 = e, s r s^(-1) = r^(-1) angle.r$: dihedral group of order $2n$.
+- $ZZ_n = chevron.l a mid a^n chevron.r$: cyclic group of order $n$.
+- $ZZ = chevron.l a mid chevron.r$: infinite cyclic group (no relations).
+- $S_3 = chevron.l a, b mid a^3 = e, b^2 = e, b a b^(-1) = a^(-1) chevron.r$: symmetric group on 3 elements.
+- $D_n = chevron.l r, s mid r^n = e, s^2 = e, s r s^(-1) = r^(-1) chevron.r$: dihedral group of order $2n$.
 
 === 40.5 Von Dyck's Theorem
 
-_If $G = angle.l A mid R angle.r$ and $H$ is a group with a map $A -> H$ satisfying all relations in $R$, then there is a unique surjective homomorphism $G -> H$._
+_If $G = chevron.l A mid R chevron.r$ and $H$ is a group with a map $A -> H$ satisfying all relations in $R$, then there is a unique surjective homomorphism $G -> H$._
 
 This gives a way to prove two groups are isomorphic: show each is a quotient of the other.
 
@@ -458,7 +458,7 @@ This gives a way to prove two groups are isomorphic: show each is a quotient of 
 
 === The Word Problem
 
-Given a presentation $G = angle.l A mid R angle.r$, the *word problem* asks: is there an algorithm to decide whether a word in $A union A^(-1)$ represents the identity in $G$? In general this is undecidable (Novikov 1955), but it is decidable for many specific classes.
+Given a presentation $G = chevron.l A mid R chevron.r$, the *word problem* asks: is there an algorithm to decide whether a word in $A union A^(-1)$ represents the identity in $G$? In general this is undecidable (Novikov 1955), but it is decidable for many specific classes.
 
 === Tietze Transformations
 
@@ -470,22 +470,22 @@ Two presentations give isomorphic groups iff one can be obtained from the other 
 
 === 40.11 Example: Free Products with Amalgamation
 
-The *free product* $G * H$ has presentation $angle.l A_G union A_H mid R_G union R_H angle.r$ where $A_G, A_H$ are disjoint generators and $R_G, R_H$ are the respective relators.
+The *free product* $G * H$ has presentation $chevron.l A_G union A_H mid R_G union R_H chevron.r$ where $A_G, A_H$ are disjoint generators and $R_G, R_H$ are the respective relators.
 
 A *free product with amalgamation* $G *_K H$ amalgamates over a common subgroup $K$, identifying the images of $K$ in $G$ and $H$.
 
 === Further Examples of Presentations
 
-*Quaternion group $Q_8$:* $angle.l i, j mid i^4 = e, j^4 = e, i^2 = j^2, i j i^(-1) = j^(-1) angle.r$.
+*Quaternion group $Q_8$:* $chevron.l i, j mid i^4 = e, j^4 = e, i^2 = j^2, i j i^(-1) = j^(-1) chevron.r$.
 
-*Trefoil knot group:* $angle.l a, b mid a^2 = b^3 angle.r$ — fundamental group of the complement of the trefoil knot in $RR^3$.
+*Trefoil knot group:* $chevron.l a, b mid a^2 = b^3 chevron.r$ — fundamental group of the complement of the trefoil knot in $RR^3$.
 
-*Finite presentations of infinite groups:* $ZZ^2 = angle.l a, b mid a b a^(-1) b^(-1) angle.r$ (abelian group, one commutator relation).
+*Finite presentations of infinite groups:* $ZZ^2 = chevron.l a, b mid a b a^(-1) b^(-1) chevron.r$ (abelian group, one commutator relation).
 
 === Abelianisation
 
-The *abelianisation* of $G = angle.l A mid R angle.r$ is $G^"ab" = G \/ [G, G]$. It is obtained by adding all commutator relations $[a_i, a_j] = e$ to the presentation:
-$ G^"ab" = angle.l A mid R union \{[a_i, a_j] mid a_i, a_j in A\} angle.r. $
+The *abelianisation* of $G = chevron.l A mid R chevron.r$ is $G^"ab" = G \/ [G, G]$. It is obtained by adding all commutator relations $[a_i, a_j] = e$ to the presentation:
+$ G^"ab" = chevron.l A mid R union \{[a_i, a_j] mid a_i, a_j in A\} chevron.r. $
 The abelianisation is the largest abelian quotient of $G$.
 
 === Summary of Key Themes
