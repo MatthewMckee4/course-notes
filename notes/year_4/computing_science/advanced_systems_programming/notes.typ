@@ -329,6 +329,71 @@ In Rust when looking up an item from a db for example, you can return Option, in
 
 This is dangerous in C because it can lead to null pointer dereferences and undefined behaviour. In Rust, Option provides a safe way to handle the absence of a value, preventing such issues.
 
+// 3c.
+
+== Pattern Matching and Closures
+
+=== Pattern Matching
+
+`match` exhaustively pattern matches on values. The compiler enforces all cases are handled, preventing unhandled states.
+
+```rust
+match msg {
+    Message::Quit            => println!("quit"),
+    Message::Move { x, y }  => println!("move to ({}, {})", x, y),
+    Message::Write(s)        => println!("write: {}", s),
+    Message::ChangeColor(r, g, b) => println!("{},{},{}", r, g, b),
+}
+```
+
+Patterns can destructure `Option` and `Result`:
+
+```rust
+match result {
+    Ok(value)  => println!("success: {}", value),
+    Err(error) => println!("error: {}", error),
+}
+```
+
+`if let` is a concise alternative when only one variant is of interest:
+
+```rust
+if let Some(x) = option {
+    println!("{}", x);
+}
+```
+
+=== Closures
+
+Closures are anonymous functions that can capture variables from their enclosing scope.
+
+```rust
+let add = |x, y| x + y;
+println!("{}", add(2, 3));  // 5
+```
+
+By default, closures capture by reference. `move` closures take ownership, which is needed when passing to threads:
+
+```rust
+let name = String::from("Alice");
+let greet = move || println!("Hello, {}!", name);
+greet();
+```
+
+=== Iterators
+
+Iterators are lazy sequences of values. The `Iterator` trait provides many composable adapters:
+
+```rust
+let numbers = vec![1, 2, 3, 4, 5];
+let sum: i32 = numbers.iter()
+    .filter(|&&x| x % 2 == 0)
+    .map(|&x| x * x)
+    .sum();
+```
+
+Iterators are *zero-cost abstractions* -- the above compiles to equivalent code as a hand-written loop. Consuming a collection with `.into_iter()` transfers ownership; borrowing with `.iter()` does not.
+
 // 3d.
 
 *References in Rust vs C*
@@ -477,6 +542,27 @@ Little in Rust is novel. Rust adopts ideas from research languages:
 - Traits adapted from Haskell type classes
 - References and ownership rules extend ideas originally developed in Cyclone
 
+=== Lifetimes
+
+Rust's *lifetime* system tracks how long references remain valid, preventing dangling references at compile time.
+
+Every reference has a lifetime -- the scope for which that reference is valid. Usually inferred, but sometimes must be annotated explicitly.
+
+```rust
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() { x } else { y }
+}
+```
+
+The annotation `'a` says: "the returned reference lives at least as long as the shorter of `x` and `y`". Without this, the compiler cannot verify the return value outlives neither input.
+
+*Lifetime elision*: the compiler applies three rules to infer lifetimes without annotations in common cases (one input reference, `&self` methods, etc.).
+
+Lifetimes prevent:
+- Returning references to local variables (dangling references)
+- References to data that has been moved or freed
+- Storing references in structs that outlive the referenced data
+
 #pagebreak()
 
 = Resource Ownership and Memory Management
@@ -605,6 +691,24 @@ There are still some costs.
   - Significant overhead for small objects.
 
 Reference counting tends to be for large, long-lived data.
+
+=== Shared Ownership: Rc\<T\> and Arc\<T\>
+
+Rust's single-ownership rule prevents cyclic or shared ownership by default. When shared ownership is genuinely needed, Rust provides two types:
+
+- `Rc<T>` (*reference counted*): multiple owners in a single thread. Cheap -- no atomic operations. Cloning increments the counter; dropping decrements it.
+- `Arc<T>` (*atomically reference counted*): multiple owners across threads. Thread-safe but slightly more expensive due to atomic operations.
+
+```rust
+use std::rc::Rc;
+
+let a = Rc::new(5);
+let b = Rc::clone(&a);   // increments count to 2
+println!("{}", Rc::strong_count(&a));  // 2
+drop(b);                 // count drops to 1; data freed when count hits 0
+```
+
+For interior mutability with `Rc<T>`, wrap in `RefCell<T>`, giving `Rc<RefCell<T>>`. This defers borrowing checks to runtime -- useful for tree structures or graph nodes that need shared mutable children.
 
 // 4c.
 
@@ -1806,3 +1910,19 @@ Also useful to represent states in a state machine, enforcing at compile time th
 === No Silver Bullet
 
 Memory safety and strong typing won't eliminate security vulnerabilities. But, used carefully, they eliminate certain classes of vulnerability, and make others less likely by making hidden assumptions visible.
+
+=== Summary: Security Principles
+
+Key principles for secure systems programming:
+
++ *Use memory-safe languages.* Eliminate entire classes of vulnerability (buffer overflow, use-after-free) by choosing a language that enforces safety at compile time or runtime.
+
++ *Encode assumptions in types.* Replace stringly-typed and integer-typed interfaces with distinct named types. If a conversion can fail or be unsafe, make it explicit.
+
++ *Minimise trust boundaries.* Parse and validate all input at the system boundary. Reject input that does not strictly conform to the expected grammar; do not attempt to be liberal.
+
++ *Use the type system as a design tool.* Phantom types, state machines as types, and newtype wrappers surface incorrect usage as compile errors rather than runtime bugs.
+
++ *Prefer simplicity.* Complex code is harder to reason about and harder to audit. Simple protocols with regular grammars are easier to parse correctly and easier to verify.
+
+Strong typing and memory safety are *necessary but not sufficient* conditions for secure software. Logic errors, incorrect trust decisions, and flawed protocol designs require careful design and code review. However, they remove a large and well-understood class of vulnerabilities at essentially no runtime cost.

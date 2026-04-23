@@ -70,11 +70,14 @@ Context-sensitive languages and recursively enumerable languages require more in
 
 == Grammars
 
-A grammar is a set of format rules specifying how to construct a sentence in a language.
-This consists of a set of terminal symbols that occur in a sentence, a distinguished
-sentence symbol that stands for a complete sentence, a set of non-terminal symbols,
-which each stand for part of a phrase and a set of production rules that specify how
-to construct a phrase from other phrases.
+Regular expressions help, but don't cut it for describing the syntax of a programming language.
+
+A grammar is a set of formal rules specifying how to construct a sentence in a language. It consists of:
+
+- A set of *terminal symbols*: symbols that occur in a sentence
+- A distinguished *sentence symbol* that stands for a complete sentence
+- A set of *nonterminal symbols*, which each stand for part of a phrase
+- A set of *production rules* that show how phrases can be made up from terminals and sub-phrases
 
 == Backus-Naur Form
 
@@ -168,6 +171,18 @@ All integers are values and cannot reduce further, so we are done.
 $ (L arrow.b.double V quad M arrow.b.double W) / (L dot.o M arrow.b.double V dot.o W) $
 
 First evaluate L to a value V, then evaluate M to a value W. The result is the actual integer operation on the two values V and W.
+
+=== Booleans and Conditionals ($L_"If"$)
+
+Boolean values are already values:
+$ "true" arrow.b.double "true" #h(4em) "false" arrow.b.double "false" $
+
+*If-then-else:*
+$
+  (L arrow.b.double "true" quad M arrow.b.double V) / ("if" L "then" M "else" N arrow.b.double V)
+  #h(2em)
+  (L arrow.b.double "false" quad N arrow.b.double V) / ("if" L "then" M "else" N arrow.b.double V)
+$
 
 = Parsing and ANTLR
 
@@ -274,67 +289,131 @@ on the integers.
 
 == Let-bindings
 
-An example of a let binding in our language is
+$"let" x = M "in" N$ evaluates M to a value V, then evaluates N with x bound to V.
 
-```
-let x = (5 + 10) in x * x
-let x = M in N
-```
-
-Let expressions act as a binder for a variable. All occurrences of x here are bound occurences.
-A variable is free if it is not in the scope of a quantifier. A quantifier $forall x . P$ binds
+Let expressions act as a binder for a variable. All occurrences of x in N are bound occurrences.
+A variable is *free* if it is not in the scope of a binder. A quantifier $forall x . P$ binds
 all free occurrences of x in its body P.
 
-For example c is free in $"isFriday" -> "Rainy"(c)$,
-but bound in $exists c in "Cities", "isFriday" -> "Rainy"(c)$
+=== Free Variables
 
-Free variables in our language formally
+$
+"FV"(n) &= {} \
+"FV"(x) &= {x} \
+"FV"(M dot.circle N) &= "FV"(M) union "FV"(N) \
+"FV"("if" L "then" M "else" N) &= "FV"(L) union "FV"(M) union "FV"(N) \
+"FV"("let" x = M "in" N) &= "FV"(M) union ("FV"(N) backslash {x})
+$
 
 == Name Shadowing
 
-Scopes of variables inside "in" inside a let binding.
+An inner let can rebind a variable already in scope. The inner binding *shadows* the outer one
+within its scope. E.g. in `let x = 1 in (let x = 2 in x) + x`, the inner x is 2, the outer x is 1.
 
 == Substitution
 
-We can define a substitution operation like
+$M {V \/ x}$ means replace all *free* occurrences of x in term M with value V.
 
 $
-M {V \/ x}
+n{V \/ x} &= n \
+x{V \/ x} &= V \
+y{V \/ x} &= y #h(4em) (y eq.not x) \
+(L dot.circle M){V \/ x} &= L{V \/ x} dot.circle M{V \/ x} \
+("let" x = M "in" N){V \/ x} &= "let" x = M{V \/ x} "in" N \
+("let" y = M "in" N){V \/ x} &= "let" y = M{V \/ x} "in" N{V \/ x} #h(2em) (y eq.not x)
 $
 
-This means, replace all free occurrences of x in term M with value V.
+=== Big-Step Semantics for Let
+
+$ (M arrow.b.double V quad N{V \/ x} arrow.b.double W) / ("let" x = M "in" N arrow.b.double W) $
 
 == Alpha Equivalence
 
-Two terms are alpha equivalent if they are the same up to renaming of bound variables.
+Two terms are *alpha equivalent* if they are the same up to renaming of bound variables.
+E.g. $"let" x = 1 "in" x + x$ is alpha equivalent to $"let" y = 1 "in" y + y$.
 
 = Functions and Recursion
 
 == Lambdas
 
-We can use lambdas with currying to act like normal functions.
+$lambda x . M$ introduces an anonymous function with parameter x and body M.
 
-$lambda x . M$
+Lambdas are values: they do not reduce further on their own.
 
-Let and let fun are syntactic sugar, we can do everything with lambdas
+*Currying:* a multi-argument function $f(x, y) = M$ is encoded as $lambda x . lambda y . M$,
+applied as $(f "  " 3) "  " 4$.
+
+`let fun f(x) = M in N` is syntactic sugar for `let f = λx.M in N`.
 
 == Semantics
 
-A function on its own shouldn't reduce further.
+$
+(M arrow.b.double lambda x . M' quad N arrow.b.double V quad M'{V \/ x} arrow.b.double W) / (M "  " N arrow.b.double W)
+$
 
-To evaluate a function application "M N" we evaluate the function down
-to a lambda expression. evaluate the argument down to a value V.
-Then replace all occurrences of x in M with V, and evaluate the result.
+Evaluate M to a lambda, evaluate the argument N to a value V,
+substitute V for x in the body, then evaluate the result.
+
+== Recursion
+
+With `let fun` (or plain lambdas), a function cannot refer to itself in its own body -- there is
+no way to write recursive functions like factorial. We need a new construct.
+
+`rec f(x). M` defines an anonymous recursive function where both $f$ (the function itself)
+and $x$ (the parameter) are bound in the body M. Like lambdas, `rec f(x). M` is a value.
+
+`let rec f x = M in N` is syntactic sugar for `let f = rec f(x). M in N`.
+
+$
+(M arrow.b.double "rec" f(x) . M' quad N arrow.b.double V quad M'{"rec" f(x).M' \/ f, V \/ x} arrow.b.double W) / (M "  " N arrow.b.double W)
+$
+
+The key difference from lambda application is that a *copy of the rec function itself* is
+substituted for $f$ in the body, allowing self-reference.
+
+=== Nontermination
+
+Recursion introduces the possibility of nontermination. For example,
+`(rec f(x). f x) true` loops forever: each step substitutes the rec function back in,
+producing the same application again.
 
 == Variable Capture
 
-Substitution can capture variables, but this is not intended.
-Whenever we need to substitute under a binding, if we pick fresh names (unused elsewhere)
-for each of the binders, to generate an alpha equivalence.
+Variable capture occurs when a free variable becomes bound after substitution, changing the meaning
+of the expression. Consider:
 
-Let "M(x <-> y)" be a swapping operation that renames x to y, and y to x, in M.
+$ (lambda f . lambda "myInt" . f) #h(1em) (lambda x . x + "myInt") $
 
-We define "subst(M, N, x)" as the operation to substitute N for x in M,
+Here `myInt` is free in the argument. Naively substituting gives
+$lambda "myInt" . (lambda x . x + "myInt")$, where `myInt` in the body now refers to the
+binder's parameter instead of the original free variable. The meaning has changed.
+
+=== Avoiding Capture
+
+Whenever we substitute under a binder, we first rename the binder to a *fresh name*
+(one not free in the substituted term), producing an alpha-equivalent expression.
+
+E.g. rename `myInt` to `roger`:
+$ (lambda "bob" . lambda "roger" . "bob") #h(1em) (lambda x . x + "myInt") arrow.b.double lambda "roger" . (lambda x . x + "myInt") $
+
+Since `roger` is fresh, it cannot appear free in the argument, so no capture occurs.
+
+=== Capture-Avoiding Substitution (Function Cases)
+
+$(lambda x . M){N \/ x} = lambda x . M$
+
+Since $x$ is bound by the lambda, there are no free occurrences of $x$ in the body to replace.
+
+$(lambda x . M){N \/ y} = lambda x . (M{N \/ y}) #h(2em) "if" x eq.not y "and" x in.not "FV"(N)$
+
+We only substitute into the body if the binder $x$ would not capture any free variable in $N$.
+If $x in "FV"(N)$, we must first alpha-rename $x$ to a fresh name before substituting.
+
+=== Formal Definition Using Swapping
+
+Let $M(x arrow.l.r y)$ be a *swapping* operation that renames x to y and y to x in M.
+
+We define $"subst"(M, N, x)$ as the operation to substitute N for x in M,
 freshening variables where required.
 
 = Types and Typechecking
@@ -351,7 +430,7 @@ $ (tack M : "Int" quad tack N : "Int") / (tack M + N : "Int") $
 
 === Generalising to other binary operations.
 
-We can specify meta-level functions: a function wh'er defining when describing our language.
+We can specify meta-level functions: a function over types defined when describing our language.
 
 $
   "ty"(compose) = A -> B -> C
@@ -394,51 +473,204 @@ $
 $
 
 $
-  (x : A in tack M : B) / (Gamma ⊢ lambda x^A . M : A -> B)
+  (Gamma, x : A ⊢ M : B) / (Gamma ⊢ lambda x^A . M : A -> B)
+$
+
+==== Typing Rules for application, let, and recursion
+
+$
+  (Gamma ⊢ M : A -> B quad Gamma ⊢ N : A) / (Gamma ⊢ M "  " N : B)
+$
+
+$
+  (Gamma ⊢ M : A quad Gamma, x : A ⊢ N : B) / (Gamma ⊢ "let" x = M "in" N : B)
+$
+
+$
+  (Gamma, f : A -> B, x : A ⊢ M : B) / (Gamma ⊢ "rec" f(x) . M : A -> B)
 $
 
 = Data Types
 
+Many data types can be *encoded* into a small set of core types: products, sums, and recursive types.
+
 == Product Types
 
-It is often useful to have pairs of values. We say that pairs have a product type A x B.
+Pairs have a *product type* $A times B$, named after the cartesian product:
+$"values"(A times B) = {(x, y) | x in "values"(A), y in "values"(B)}$.
 
-This can be thought of as the cartesian product of types.
-tuples of (A, B) is a product type.
+Constructed with $(M, N)$, eliminated with `fst` and `snd`.
+
+$
+  (Gamma tack M : A quad Gamma tack N : B) / (Gamma tack (M, N) : A times B)
+  #h(2em)
+  (Gamma tack M : A times B) / (Gamma tack "fst" M : A)
+  #h(2em)
+  (Gamma tack M : A times B) / (Gamma tack "snd" M : B)
+$
+
+Semantics: $(M, N) arrow.b.double (V, W)$ if $M arrow.b.double V$ and $N arrow.b.double W$.
+$"fst"(V, W) arrow.b.double V$ and $"snd"(V, W) arrow.b.double W$.
+
+=== Tuples
+
+$n$-ary tuples are encoded by nesting pairs.
+E.g. a 4-tuple $(a, b, c, d)$ becomes $(a, (b, (c, d)))$.
+Elements are accessed via chains of `fst`/`snd` projections.
+
+=== Unit Type
+
+The *unit type* has exactly one value: `()`. It is the zero-element tuple.
+
+$ () / (Gamma tack () : "Unit") $
+
+Useful as the return type of side-effecting operations in expression-based languages
+(which have no `void`), e.g. `printLine : String -> Unit`.
 
 == Record Types
 
-We often want to give labels to values inside data.
+Records are product types with *named fields*: accessed by field name rather than position.
+They can be encoded as nested pairs with named projection functions.
 
 == Sum Types
 
-Can be thought of as enums.
+A *sum type* $A + B$ represents a value that is *either* of type A or type B.
 
-To construct a sum type A + B, we use sum injection functions to say whether we're
-providing a value of type A or B.
+Constructed using *injection functions*: $"inl"(M)$ for a value of type A, $"inr"(M)$ for type B.
 
-To use a sum type, we need to analyse it to determine whether it was constructing
-using the left or right injection. We can match over it.
+$
+  (Gamma tack M : A) / (Gamma tack "inl" M : A + B)
+  #h(2em)
+  (Gamma tack M : B) / (Gamma tack "inr" M : A + B)
+$
+
+Eliminated by *case analysis*: determine which injection was used and evaluate the corresponding branch.
+
+$
+  (Gamma tack L : A + B quad Gamma, x : A tack M : C quad Gamma, y : B tack N : C) / (Gamma tack "case" L "of" { "inl" x |-> M ; "inr" y |-> N } : C)
+$
+
+*Semantics:*
+$ (M arrow.b.double V) / ("inl" M arrow.b.double "inl" V)
+  #h(2em)
+  (L arrow.b.double "inl" V quad M{V \/ x} arrow.b.double W) / ("case" L "of" { "inl" x |-> M ; "inr" y |-> N } arrow.b.double W)
+$
+
+(Symmetric rules for `inr`.)
+
+=== Encoding Booleans as Sums
+
+With sum types and unit: $"true" equiv "inl" ()$ and $"false" equiv "inr" ()$ (type $"Unit" + "Unit"$).
+Conditionals become case analysis with fresh binders.
 
 === Variant Types
 
-A sum type with more than two values. can also be encoded via nested sum types.
-
-Enums can be encoded as a variant type and then can be encoded as a sum type.
+A *variant type* is a sum with more than two alternatives, each with a named constructor and a payload type.
+Constructors without data use `Unit` as payload.
+Eliminated by case analysis with a branch per constructor.
+Variants can be encoded as nested sum types using `inl`/`inr`.
 
 == Recursive Types
 
-We can define lists as having a default case '[]' and then [1,2,3] is syntactic sugar for
-1 :: (2 :: (3 :: []))).
+A *recursive type* is a type defined in terms of itself. Lists are the canonical example:
+an `IntList` is either empty (`[]`) or a head element consed onto another list (`Int :: IntList`).
 
 ```
 type IntList = [ ]
   | Int :: IntList
 ```
 
+`[1,2,3]` is syntactic sugar for `1 :: (2 :: (3 :: []))`.
+
+=== Typing Rules for Lists
+
+$
+  () / (Gamma tack [] : "IntList")
+  #h(2em)
+  (Gamma tack M : "Int" quad Gamma tack N : "IntList") / (Gamma tack M :: N : "IntList")
+$
+
+$
+  (Gamma tack L : "IntList" quad Gamma tack M : A quad Gamma, x : "Int", "xs" : "IntList" tack N : A) / (Gamma tack "case" L "of" { [] |-> M ; x :: "xs" |-> N } : A)
+$
+
+=== Formal Recursive Types
+
+The $mu$ operator allows a type to refer to itself: $mu X . A$ binds recursive type variable $X$ in type $A$.
+
+$"IntList" equiv mu X . "Unit" + ("Int" times X)$
+
+== Algebraic Data Types
+
+Products, sums, and recursive types together form *algebraic data types* (ADTs), the foundation
+of data in functional languages (e.g. Haskell, OCaml). Imperative languages also benefit from
+these building blocks, with mutability enabling additional structures like arrays.
+
 = Imperative Programming
 
-Statements do not evaluate, they affect a state and return a new state.
+Unlike expression-based (functional) languages, *imperative* languages allow mutable variables
+and modify program state. An imperative program has a program counter, call stack, and state.
+
+== Expressions vs Statements
+
+A *statement* is an instruction that performs a computation but does not return a value.
+An *expression* is a term that reduces to a value and can be contained within a statement.
+
+== $L_"While"$: A Core Imperative Language
+
+=== Syntax
+
+$
+"Constants" c &:= n | b \
+"Values" V, W &:= n | b \
+"Expressions" L, M, N &:= x | c | M dot.circle N \
+"Statements" s, t &:= s; t | "skip" | x := M | "if" M "then" s "else" t | "while" M { s }
+$
+
+- $s; t$: statement sequencing (run s then t)
+- `skip`: no-op ($"skip"; s = s = s; "skip"$)
+- $x := M$: variable assignment
+- `if M then s else t`: conditional statement
+- `while M { s }`: loop until M evaluates to false
+
+=== Expression Semantics
+
+Expressions now evaluate under a state $sigma$ (a mapping from variables to values):
+$sigma, M arrow.b.double V$ means "under state $sigma$, expression $M$ evaluates to value $V$".
+
+$
+  (x |-> V in sigma) / (sigma, x arrow.b.double V)
+  #h(2em)
+  () / (sigma, c arrow.b.double c)
+  #h(2em)
+  (sigma, L arrow.b.double V quad sigma, M arrow.b.double W) / (sigma, L dot.circle M arrow.b.double V hat(dot.circle) W)
+$
+
+=== Statement Semantics
+
+$sigma, s arrow.b.double sigma'$ means "given input state $sigma$, executing statement $s$ produces updated state $sigma'$".
+
+*Skip:*
+$ () / (sigma, "skip" arrow.b.double sigma) $
+
+*Sequencing:*
+$ (sigma, s arrow.b.double sigma' quad sigma', t arrow.b.double sigma'') / (sigma, s; t arrow.b.double sigma'') $
+
+*Assignment:*
+$ (sigma, M arrow.b.double V) / (sigma, x := M arrow.b.double sigma[x |-> V]) $
+
+*If-then-else:*
+$
+  (sigma, M arrow.b.double "true" quad sigma, s arrow.b.double sigma') / (sigma, "if" M "then" s "else" t arrow.b.double sigma')
+  #h(2em)
+  (sigma, M arrow.b.double "false" quad sigma, t arrow.b.double sigma') / (sigma, "if" M "then" s "else" t arrow.b.double sigma')
+$
+
+*While (false):*
+$ (sigma, M arrow.b.double "false") / (sigma, "while" M { s } arrow.b.double sigma) $
+
+*While (true):*
+$ (sigma, M arrow.b.double "true" quad sigma, s arrow.b.double sigma' quad sigma', "while" M { s } arrow.b.double sigma'') / (sigma, "while" M { s } arrow.b.double sigma'') $
 
 = Small-step Semantics and Type Soundness
 
@@ -572,10 +804,20 @@ while status == RUNNING:
 
 A constant $n$ compiles to `LOADC n`. A binary operation $M dot.o N$ compiles by: compile $M$, compile $N$, emit the corresponding instruction.
 
-=== Variables
+=== Variable Storage
+
+Variables in imperative languages fall into three categories:
+
+- *Global*: in scope across all functions, allocated at declaration, remain until program terminates.
+- *Local*: in scope for a single function call, allocated on the *variable stack*, deallocated on return.
+- *Heap*: allocated on demand (e.g. `malloc`), persist across function calls, deallocated explicitly or by a garbage collector.
 
 An *address table* maps variable names to (locale, address) pairs, where locale is `GLOBAL` or `LOCAL`.
 A variable reference compiles to `LOADG a` or `LOADL o` depending on locale.
+
+=== Assignments
+
+An assignment $x := M$ compiles by: compile $M$ (pushes value onto stack), then emit `STOREG a` or `STOREL o` to pop and store the value.
 
 === Conditionals (Back-Patching)
 
@@ -616,7 +858,16 @@ For `if L then M else N`:
 
 Bytecode VMs are stack-based, have simple instruction sets, are portable, but have interpretation overhead.
 
-Native code is register-based, architecture-specific (RISC vs CISC), with no interpretation overhead.
+Native code is register-based, architecture-specific, with no interpretation overhead.
+
+=== RISC vs CISC
+
+*CISC* (Complex Instruction Set Computer, e.g. x86): many instructions that can perform multiple operations at once.
+
+*RISC* (Reduced Instruction Set Computer, e.g. RISC-V, ARM): simpler, fewer instructions; generated code may be larger but each instruction is fast and uniform.
+
+Registers are a finite set of fast storage locations on the CPU. Native instruction sets expect arguments in registers
+rather than on a stack. Computing with registers is fast; reading/writing memory is much more expensive.
 
 == Compilation Pipeline
 
@@ -625,6 +876,12 @@ Frontend (parsing/typechecking) $arrow.r$ Compilation to IR $arrow.r$ Instructio
 == Intermediate Representations
 
 It is better to compile to an IR first rather than directly to native code. A classic example is LLVM. This allows many frontends to share the same backend pipeline. Many compilers use multiple IRs.
+
+=== IR Lowering Chain
+
+The IR is progressively lowered through several representations:
+
+Tree-based IR (close to source) $arrow.r$ Linearised sequence with two-way conditional jumps $arrow.r$ Three-address code with one-way jumps and fall-through (close to assembly).
 
 === Tree-Based IR
 
@@ -691,6 +948,19 @@ The IR and three-address code assume an infinite number of registers, but CPUs o
 
 A variable is *live* at a location if it may be inspected at a later point. We want to know the range of locations between when a variable is assigned and when it is last used. Variables with non-overlapping liveness ranges can be assigned to the same register.
 
+*Example:* For `int s = (a+b+c)/2; return s*(s-a)*(s-b)*(s-c);` compiled to three-address code:
+
+```
+1: t1 <- a + b     5: t4 <- s * t3
+2: t2 <- t1 + c    6: t5 <- s - b
+3: s  <- t2 / 2    7: t6 <- t4 * t5
+4: t3 <- s - a     8: t7 <- s - c
+                    9: t8 <- t6 * t7
+                   10: return t8
+```
+
+Variable `a` is live from location 1 (first use) to 4 (last use). Variable `s` is live from 3 (definition) to 8 (last use). Variable `t8` is live only from 9 to 10. Since `a` and `t8` have non-overlapping ranges, they can share the same register.
+
 === Liveness with Control Flow
 
 With control flow (e.g. loops), liveness ranges can span across jumps. A variable may be live on paths that loop back to its use site. Since basic blocks have multiple instructions and no intermediate control flow, we can group instructions and compute liveness on basic blocks directly.
@@ -749,9 +1019,17 @@ We then allocate registers by *colouring the graph*: no adjacent node can be giv
 
 === Graph Colouring
 
-Graph colouring is an NP-complete problem. However, there is a *linear time approximation* algorithm used in practice that gives good results.
+Graph colouring is an NP-complete problem. However, there is a *linear time heuristic* that works well in practice:
 
-Sometimes we will get a graph that we cannot colour with the available number of registers: in this case we need to write the variable to memory. This is called *spilling*.
++ Find a node with fewer than $k$ neighbours (where $k$ = number of available registers).
++ Remove it from the graph and push it onto a stack.
++ Repeat until the graph is empty (or no such node exists -- then a variable must be *spilled*).
++ Pop nodes from the stack, assigning each a colour different from its already-coloured neighbours.
+
+Since each removed node had fewer than $k$ neighbours, a valid colour is always available.
+
+*Spilling:* if at any point every remaining node has $gt.eq k$ neighbours, we cannot guarantee a colouring.
+The variable is *spilled* to memory: the compiler inserts load/store instructions around its uses.
 
 == Instruction Selection
 

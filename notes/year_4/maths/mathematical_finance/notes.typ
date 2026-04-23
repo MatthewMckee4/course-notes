@@ -123,7 +123,7 @@ $ P = sum_(k=1)^N A_k (1 + r^* / n)^(-k) $
 
 == APR via Newton-Raphson
 
-When the APR equation $f(r) = 0$ has no closed-form solution, use Newton-Raphson iteration: $r_(n+1) = r_n - f(r_n) / f'(r_n)$.
+When the APR equation $f(r) = 0$ has no closed-form solution, use Newton-Raphson iteration: $r_(n+1) = r_n - f(r_n) / (f'(r_n))$.
 
 == Asset Classes
 
@@ -318,11 +318,13 @@ A *spread* combines options of the same type (all calls or all puts) with differ
 
 Buy call at $X_1$, sell call at $X_2$ ($X_1 < X_2$). Payoff:
 
-$ V(T) = cases(
-  0 & "if" S_T <= X_1,
-  S_T - X_1 & "if" X_1 < S_T <= X_2,
-  X_2 - X_1 & "if" S_T > X_2
-) $
+$
+  V(T) = cases(
+    0 & "if" S_T <= X_1,
+    S_T - X_1 & "if" X_1 < S_T <= X_2,
+    X_2 - X_1 & "if" S_T > X_2
+  )
+$
 
 Net premium: $pi_(C_1) - pi_(C_2) > 0$ (since lower strike call costs more). Profit is bounded: $-(pi_(C_1) - pi_(C_2))e^(r T) <= "Profit" <= (X_2 - X_1) - (pi_(C_1) - pi_(C_2))e^(r T)$.
 
@@ -385,7 +387,9 @@ $ xi_1 = 1 / (pi_1 (u - d)), quad xi_0 = (-d) / ((u - d)(1 + r) pi_0) $
 
 *Arrow-Debreu securities*:
 
-$ phi^U (omega) = cases(1 & "if" omega = U, 0 & "if" omega = D), quad phi^D (omega) = cases(0 & "if" omega = U, 1 & "if" omega = D) $
+$
+  phi^U (omega) = cases(1 & "if" omega = U, 0 & "if" omega = D), quad phi^D (omega) = cases(0 & "if" omega = U, 1 & "if" omega = D)
+$
 
 These form a basis: any payoff $phi$ with $phi(U) = a$, $phi(D) = b$ can be written $phi = a phi^U + b phi^D$.
 
@@ -612,7 +616,9 @@ We write $[P]$ for the equivalence class of $P$.
 
 *Proof ($arrow.l.double$)*: Suppose $Q tilde P$ is risk-neutral and $overline(xi)$ is a portfolio with $overline(xi) dot overline(pi) <= 0$. Then:
 
-$ overline(xi) dot overline(pi) = sum_(i=0)^d xi_i pi_i = sum_(i=0)^d xi_i EE_Q (S^i / (1+r)) = EE_Q (overline(xi) dot overline(S) / (1+r)) $
+$
+  overline(xi) dot overline(pi) = sum_(i=0)^d xi_i pi_i = sum_(i=0)^d xi_i EE_Q (S^i / (1+r)) = EE_Q (overline(xi) dot overline(S) / (1+r))
+$
 
 So $EE_Q (overline(xi) dot overline(S)) = (1+r) overline(xi) dot overline(pi) <= 0$. If also $overline(xi) dot overline(S) >= 0$ $Q$-a.s. (equivalently $P$-a.s. since $Q tilde P$), then $EE_Q (overline(xi) dot overline(S)) >= 0$. Combined: $EE_Q (overline(xi) dot overline(S)) = 0$. Since $overline(xi) dot overline(S) >= 0$ $Q$-a.s. with expectation 0, we get $overline(xi) dot overline(S) = 0$ $Q$-a.s., hence $P$-a.s. So $P(overline(xi) dot overline(S) > 0) = 0$, and $overline(xi)$ is not an arbitrage.
 
@@ -667,7 +673,9 @@ $ xi_1 = (C(U) - C(D)) / (S(U) - S(D)), quad xi_0 = (C(D) dot S(U) - C(U) dot S(
 
 The price is:
 
-$ pi_C = (C(D)) / (1 + r) dot (S(U) - pi_1(1 + r)) / (S(U) - S(D)) + (C(U)) / (1 + r) dot (pi_1(1 + r) - S(D)) / (S(U) - S(D)) $
+$
+  pi_C = (C(D)) / (1 + r) dot (S(U) - pi_1(1 + r)) / (S(U) - S(D)) + (C(U)) / (1 + r) dot (pi_1(1 + r) - S(D)) / (S(U) - S(D))
+$
 
 Or equivalently: $pi_C = (tilde(p) C(U) + tilde(q) C(D)) / (1 + r)$.
 
@@ -749,9 +757,11 @@ The $sigma$-algebra $cal(F)_t$ contains the random events that depend only on th
 
 *Example ($T = 2$)*:
 
-$ cal(F)_0 &= {emptyset, Omega} \
-cal(F)_1 &= {emptyset, {U U, U D}, {D U, D D}, Omega} \
-cal(F)_2 &= cal(P)(Omega) $
+$
+  cal(F)_0 & = {emptyset, Omega} \
+  cal(F)_1 & = {emptyset, {U U, U D}, {D U, D D}, Omega} \
+  cal(F)_2 & = cal(P)(Omega)
+$
 
 Note that $cal(F)_1$ distinguishes whether the first move was $U$ or $D$, but does not distinguish between $U U$ and $U D$.
 
@@ -759,7 +769,9 @@ Note that $cal(F)_1$ distinguishes whether the first move was $U$ or $D$, but do
 
 In general, the degree to which prices vary as a result of 'Up' and 'Down' movements may depend on time and the current node. But we assume the price process behaves as:
 
-$ S_(t+1)(omega) = Z_(t+1)(omega) S_t (omega), quad Z_(t+1) = cases(u & "the" (t+1)"-th component of" omega "is" U, d & "the" (t+1)"-th component of" omega "is" D) $
+$
+  S_(t+1)(omega) = Z_(t+1)(omega) S_t (omega), quad Z_(t+1) = cases(u & "the" (t+1)"-th component of" omega "is" U, d & "the" (t+1)"-th component of" omega "is" D)
+$
 
 The $S_t$ are $cal(F)_t$-measurable random variables.
 
@@ -820,8 +832,10 @@ The outcomes of the claim are $C(U U)$, $C(U D)$, $C(D U)$, and $C(D D)$. To fin
 
 *Upper branch*: At the node $S_0 u$ we solve:
 
-$ xi_0^1 (U) pi_0 (1 + r)^2 + xi_1^1 (U) u S_1 (U) &= C(U U) \
-xi_0^1 (U) pi_0 (1 + r)^2 + xi_1^1 (U) d S_1 (U) &= C(U D) $
+$
+  xi_0^1 (U) pi_0 (1 + r)^2 + xi_1^1 (U) u S_1 (U) & = C(U U) \
+  xi_0^1 (U) pi_0 (1 + r)^2 + xi_1^1 (U) d S_1 (U) & = C(U D)
+$
 
 The value of the portfolio on the upper branch at $t = 1$ is:
 
@@ -835,9 +849,11 @@ $ V_1 (D) = xi_0^1 (D) pi_0 (1 + r) + xi_1^1 (D) S_1 (D) = 1 / (1 + r) (q C(D U)
 
 *Initial branch*: Now the payoffs $V_1(U)$ and $V_1(D)$ can be replicated on the initial branch:
 
-$ V_0 &= xi_0^0 pi_0 + xi_1^0 S_0 = 1 / (1 + r) (q V_1 (U) + (1 - q) V_1 (D)) \
-&= 1 / (1 + r)^2 [q^2 C(U U) + q(1 - q)(C(U D) + C(D U)) + (1 - q)^2 C(D D)] \
-&= 1 / (1 + r)^2 sum_(k=0)^2 binom(2, k) q^k (1 - q)^(2 - k) f(S_0 u^k d^(2 - k)) $
+$
+  V_0 & = xi_0^0 pi_0 + xi_1^0 S_0 = 1 / (1 + r) (q V_1 (U) + (1 - q) V_1 (D)) \
+      & = 1 / (1 + r)^2 [q^2 C(U U) + q(1 - q)(C(U D) + C(D U)) + (1 - q)^2 C(D D)] \
+      & = 1 / (1 + r)^2 sum_(k=0)^2 binom(2, k) q^k (1 - q)^(2 - k) f(S_0 u^k d^(2 - k))
+$
 
 where $C(omega) = f(S_T (omega))$ and $S_T (omega) = S_0 u^k d^(T - k)$ where $k$ is the number of times $U$ appears in $omega$.
 
@@ -872,3 +888,237 @@ $ C_(u u) = |95 - 144| = 49, quad C_(u d) = C_(d u) = |95 - 108| = 13, quad C_(d
 So:
 
 $ pi_C = 1 / 1.05^2 (0.25 dot 49 + 0.5 dot 13 + 0.25 dot 14) approx 20.18 $
+
+= Lecture 15: Black-Scholes-Merton Formula
+
+== Limiting Process
+
+Fix terminal time $T$ and divide $[0, T]$ into $n$ intervals of length $Delta t = T / n$. Consider an $n$-period CRR model with $u = e^(sigma sqrt(Delta t))$, $d = e^(-sigma sqrt(Delta t))$, and compounding factor $e^(r Delta t)$ per interval. The risk-neutral probability is:
+
+$ q = (e^(r Delta t) - d) / (u - d) approx 1 / 2 + 1 / (2 sigma) (r - 1 / 2 sigma^2) sqrt(Delta t) $
+
+The asset price after $n$ moves is $S_T = S_0 u^k d^(n-k) = S_0 exp[sigma sqrt(Delta t)(2k - n)]$ where $k ~ "Binom"(n, q)$.
+
+== Convergence to Log-Normal Distribution
+
+By the central limit theorem, $(2k - n) / sqrt(n) ->^d N((r - sigma^2 / 2) sqrt(T) / sigma, 1)$, so as $n -> infinity$:
+
+$ S_T = S_0 exp[(r - 1 / 2 sigma^2) T + sigma sqrt(T) N(0, 1)] $
+
+The terminal price $S_T$ is *log-normally distributed*.
+
+== Black-Scholes-Merton Formula
+
+The discounting factor is $e^(-r T)$ (continuous compounding). The price of a path-independent claim $C = f(S_T)$ is:
+
+$
+  pi_C = e^(-r T) 1 / sqrt(2 pi) integral_(-infinity)^infinity e^(-1 / 2 s^2) f(S_0 e^(r T - 1 / 2 sigma^2 T + sigma sqrt(T) s)) dif s
+$
+
+Parameters: $r$ (risk-free rate), $T$ (expiry), $S_0$ (initial price), $sigma$ (*volatility* -- magnitude of random price fluctuations).
+
+== Call and Put Prices
+
+For a European call with strike $X$:
+
+$ pi_"call" = S_0 Phi(d_+) - X e^(-r T) Phi(d_-) $
+
+where:
+
+$ d_-(S_0, T) = 1 / (sigma sqrt(T)) (log(S_0 / X) + r T - 1 / 2 sigma^2 T), quad d_+ = d_- + sigma sqrt(T) $
+
+and $Phi(z) = 1 / sqrt(2 pi) integral_(-infinity)^z e^(-1 / 2 s^2) dif s$ is the standard normal CDF.
+
+For a European put (by put-call parity or direct computation):
+
+$ pi_"put" = X e^(-r T) Phi(-d_-) - S_0 Phi(-d_+) $
+
+== Estimating Volatility
+
+In geometric Brownian motion, the *log-returns* over interval $delta$ are:
+
+$ R_i = log(S_i / S_(i - delta)) ~ N((r - 1 / 2 sigma^2) delta, sigma^2 delta) $
+
+Given $M$ daily log-returns ($delta = 1$ day), an unbiased estimator of $sigma^2$ is:
+
+$ hat(sigma)^2 = 1 / ((M - 1) delta) sum_(i=1)^M (R_i - macron(R))^2, quad macron(R) = 1 / M sum_(i=1)^M R_i $
+
+== Value at General Time $t$
+
+The value of a claim $C = f(S_T)$ at time $t in [0, T]$, given $S_t$:
+
+$
+  V(t, S_t) = e^(-r(T - t)) 1 / sqrt(2 pi) integral_(-infinity)^infinity e^(-1 / 2 s^2) f(S_t e^(r(T - t) - 1 / 2 sigma^2 (T - t) + sigma sqrt(T - t) s)) dif s
+$
+
+Note $V(0, S_0) = pi_C$ (the price) and $V(T, S_T) = f(S_T)$ (the payoff).
+
+= Lecture 16: The Greeks
+
+== Call Option Value at Time $t$
+
+For a European call with strike $X$, writing $tau = T - t$ for time to expiry:
+
+$ V(t, S_t) = S_t Phi(d_+) - X e^(-r tau) Phi(d_-) $
+
+$ d_-(S_t, t) = 1 / (sigma sqrt(tau)) (log(S_t / X) + r tau - 1 / 2 sigma^2 tau), quad d_+ = d_- + sigma sqrt(tau) $
+
+== Definition
+
+*The Greeks* are rates of change of the option value with respect to underlying parameters.
+
+#table(
+  columns: (auto, auto, auto, auto, auto, auto),
+  [*Delta*], [$Delta = partial V / partial S_t$], [*Rho*], [$rho = partial V / partial r$], [], [],
+  [*Theta*],
+  [$Theta = partial V / partial t = - partial V / partial tau$],
+  [*Vega*],
+  [$nu = partial V / partial sigma$],
+  [],
+  [],
+
+  [*Gamma*], [$Gamma = partial Delta / partial S_t$], [], [], [], [],
+)
+
+== Key Identity
+
+For a call option, $S_t Phi'(d_+) - X e^(-r tau) Phi'(d_-) = 0$. This simplifies many Greek derivations.
+
+== Greeks for a European Call
+
+*Delta*:
+
+$ Delta = Phi(d_+) >= 0 $
+
+Measures the change in call value per unit change in asset price.
+
+*Theta*:
+
+$ Theta = -(S_t sigma Phi'(d_+)) / (2 sqrt(tau)) - r X e^(-r tau) Phi(d_-) $
+
+Measures time-decay of the option value. For calls, $Theta < 0$.
+
+*Rho*:
+
+$ rho = X tau e^(-r tau) Phi(d_-) $
+
+Measures sensitivity to the risk-free rate.
+
+*Vega*:
+
+$ nu = S_t sqrt(tau) Phi'(d_+) >= 0 $
+
+Measures sensitivity to volatility.
+
+== Delta-Hedging
+
+Sell one call (value $-V(t, S_t)$) and hold $Delta^*$ shares. Position value: $-V(t, S_t) + Delta^* S_t$. If the share price moves by $delta S_t$ in time $delta t$, the change in position value is approximately:
+
+$ (-Delta + Delta^*) delta S_t - Theta delta t - 1 / 2 Gamma (delta S_t)^2 $
+
+Setting $Delta^* = Delta$ eliminates first-order price risk. The position then profits from time-decay ($-Theta delta t > 0$ since $Theta < 0$) but loses from gamma ($-1 / 2 Gamma (delta S_t)^2 < 0$).
+
+In the Black-Scholes model, the expected contributions of $Theta$ and $Gamma$ exactly balance so the perfectly hedged portfolio earns the risk-free rate. In practice, the *actual volatility* may differ from the *implied volatility* used for pricing, and this difference determines whether a delta-hedged position is profitable.
+
+= Lecture 17: Exotic Options in the CRR Model
+
+== American Options in the CRR Model
+
+An *American call* (resp. put) gives the right to buy (resp. sell) at strike $X$ at any time up to $T$. For non-dividend-paying assets, early exercise of an American call is never optimal ($pi_(C_A) = pi_C$). For puts or calls on dividend-paying assets, early exercise may be optimal.
+
+=== Backward Induction for American Options
+
+At each node, the value is the *maximum* of the immediate payoff and the discounted continuation value:
+
+$ V_t = max{f(S_t), 1 / (1 + r) EE_Q [V_(t+1) | cal(F)_t]} $
+
+where $f(S) = (S - X)^+$ for a call and $f(S) = (X - S)^+$ for a put. If the immediate payoff exceeds the continuation value, early exercise is optimal at that node.
+
+=== Example: American Put ($T = 2$)
+
+$S_0 = 100$, $u = 1.2$, $d = 0.9$, $r = 0.05$, $X = 105$, $q = 0.5$.
+
+Terminal payoffs: $C_(U U) = 0$, $C_(U D) = C_(D U) = 0$, $C_(D D) = 24$.
+
+At $t = 1$: $V_1(U) = max{0, (0 + 0) / 1.05} = 0$. $V_1(D) = max{15, (0 + 24) / (2 dot 1.05)} = max{15, 11.43} = 15$ (early exercise).
+
+At $t = 0$: $V_0 = max{5, (0 + 15) / (2 dot 1.05)} = max{5, 7.14} = 7.14$.
+
+Price is \$7.14. Early exercise occurs in the $D$ state at $t = 1$.
+
+== Path-Dependent Claims
+
+For path-dependent payoffs $C(omega)$, the price uses the full path measure:
+
+$ pi_C = 1 / (1 + r)^T sum_(omega in Omega) q^(hat(k)(omega)) (1 - q)^(T - hat(k)(omega)) C(omega) $
+
+where $hat(k)(omega)$ is the number of Up moves in $omega$. Path-dependent claims require summing over all $2^T$ paths (versus $T + 1$ terminal prices for path-independent claims).
+
+== Asian Options
+
+An *Asian call option* has payoff $(macron(S) - X)^+$ where $macron(S) = 1 / (T + 1) sum_(t=0)^T S_t$ is the average asset price over the contract's life. This is path-dependent: even if two paths reach the same terminal price, different histories give different averages.
+
+=== Example ($T = 2$)
+
+$S_0 = 100$, $u = 1.2$, $d = 0.9$, $r = 0.05$, $X = 105$, $q = 0.5$.
+
+Average prices and payoffs: $U U$: $macron(S) = 121.33$, $C = 16.33$. $U D$: $macron(S) = 109.33$, $C = 4.33$. $D U$: $macron(S) = 99.33$, $C = 0$. $D D$: $macron(S) = 90.33$, $C = 0$.
+
+Note $U D$ and $D U$ reach the same terminal price $S_2 = 108$ but have different payoffs.
+
+$V_1(U) = (0.5 dot 16.33 + 0.5 dot 4.33) / 1.05 = 9.84$, $V_1(D) = 0$. $V_0 = (0.5 dot 9.84) / 1.05 = 4.69$.
+
+== Look-Back Options
+
+=== Fixed-Strike
+
+- *Fixed-strike call*: $C(omega) = (max_(t in {0,...,T}) S_t (omega) - X)^+$
+- *Fixed-strike put*: $C(omega) = (X - min_(t in {0,...,T}) S_t (omega))^+$
+
+=== Floating-Strike
+
+- *Floating-strike call*: $C(omega) = (S_T - min_(t in {0,...,T}) S_t (omega))^+$
+- *Floating-strike put*: $C(omega) = (max_(t in {0,...,T}) S_t (omega) - S_T)^+$
+
+== Barrier Options
+
+A *barrier option* activates or deactivates when the asset price crosses a barrier $B$.
+
+- *Knock-in*: activates if the barrier is crossed at least once
+- *Knock-out*: deactivates if the barrier is crossed
+
+The barrier can be *up* ($B > S_0$) or *down* ($B < S_0$), and the option can be a call or put, giving 8 types: (In/Out) $times$ (Up/Down) $times$ (Call/Put).
+
+When activated, the payoff is that of the corresponding vanilla option. *Knock-in + Knock-out = European option*, so barrier options are cheaper than their European counterparts.
+
+=== Example: Down-and-In Put ($T = 3$)
+
+$S_0 = 100$, $u = 1.2$, $d = 0.9$, $r = 0.05$, $X = 105$, $B = 95$, $q = 0.5$. The put activates only if $min_t S_t <= B$.
+
+Paths where the barrier is crossed ($min S_t <= 95$): $D U U$, $D U D$, $D D U$, $D D D$. Payoffs: $C = 0, 7.80, 7.80, 32.10$ respectively. Price: $pi = 1 / 1.05^3 dot 1 / 8 dot (0 + 7.80 + 7.80 + 32.10) = 5.15$.
+
+= Lecture 18: Arbitrage Arguments & American Option Bounds
+
+== General Arbitrage Strategy
+
+To show $pi_B >= pi_A$ via no-arbitrage:
++ Assume the contrary: $pi_A > pi_B$
++ *Buy low, sell high*: go long in $B$, short in $A$, invest the difference $pi_A - pi_B > 0$ at the risk-free rate
++ Show the position has value $>= 0$ in all states and $> 0$ in at least one state
++ This contradicts no-arbitrage, so $pi_B >= pi_A$
+
+To show $pi_A = pi_B$ (*law of one price*): find portfolios $A$ and $B$ with identical payoffs in all states, then two applications of the dominance principle give $pi_A >= pi_B$ and $pi_B >= pi_A$.
+
+== American Call Equals European Call (Continuous Compounding)
+
+*Claim*: $pi_(C_A) = pi_(C_E)$ for a non-dividend-paying asset.
+
+*Proof ($pi_(C_A) <= pi_(C_E)$)*: Assume $pi_(C_A) > pi_(C_E)$. Buy a European call, sell an American call, invest $pi_(C_A) - pi_(C_E) > 0$ at the risk-free rate. If the American call is exercised at time $t$: borrow the asset and sell for $X$, invest $X$ at the risk-free rate. At expiry $T$: buy the asset to close the short using the European call, costing $min{S_T, X}$. Position value: $(pi_(C_A) - pi_(C_E)) e^(r T) + min{X(e^(r(T - t)) - 1), 0} > 0$. Arbitrage. The reverse inequality $pi_(C_A) >= pi_(C_E)$ is immediate since the American option is at least as flexible.
+
+== American Put Bounds
+
+$ max{pi_(P_E), X - S_0} <= pi_(P_A) <= X $
+
+*Upper bound*: If $pi_(P_A) > X$, sell the put and invest at the risk-free rate. The maximum payoff of the put is $X$ (when $S_T = 0$), so the position $pi_(P_A) e^(r T) - (X - S_T)^+ >= pi_(P_A) - X > 0$ is always profitable. Arbitrage.
+
+*Lower bound $pi_(P_A) >= X - S_0$*: If $pi_(P_A) < (X - S_0)^+$, buy the put and exercise immediately for profit $(X - S_0) - pi_(P_A) > 0$.
