@@ -1099,3 +1099,199 @@ We say that two expressions are alpha equivalent if they are the same up to rena
 
 Computation in the lambda calculus is driven by beta reduction:
 this involves substituting an argument for a parameter when applying a function.
+
+#pagebreak()
+
+= A Worked Example: Mini Expression-Language REPL
+
+The following self-contained Haskell program ties together most of the features
+covered in these notes. It implements a small calculator with variables: it
+parses an expression, evaluates it while threading an environment and a trace
+log, supports a REPL with command history, and includes a property test.
+
+It uses: algebraic data types (sum, product, recursive, parameterised),
+records, `newtype`, pattern matching, guards, `let`/`where` bindings, list
+comprehensions, higher-order functions (`map`, `foldr`, `<$>`, `<*>`), the
+`Maybe` and `Either` types, manual and derived typeclass instances, parser
+combinators with Parsec, the `State` and `Writer` monads composed via monad
+transformers, `IO` with `IORef`, and a `QuickCheck` property.
+
+```hs
+module Calculator where
+
+import qualified Data.Map.Strict as Map
+import Control.Monad.State    (StateT, runStateT, get, modify)
+import Control.Monad.Writer   (WriterT, runWriterT, tell)
+import Data.IORef             (newIORef, modifyIORef', readIORef)
+import Text.Parsec
+import Text.Parsec.String     (Parser)
+import Test.QuickCheck        (quickCheck)
+
+-- Algebraic data types ------------------------------------------------------
+
+data Op = Add | Sub | Mul | Div
+  deriving (Show, Eq)
+
+data Expr
+  = Num Double
+  | Var String
+  | BinOp Op Expr Expr
+  | Let String Expr Expr
+  deriving (Show, Eq)
+
+-- Newtype: distinguish variable names from arbitrary strings.
+newtype VarName = VarName { getName :: String } deriving (Show, Eq, Ord)
+
+-- Record: configuration passed around the interpreter.
+data ReplState = ReplState
+  { history    :: [String]
+  , entryCount :: Int
+  } deriving (Show)
+
+-- Typeclass with manual instances -------------------------------------------
+
+class Pretty a where
+  pretty :: a -> String
+
+instance Pretty Op where
+  pretty Add = "+"
+  pretty Sub = "-"
+  pretty Mul = "*"
+  pretty Div = "/"
+
+instance Pretty Expr where
+  pretty (Num n)        = show n
+  pretty (Var x)        = x
+  pretty (BinOp o a b)  = "(" ++ pretty a ++ " " ++ pretty o ++ " " ++ pretty b ++ ")"
+  pretty (Let x e body) = "let " ++ x ++ " = " ++ pretty e ++ " in " ++ pretty body
+
+-- Evaluator: StateT (env) over WriterT (trace) over Either (errors) ---------
+
+type Env  = Map.Map String Double
+type Eval = StateT Env (WriterT [String] (Either String))
+
+throw :: String -> Eval a
+throw = lift . lift . Left
+
+applyOp :: Op -> Double -> Double -> Either String Double
+applyOp Add x y          = Right (x + y)
+applyOp Sub x y          = Right (x - y)
+applyOp Mul x y          = Right (x * y)
+applyOp Div _ 0          = Left "division by zero"
+applyOp Div x y          = Right (x / y)
+
+eval :: Expr -> Eval Double
+eval (Num n)         = n <$ tell ["num " ++ show n]
+eval (Var x)         = do
+  env <- get
+  case Map.lookup x env of
+    Just v  -> v <$ tell ["var " ++ x ++ " = " ++ show v]
+    Nothing -> throw ("unbound variable: " ++ x)
+eval (BinOp op a b)  = do
+  va <- eval a
+  vb <- eval b
+  case applyOp op va vb of
+    Right r -> r <$ tell [show va ++ " " ++ pretty op ++ " " ++ show vb ++ " = " ++ show r]
+    Left  e -> throw e
+eval (Let x e body)  = do
+  v <- eval e
+  modify (Map.insert x v)
+  eval body
+
+runEval :: Expr -> Either String (Double, [String])
+runEval e = do
+  ((v, _env), logs) <- runWriterT (runStateT (eval e) Map.empty)
+  return (v, logs)
+
+-- Parser combinators (Parsec) -----------------------------------------------
+
+lexeme :: Parser a -> Parser a
+lexeme p = p <* spaces
+
+number :: Parser Expr
+number = lexeme $ do
+  whole <- many1 digit
+  frac  <- option "" ((:) <$> char '.' <*> many1 digit)
+  return (Num (read (whole ++ frac)))
+
+ident :: Parser String
+ident = lexeme ((:) <$> letter <*> many alphaNum)
+
+letExpr :: Parser Expr
+letExpr = do
+  _ <- lexeme (string "let")
+  x <- ident
+  _ <- lexeme (char '=')
+  e <- expr
+  _ <- lexeme (string "in")
+  Let x e <$> expr
+
+parens :: Parser a -> Parser a
+parens = between (lexeme (char '(')) (lexeme (char ')'))
+
+factor, term, expr :: Parser Expr
+factor = try letExpr <|> number <|> (Var <$> ident) <|> parens expr
+term   = chainl1 factor mulOp
+  where mulOp = (lexeme (char '*') >> return (BinOp Mul))
+            <|> (lexeme (char '/') >> return (BinOp Div))
+expr   = chainl1 term addOp
+  where addOp = (lexeme (char '+') >> return (BinOp Add))
+            <|> (lexeme (char '-') >> return (BinOp Sub))
+
+parseExpr :: String -> Either String Expr
+parseExpr s = case parse (spaces *> expr <* eof) "" s of
+  Left  e -> Left (show e)
+  Right e -> Right e
+
+-- IO REPL using IORef -------------------------------------------------------
+
+repl :: IO ()
+repl = do
+  ref <- newIORef (ReplState { history = [], entryCount = 0 })
+  let loop = do
+        line <- getLine
+        if null line
+          then do
+            n <- entryCount <$> readIORef ref
+            putStrLn ("bye (" ++ show n ++ " expressions evaluated)")
+          else do
+            modifyIORef' ref (\s -> s { history = line : history s
+                                      , entryCount = entryCount s + 1 })
+            case parseExpr line >>= runEval of
+              Left  err        -> putStrLn ("error: " ++ err)
+              Right (v, logs)  -> do
+                mapM_ (putStrLn . ("  " ++)) logs
+                putStrLn ("=> " ++ show v)
+            loop
+  loop
+
+-- QuickCheck property: addition is commutative under our evaluator ----------
+
+prop_addCommutative :: Double -> Double -> Bool
+prop_addCommutative x y =
+  let e1 = BinOp Add (Num x) (Num y)
+      e2 = BinOp Add (Num y) (Num x)
+  in fmap fst (runEval e1) == fmap fst (runEval e2)
+
+main :: IO ()
+main = do
+  let src = "let x = 3 in let y = 4 in x * x + y * y"
+  case parseExpr src of
+    Left  err -> putStrLn err
+    Right e   -> do
+      putStrLn ("source: " ++ src)
+      putStrLn ("ast:    " ++ pretty e)
+      case runEval e of
+        Left  err        -> putStrLn ("error: " ++ err)
+        Right (v, logs)  -> do
+          putStrLn "trace:"
+          mapM_ (putStrLn . ("  " ++)) logs
+          putStrLn ("result: " ++ show v)
+  quickCheck prop_addCommutative
+  putStrLn "Enter expressions (empty line to quit):"
+  repl
+```
+
+Running `main` parses `let x = 3 in let y = 4 in x * x + y * y`, traces each
+sub-evaluation through the `Writer` log, returns `25.0`, then runs a
+`QuickCheck` property and finally drops into the REPL.
