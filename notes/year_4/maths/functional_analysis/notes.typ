@@ -159,7 +159,49 @@ For a Cauchy sequence $(x_m)$ in $RR^n$, each component sequence $(xi_j^((m)))$ 
 
 === 1.5-2 Completeness of $l^infinity$
 
-For a Cauchy sequence $(x_m)$ in $l^infinity$ with $x_m = (xi_j^((m)))$, each $(xi_j^((m)))_(m=1)^infinity$ is Cauchy in $RR$ (or $CC$) and converges to $xi_j$. Define $x = (xi_j)$. Since $|xi_j^((m)) - xi_j| <= epsilon$ for $m > N$ and $|xi_j| <= epsilon + k_m$ (where $|xi_j^((m))| <= k_m$), $x in l^infinity$. Also $d(x_m, x) = sup_j |xi_j^((m)) - xi_j| <= epsilon$.
+_The space $l^infinity$ is complete._
+
+Recall $l^infinity$ consists of all bounded scalar sequences $x = (xi_j)$ with metric $d(x, y) = sup_(j in NN) |xi_j - eta_j|$ (induced by the norm $||x|| = sup_j |xi_j|$).
+
+*Proof.* Follow the three-step pattern: (i) construct a candidate limit, (ii) show it lies in $l^infinity$, (iii) show convergence in the metric.
+
+Let $(x_m)$ be a Cauchy sequence in $l^infinity$, where $x_m = (xi_1^((m)), xi_2^((m)), dots)$. Given $epsilon > 0$, there exists $N$ such that for all $m, n > N$:
+$ d(x_m, x_n) = sup_(j in NN) |xi_j^((m)) - xi_j^((n))| < epsilon. $
+
+*(i) Construction of the candidate limit.* A fortiori, for every _fixed_ $j$ and all $m, n > N$:
+$ |xi_j^((m)) - xi_j^((n))| < epsilon. quad (*) $
+Hence $(xi_j^((m)))_(m=1)^infinity$ is a Cauchy sequence of scalars. Since $RR$ (or $CC$) is complete (Theorem 1.4-4), it converges:
+$ xi_j^((m)) -> xi_j quad "as" m -> infinity. $
+Use these infinitely many limits to define $x = (xi_1, xi_2, dots)$.
+
+*(ii) Show $x in l^infinity$ (i.e. $x$ is bounded).* Letting $n -> infinity$ in $(*)$:
+$ |xi_j^((m)) - xi_j| <= epsilon quad "for all" m > N "and all" j. quad (**) $
+Since $x_m in l^infinity$, there is $k_m in RR$ with $|xi_j^((m))| <= k_m$ for all $j$. By the triangle inequality:
+$ |xi_j| <= |xi_j - xi_j^((m))| + |xi_j^((m))| <= epsilon + k_m quad "for all" j. $
+The right-hand side is independent of $j$, so $(xi_j)$ is bounded, i.e. $x in l^infinity$.
+
+*(iii) Convergence $x_m -> x$.* From $(**)$, taking the supremum over $j$:
+$ d(x_m, x) = sup_j |xi_j^((m)) - xi_j| <= epsilon quad "for all" m > N. $
+Hence $x_m -> x$ in $l^infinity$. Since $(x_m)$ was arbitrary, $l^infinity$ is complete. $square$
+
+=== Remarks on the proof technique
+
+The argument illustrates a *diagonal-style construction* used repeatedly in completeness proofs (e.g. for $RR^n$, $l^p$, $C[a, b]$):
+
++ *Componentwise extraction.* The Cauchy condition in the sup-metric forces each coordinate sequence to be Cauchy in $RR$/$CC$. Completeness of the scalars then yields a coordinatewise limit $xi_j$.
++ *Assembly.* The candidate limit is built _coordinatewise_ as $x = (xi_j)$. There is no a priori guarantee that $x$ lies in the original space.
++ *Membership check.* Verify $x in l^infinity$ separately (boundedness here). For $l^p$ this step uses Minkowski; for $C[a, b]$ it uses uniform convergence preserving continuity.
++ *Convergence in the original metric.* Pass to the limit $n -> infinity$ inside the Cauchy estimate, then take the supremum (or norm) over $j$. The interchange is justified because $epsilon$ in $(**)$ is _independent_ of $j$.
+
+=== Why $l^infinity$ is "harder" than $RR^n$
+
+In $RR^n$ each Cauchy sequence has only finitely many coordinates, so coordinatewise convergence is automatic. In $l^infinity$ we have infinitely many coordinates, and the key subtlety is that the bound $epsilon$ in $(**)$ must be uniform in $j$ — this is exactly what the _sup_-metric provides. Without uniformity, $(xi_j) - (xi_j^((m)))$ might fail to lie in $l^infinity$.
+
+=== Consequence: $l^infinity$ is a Banach space
+
+Combined with the vector-space structure and the fact that the metric comes from the norm $||x|| = sup_j |xi_j|$ satisfying (N1)--(N4), this gives:
+$ l^infinity quad "is a Banach space." $
+The same proof, restricted to the subspace $c subset l^infinity$ of convergent sequences, plus closedness of $c$ in $l^infinity$ (Theorem 1.5-3), yields completeness of $c$. The subspace $c_0 subset c$ of null sequences is also closed, hence complete.
 
 === 1.5-3 Completeness of space $c$
 
@@ -189,7 +231,22 @@ A *linear operator* $T$ satisfies $T(alpha x + beta y) = alpha T x + beta T y$ f
 
 *(a)* $cal(R)(T)$ is a vector space. *(b)* If $dim cal(D)(T) = n$, then $dim cal(R)(T) <= n$. *(c)* $cal(N)(T)$ is a vector space.
 
-The inverse $T^(-1)$ exists if and only if $cal(N)(T) = {0}$.
+Linear operators preserve linear dependence.
+
+=== 2.6-10 Theorem (Inverse operator)
+
+_Let $T: cal(D)(T) -> Y$ be linear. Then:_
+
+*(a)* $T^(-1): cal(R)(T) -> cal(D)(T)$ exists iff $T x = 0 ==> x = 0$ (i.e. $cal(N)(T) = {0}$).
+
+*(b)* If $T^(-1)$ exists, it is a linear operator.
+
+*(c)* If $dim cal(D)(T) = n < infinity$ and $T^(-1)$ exists, then $dim cal(R)(T) = dim cal(D)(T)$.
+
+=== 2.6-11 Lemma (Inverse of product)
+
+_For bijective linear $T: X -> Y$, $S: Y -> Z$:_
+$ (S T)^(-1) = T^(-1) S^(-1) $
 
 == Bounded and Continuous Linear Operators (Sec 2.7)
 
@@ -200,6 +257,21 @@ $T: cal(D)(T) -> Y$ is *bounded* if there exists $c$ such that $||T x|| <= c ||x
 $ ||T|| = sup_(x != 0) (||T x||) / (||x||) = sup_(||x|| = 1) ||T x|| $
 
 Key inequality: $||T x|| <= ||T|| ||x||$.
+
+=== 2.7-2 Lemma (Norm)
+
+_For bounded linear $T$:_
+
+*(a)* $||T|| = sup_(||x|| = 1) ||T x||$.
+
+*(b)* $||dot||$ defined by the supremum satisfies (N1)--(N4) for a norm.
+
+A bounded linear operator maps bounded sets onto bounded sets.
+
+=== Sub-multiplicativity
+
+For composable bounded linear operators:
+$ ||T_1 T_2|| <= ||T_1|| ||T_2||, quad ||T^n|| <= ||T||^n quad (n in NN) $
 
 === Examples
 
@@ -217,7 +289,11 @@ _If $X$ is finite dimensional, every linear operator on $X$ is bounded._
 
 *(b)* _If $T$ is continuous at a single point, it is continuous everywhere._
 
-*Proof of (a).* If $T$ is bounded, then $||T x - T x_0|| = ||T(x - x_0)|| <= ||T|| ||x - x_0|| < epsilon$ whenever $||x - x_0|| < epsilon / (||T||)$. Conversely, if $T$ is continuous at $x_0$, there is $delta > 0$ with $||T x - T x_0|| <= epsilon$ for $||x - x_0|| <= delta$. For any $y != 0$, set $x = x_0 + (delta / (||y||)) y$. Then $||T y|| <= (epsilon / delta) ||y||$. $square$
+*Proof of (a).* ($arrow.l.double$) If $T = 0$, trivial. Else for any $x_0$ and $epsilon > 0$, take $delta = epsilon\/||T||$. Then $||x - x_0|| < delta$ gives $||T x - T x_0|| <= ||T|| ||x - x_0|| < epsilon$.
+
+($arrow.r.double$) Suppose $T$ continuous at some $x_0$. Pick $delta > 0$ with $||T x - T x_0|| <= 1$ whenever $||x - x_0|| <= delta$. For $y != 0$, set $x = x_0 + (delta\/||y||) y$, so $||x - x_0|| = delta$. Linearity gives $T x - T x_0 = (delta\/||y||) T y$, hence $||T y|| <= (1\/delta) ||y||$. So $T$ is bounded with $||T|| <= 1\/delta$. $square$
+
+(b) follows immediately: continuity at one point gives boundedness, hence continuity everywhere.
 
 === 2.7-10 Corollary
 
@@ -226,6 +302,8 @@ _If $X$ is finite dimensional, every linear operator on $X$ is bounded._
 === 2.7-11 Theorem (Bounded linear extension)
 
 _If $T: cal(D)(T) -> Y$ is bounded linear with $Y$ a Banach space, then $T$ has a unique bounded linear extension $tilde(T): overline(cal(D)(T)) -> Y$ with $||tilde(T)|| = ||T||$._
+
+*Proof.* For $x in overline(cal(D)(T))$, pick $(x_n)$ in $cal(D)(T)$ with $x_n -> x$. Then $||T x_n - T x_m|| <= ||T|| ||x_n - x_m||$, so $(T x_n)$ is Cauchy in $Y$ and converges (by completeness) to some $y$. Set $tilde(T) x = y$. Independence of the chosen sequence: if $z_n -> x$ too, the interleaved sequence $x_1, z_1, x_2, z_2, dots$ also converges to $x$, hence its image is Cauchy, forcing $lim T x_n = lim T z_n$. Linearity is preserved under limits. From $||T x_n|| <= ||T|| ||x_n||$ and continuity of the norm, $||tilde(T) x|| <= ||T|| ||x||$, so $||tilde(T)|| <= ||T||$. The reverse is automatic since $tilde(T)$ extends $T$. $square$
 
 == Linear Functionals (Sec 2.8, first part)
 
@@ -253,6 +331,12 @@ For fixed $a = (alpha_j) in l^2$, $f(x) = sum_(j=1)^infinity xi_j alpha_j$ is bo
 The set $X^*$ of all linear functionals on a vector space $X$ forms a vector space (the *algebraic dual space*) with $(f_1 + f_2)(x) = f_1(x) + f_2(x)$ and $(alpha f)(x) = alpha f(x)$.
 
 The *second algebraic dual* $X^(**)  = (X^*)^*$ contains functionals $g_x (f) = f(x)$ for fixed $x in X$.
+
+=== Canonical Embedding
+
+The map $C: X -> X^(**)$, $x |-> g_x$ where $g_x (f) = f(x)$, is called the *canonical mapping* (or *canonical embedding*) of $X$ into $X^(**)$. $C$ is linear and injective, hence a vector-space isomorphism onto $cal(R)(C) subset.eq X^(**)$.
+
+$X$ is *algebraically reflexive* if $C$ is surjective ($cal(R)(C) = X^(**)$). Every finite-dimensional space is algebraically reflexive.
 
 == Normed Spaces of Operators (Sec 2.10)
 
@@ -345,7 +429,11 @@ Equality iff ${x, y}$ is linearly dependent.
 $ ||x + y|| <= ||x|| + ||y|| $
 Equality iff $y = 0$ or $x = c y$ with $c >= 0$.
 
-*Proof of (a).* For $y != 0$, choose $alpha$ with $overline(alpha) = (chevron.l y, x chevron.r)  / (chevron.l y, y chevron.r)$. Then $0 <= ||x - alpha y||^2 = ||x||^2 - |chevron.l x, y chevron.r|^2 / (||y||^2)$. $square$
+*Proof of (a).* If $y = 0$, both sides are $0$. Else for any scalar $alpha$:
+$ 0 <= ||x - alpha y||^2 = ||x||^2 - overline(alpha) chevron.l x, y chevron.r - alpha chevron.l y, x chevron.r + |alpha|^2 ||y||^2. $
+Choose $alpha = chevron.l x, y chevron.r \/ ||y||^2$. The cross terms collapse to give $0 <= ||x||^2 - |chevron.l x, y chevron.r|^2 \/ ||y||^2$, i.e. (1). Equality forces $x - alpha y = 0$, i.e. ${x, y}$ dependent.
+
+*Proof of (b).* Expand $||x + y||^2 = ||x||^2 + 2 "Re" chevron.l x, y chevron.r + ||y||^2 <= ||x||^2 + 2 |chevron.l x, y chevron.r| + ||y||^2 <= (||x|| + ||y||)^2$ by Schwarz. Take square roots. Equality requires both Schwarz equality and $"Re" chevron.l x, y chevron.r = |chevron.l x, y chevron.r|$, i.e. $chevron.l x, y chevron.r$ real and $>= 0$, giving $x = c y$ with $c >= 0$. $square$
 
 === 3.2-2 Lemma (Continuity of inner product)
 
@@ -369,9 +457,15 @@ A set $M$ is *convex* if for all $x, y in M$ and $0 <= alpha <= 1$: $alpha x + (
 
 _Let $M != emptyset$ be a convex complete subset of an inner product space $X$. For every $x in X$ there exists a unique $y in M$ such that $delta = ||x - y||$._
 
-*Proof.* Choose $(y_n)$ in $M$ with $||x - y_n|| -> delta$. By the parallelogram equality on $v_n = y_n - x$:
-$ ||y_n - y_m||^2 <= -4 delta^2 + 2(delta_n^2 + delta_m^2) -> 0 $
-so $(y_n)$ is Cauchy and converges to $y in M$ with $||x - y|| = delta$. Uniqueness follows from convexity and the parallelogram equality. $square$
+*Proof.* *Existence.* Choose $(y_n)$ in $M$ with $delta_n = ||y_n - x|| -> delta$. Set $v_n = y_n - x$. By the parallelogram equality applied to $v_n, v_m$:
+$ ||v_n - v_m||^2 = -||v_n + v_m||^2 + 2(||v_n||^2 + ||v_m||^2). $
+Since $1/2(y_n + y_m) in M$ by convexity, $||v_n + v_m|| = 2 ||1/2(y_n + y_m) - x|| >= 2 delta$, so
+$ ||y_n - y_m||^2 = ||v_n - v_m||^2 <= 2(delta_n^2 + delta_m^2) - 4 delta^2 -> 0. $
+Hence $(y_n)$ is Cauchy; by completeness of $M$, $y_n -> y in M$ with $||x - y|| = delta$.
+
+*Uniqueness.* If $y, y_0 in M$ both achieve the minimum, the parallelogram equality on $y - x, y_0 - x$ gives
+$ ||y - y_0||^2 = 2(||y - x||^2 + ||y_0 - x||^2) - ||y + y_0 - 2 x||^2 <= 4 delta^2 - 4 delta^2 = 0, $
+using $||1/2(y + y_0) - x|| >= delta$. So $y = y_0$. $square$
 
 === 3.3-2 Lemma (Orthogonality)
 
@@ -388,7 +482,11 @@ $ Y^perp = {z in H : z perp Y} = {z in H : chevron.l z, v chevron.r = 0 "for all
 === 3.3-4 Theorem (Projection theorem)
 
 _For any closed subspace $Y$ of a Hilbert space $H$:_
-$ H = Y plus.o Y^perp $
+$ H = Y plus.o Y^perp. $
+
+*Proof.* $Y$ is closed in the complete space $H$, hence complete (Theorem 1.4-7), and convex (being a subspace). For each $x in H$, Theorem 3.3-1 gives a unique $y in Y$ with $||x - y|| = inf_(tilde(y) in Y) ||x - tilde(y)||$. By Lemma 3.3-2, $z = x - y in Y^perp$. Hence $x = y + z$ with $y in Y$, $z in Y^perp$.
+
+*Uniqueness of decomposition.* If $x = y + z = y_1 + z_1$ with $y, y_1 in Y$, $z, z_1 in Y^perp$, then $y - y_1 = z_1 - z in Y inter Y^perp = {0}$ (the only vector orthogonal to itself is $0$). $square$
 
 = Week 7: Orthogonal Complements (ctd), Orthonormal Sets
 
@@ -415,6 +513,10 @@ _If $Y$ is a closed subspace of a Hilbert space $H$, then $Y = Y^(perp perp)$._
 === 3.3-7 Lemma (Dense set)
 
 _For $M != emptyset$ in a Hilbert space $H$: $"span" M$ is dense in $H$ iff $M^perp = {0}$._
+
+*Proof.* Let $V = "span" M$. ($arrow.r.double$) Suppose $overline(V) = H$. If $x in M^perp$, then $x perp v$ for all $v in V$. By continuity of the inner product, $x perp w$ for all $w in overline(V) = H$, so $chevron.l x, x chevron.r = 0$, giving $x = 0$.
+
+($arrow.l.double$) Suppose $M^perp = {0}$. $overline(V)$ is a closed subspace of $H$, so $H = overline(V) plus.o overline(V)^perp$ by 3.3-4. But $overline(V)^perp = M^perp = {0}$ (since $M subset V$ gives $V^perp subset M^perp$, and the reverse holds by linearity/continuity). Hence $overline(V) = H$. $square$
 
 == Orthonormal Sets and Sequences (Sec 3.4)
 
@@ -449,7 +551,11 @@ Then $z = x - y perp y$ and $||x||^2 = ||y||^2 + ||z||^2 = sum_(k=1)^n |chevron.
 === 3.4-6 Theorem (Bessel inequality)
 
 _For an orthonormal sequence $(e_k)$ and any $x in X$:_
-$ sum_(k=1)^infinity |chevron.l x, e_k chevron.r|^2 <= ||x||^2 $
+$ sum_(k=1)^infinity |chevron.l x, e_k chevron.r|^2 <= ||x||^2. $
+
+*Proof.* For each $n$, set $y_n = sum_(k=1)^n chevron.l x, e_k chevron.r e_k$ and $z_n = x - y_n$. Then $z_n perp y_n$ (computed as in the projection paragraph above), so by Pythagoras:
+$ ||x||^2 = ||y_n||^2 + ||z_n||^2 >= ||y_n||^2 = sum_(k=1)^n |chevron.l x, e_k chevron.r|^2. $
+The partial sums are bounded above by $||x||^2$ and monotone, hence converge. $square$
 
 The quantities $chevron.l x, e_k chevron.r$ are the *Fourier coefficients* of $x$.
 
@@ -481,7 +587,11 @@ _Let $(e_k)$ be orthonormal in a Hilbert space $H$. Then:_
 
 *(c)* For any $x in H$, the series $sum chevron.l x, e_k chevron.r e_k$ converges.
 
-*Proof of (a).* By orthonormality, $||s_n - s_m||^2 = |alpha_(m+1)|^2 + dots.c + |alpha_n|^2 = sigma_n - sigma_m$. So $(s_n)$ is Cauchy iff $sigma_n = sum_(k=1)^n |alpha_k|^2$ is Cauchy. Both $H$ and $RR$ are complete. $square$
+*Proof.* (a) For $n > m$, orthonormality gives $||s_n - s_m||^2 = sum_(k=m+1)^n |alpha_k|^2 = sigma_n - sigma_m$ where $sigma_n = sum_(k=1)^n |alpha_k|^2$. So $(s_n)$ Cauchy in $H$ $arrow.l.r.double$ $(sigma_n)$ Cauchy in $RR$. Both are complete, so convergence transfers.
+
+(b) If $s_n -> x$, then by continuity of $chevron.l dot, e_j chevron.r$, $chevron.l s_n, e_j chevron.r -> chevron.l x, e_j chevron.r$. For $n >= j$, $chevron.l s_n, e_j chevron.r = alpha_j$.
+
+(c) Bessel's inequality gives $sum |chevron.l x, e_k chevron.r|^2 <= ||x||^2 < infinity$, so by (a) the series $sum chevron.l x, e_k chevron.r e_k$ converges. $square$
 
 === 3.5-3 Lemma
 
@@ -500,6 +610,10 @@ Every Hilbert space $H != {0}$ has a total orthonormal set. All total orthonorma
 *(a)* If $M$ is total in $X$, then $x perp M ==> x = 0$.
 
 *(b)* If $X$ is complete, the converse also holds.
+
+*Proof.* (a) If $x perp M$, then by continuity of the inner product $x perp overline("span" M) = X$, so $x perp x$ and $x = 0$.
+
+(b) If $X = H$ is a Hilbert space and $M^perp = {0}$, Lemma 3.3-7 gives $overline("span" M) = H$, i.e. $M$ is total. $square$
 
 === 3.6-3 Theorem (Parseval relation)
 
